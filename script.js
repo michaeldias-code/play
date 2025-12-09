@@ -1,5 +1,5 @@
 // ============================================================
-// DESENHAR ÃCONES DOS BOTÃ•ES
+// DESENHAR ÍCONES DOS BOTÕES
 // ============================================================
 function drawButtonIcons() {
     // Semibreve normal
@@ -11,7 +11,7 @@ function drawButtonIcons() {
     ctxS.lineWidth = 2.5;
     ctxS.stroke();
 
-    // MÃ­nima normal
+    // Mínima normal
     const minima = document.querySelector('[data-type="minima"][data-dot="false"] canvas');
     const ctxM = minima.getContext('2d');
     ctxM.translate(25, 30);
@@ -37,7 +37,7 @@ function drawButtonIcons() {
     ctxSD.arc(16, 0, 2.5, 0, Math.PI * 2);
     ctxSD.fill();
 
-    // MÃ­nima pontuada
+    // Mínima pontuada
     const minimaDot = document.querySelector('[data-type="minima"][data-dot="true"] canvas');
     const ctxMD = minimaDot.getContext('2d');
     ctxMD.translate(20, 30);
@@ -54,7 +54,7 @@ function drawButtonIcons() {
     ctxMD.arc(16, 0, 2.5, 0, Math.PI * 2);
     ctxMD.fill();
 
-    // SemÃ­nima pontuada
+    // Semínima pontuada
     const seminimaDot = document.querySelector('[data-type="seminima"][data-dot="true"] canvas');
     const ctxSED = seminimaDot.getContext('2d');
     ctxSED.translate(20, 30);
@@ -98,7 +98,7 @@ function drawButtonIcons() {
 drawButtonIcons();
 
 // ============================================================
-// ÃUDIO
+// ÁUDIO
 // ============================================================
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -120,7 +120,7 @@ function playFreq(freq, duration, startTime = audioCtx.currentTime) {
 }
 
 // ============================================================
-// TABELAS DE ALTURAS E FREQUÃŠNCIAS
+// TABELAS DE ALTURAS E FREQUÊNCIAS
 // ============================================================
 const noteY = {
     "B5": 40, "A5": 50, "G5": 60, "F5": 70, "E5": 80,
@@ -276,7 +276,7 @@ clefImg.onload = function() {
 };
 
 // ============================================================
-// INTERAÃ‡ÃƒO COM CANVAS
+// INTERAÇÃO COM CANVAS
 // ============================================================
 canvas.addEventListener("click", e => {
     const rect = canvas.getBoundingClientRect();
@@ -312,7 +312,7 @@ document.querySelectorAll(".fig").forEach(btn => {
 document.querySelector(".fig[data-type='semibreve'][data-dot='false']").classList.add("selected");
 
 // ============================================================
-// BOTÃ•ES DE CONTROLE
+// BOTÕES DE CONTROLE
 // ============================================================
 document.getElementById("play").addEventListener("click", async () => {
     if (notes.length === 0) {
@@ -347,3 +347,4 @@ document.getElementById("undo").addEventListener("click", () => {
         redraw();
     }
 });
+		
