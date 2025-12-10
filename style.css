@@ -278,6 +278,13 @@ button {
 
 /* ------------------- MEDIA QUERIES ------------------- */
 @media (max-width: 768px) {
+    container {
+        padding-left: 5px;   /* quase encostado na borda */
+        padding-right: 5px;  /* opcional */
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+
 
     .controls {
         flex-direction: column; 
@@ -339,5 +346,6 @@ button {
         margin-left: 10px !important;
     }
 }
+
 
 
