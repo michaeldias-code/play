@@ -303,8 +303,12 @@ button {
         transform-origin: center;
     }
 
+    /* No celular, alinhar os botões da paleta à esquerda */
+    .palette {
+        padding-left: 5px; /* reduz o padding à esquerda */
+    }
     .palette-row {
-        justify-content: space-around;
+        justify-content: flex-start;;
     }
     .palette-label {
         width: auto;
@@ -333,3 +337,4 @@ button {
         margin-left: 10px !important;
     }
 }
+
