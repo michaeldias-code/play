@@ -397,9 +397,13 @@ button {
         margin-top: 6px !important;
 
         /* Evita que ele fique espremido */
-    /*    min-width: 70px !important;*/
-    }
+    /*    min-width: 70px !important;
+    
+    }*/
+    body { outline: 4px dashed magenta !important; }
+
 }
+
 
 
 
