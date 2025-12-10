@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editor de Partituras</title>
-	<link rel="stylesheet" href="style.css?v=17">
+	<link rel="stylesheet" href="style.css?v=18">
 </head>
 <body>
     <div class="container">
@@ -41,11 +41,19 @@
         </div>
         
         <div class="palette-row">
-            <span class="palette-label">Acidente:</span>
+            <span class="palette-label">Armadura de Clave:</span>
+            <button id="key-sharp-up" class="key-control" data-type="sharp" data-action="up" title="Adicionar Sustenido">♯ +</button>
+            <button id="key-sharp-down" class="key-control" data-type="sharp" data-action="down" title="Remover Sustenido">♯ -</button>
+            <button id="key-flat-up" class="key-control" data-type="flat" data-action="up" title="Adicionar Bemol">♭ +</button>
+            <button id="key-flat-down" class="key-control" data-type="flat" data-action="down" title="Remover Bemol">♭ -</button>
+        </div>
+
+        <div class="palette-row">
+            <span class="palette-label staff-label">Acidente (Individual):</span>
             <button class="accidental" id="acc-sharp" data-accidental="sharp" title="Sustenido">♯</button>
             <button class="accidental" id="acc-flat" data-accidental="flat" title="Bemol">♭</button>
             
-            <span class="palette-label staff-label">Pauta:</span>
+            <span class="palette-label staff-label">Pautas:</span>
             <button id="add-staff" title="Adicionar Pauta">➕ Pauta</button>
         </div>
     </div>
@@ -57,7 +65,6 @@
         <button id="clear">✕ Limpar</button>
     </div>
 </div>
-
         <canvas id="score" width="900" height="250"></canvas>
         
         <div class="info">
@@ -67,5 +74,6 @@
 	<script src="script.js"></script>
 </body>
 </html>
+
 
 
