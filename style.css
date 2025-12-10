@@ -281,7 +281,7 @@ button {
     body {
         justify-content: flex-start; /* Força todo o conteúdo do body para esquerda */
         align-items: flex-start;     /* Mantém alinhado no topo também */
-        padding-left: 10px;          /* Pequeno espaçamento da borda da tela */
+        padding-left: 5px;          /* Pequeno espaçamento da borda da tela */
     }
     container {
         /*padding-left: 5px;   /* quase encostado na borda
@@ -291,7 +291,7 @@ button {
 
         max-width: 100%;             /* Ocupa a tela inteira */
         margin: 0;                   /* Remove margem automática */
-        padding-left: 0;             /* Remove padding interno se quiser encostar mesmo */
+        padding-left: 5px;             /* Remove padding interno se quiser encostar mesmo */
         padding-right: 0;
     }
 
@@ -304,7 +304,7 @@ button {
     .controls, .palette, .buttons {
         justify-content: flex-start; /* Alinha tudo à esquerda */
         align-items: flex-start;
-        padding-left: 0;
+        padding-left: 5px;
     }
 
     .palette, .buttons {
@@ -362,6 +362,7 @@ button {
         margin-left: 10px !important;
     }
 }
+
 
 
 
