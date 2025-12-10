@@ -30,17 +30,14 @@ h1 {
     font-size: 28px;
 }
 
+/* Os controles permanecem fixos no topo, FORA do score-wrapper */
 .controls {
-    position: sticky; /* <-- ESSENCIAL para fixar */
+    position: sticky;
     top: 0; 
     z-index: 10; 
     background-color: #f7f7f7; 
-    display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
 }
 
 .palette {
@@ -124,6 +121,23 @@ button {
     box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
 }
 
+/* --- ESTILOS DE BOTÕES DE ACIDENTES DE ARMATURA --- */
+.key-control {
+    padding: 10px 15px;
+    margin-right: 5px;
+    background-color: #e0e0ff; /* Cor diferenciada para Armadura */
+    border: 1px solid #99aaff;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 50px; 
+}
+.key-control:hover {
+    background-color: #c9c9ff;
+    transform: translateY(-1px);
+}
+
 #clear {
     background: #f44336;
     color: white;
@@ -146,15 +160,18 @@ button {
     box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
 }
 
-/* Regras para o Wrapper do Canvas */
+/* --- CORREÇÃO DE SCROLL VERTICAL E HORIZONTAL --- */
 .score-wrapper {
+    /* O canvas agora se expande DENTRO deste container. */
     width: 100%;
-    overflow-x: auto; /* Habilita o scroll horizontal */
-    -webkit-overflow-scrolling: touch; /* Melhor scroll no iOS */
-    margin: 15px auto;
-    border: 2px solid #ddd; /* A borda da pauta agora fica no wrapper */
-    border-radius: 10px;
-    background: #fefefe;
+    /* Altura máxima para ativar o scroll vertical */
+    max-height: 75vh; 
+    overflow-x: auto; /* Scroll horizontal se necessário */
+    overflow-y: auto; /* Scroll vertical se novas pautas forem adicionadas */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-top: 15px; /* Separa dos controles fixos */
+    background-color: white;
 }
 
 #score {
