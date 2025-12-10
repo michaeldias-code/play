@@ -31,12 +31,12 @@ h1 {
     font-size: 28px;
 }
 
-/* Os controles permanecem fixos no topo, FORA do score-wrapper */
+/* CONTROLES FIXOS NO TOPO */
 .controls {
     position: sticky;
-    top: 0; 
-    z-index: 10; 
-    background-color: #f7f7f7; 
+    top: 0;
+    z-index: 10;
+    background-color: #f7f7f7;
     padding: 10px;
     border-bottom: 1px solid #ddd;
 }
@@ -122,17 +122,17 @@ button {
     box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
 }
 
-/* --- ESTILOS DE BOTÕES DE ACIDENTES DE ARMATURA --- */
+/* BOTÕES ARMADURA */
 .key-control {
     padding: 10px 15px;
     margin-right: 5px;
-    background-color: #e0e0ff; /* Cor diferenciada para Armadura */
+    background-color: #e0e0ff;
     border: 1px solid #99aaff;
     border-radius: 8px;
     font-size: 18px;
     cursor: pointer;
     transition: all 0.2s;
-    min-width: 50px; 
+    min-width: 50px;
 }
 .key-control:hover {
     background-color: #c9c9ff;
@@ -143,7 +143,6 @@ button {
     background: #f44336;
     color: white;
 }
-
 #clear:hover {
     background: #da190b;
     transform: translateY(-2px);
@@ -154,124 +153,29 @@ button {
     background: #ff9800;
     color: white;
 }
-
 #undo:hover {
     background: #e68900;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
 }
 
-/* --- CORREÇÃO DE SCROLL VERTICAL E HORIZONTAL --- */
-.score-wrapper {
-    /* O canvas agora se expande DENTRO deste container. */
+/* -------- SCROLL AJUSTADO (BOTTOM SECTION) -------- */
+
+#bottom-section {
     width: 100%;
-    /* Altura máxima para ativar o scroll vertical */
-    max-height: 75vh; 
-    overflow-x: auto; /* Scroll horizontal se necessário */
-    overflow-y: auto; /* Scroll vertical se novas pautas forem adicionadas */
+    max-height: 75vh;       /* Scroll vertical */
+    overflow-x: auto;       /* Scroll horizontal */
+    overflow-y: auto;
     border: 1px solid #ddd;
     border-radius: 8px;
-    margin-top: 15px; /* Separa dos controles fixos */
-    background-color: white;
-}
-
-#score {
-    /* Remove a borda e o background pois eles estão no wrapper */
-    border: none;
-    background: none;
-    /* Remove a largura e altura fixas daqui, o JS irá definir */
-    width: auto !important;
-    height: 250px; /* Mantém a altura base de 250px */
-    display: block;
-    cursor: crosshair;
-    margin: 0;
-}
-
-.info {
-    text-align: center;
     margin-top: 15px;
-    color: #666;
-    font-size: 14px;
-}
-
-.clef-image {
-    width: 40px;
-    height: 80px;
-    object-fit: contain;
-}
-
-/* Estilo para o novo botão de Harmonia */
-#harmony {
-    background: #2196F3; /* Azul */
-    color: white;
-}
-#harmony:hover {
-    background: #0c7cd5;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
-}
-#harmony.active {
-    background: #4CAF50; /* Verde quando ativado */
-    border: 2px solid #388E3C;
-}
-
-/* Estilo para o botão Adicionar Pauta */
-.add-staff-control {
-    text-align: center;
-    margin-top: 20px;
-}
-#add-staff {
-    background: #9C27B0; /* Roxo */
-    color: white;
-}
-#add-staff:hover {
-    background: #7B1FA2;
-}
-
-/* Estilo para os botões de Acidente e Pauta */
-.accidental, #add-staff {
-    padding: 10px 15px;
-    margin-right: 5px;
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 18px;
-    cursor: pointer;
-    transition: all 0.2s;
-    min-width: 50px; /* Garante tamanho mínimo */
-}
-.accidental:hover, #add-staff:hover {
-    background-color: #ddd;
-    transform: translateY(-1px);
-}
-.accidental.selected {
-    background-color: #FFA07A; /* Cor salmão para Sustenido/Bemol selecionado */
-    border-color: #FF6347;
-}
-
-.staff-label {
-    margin-left: 15px; /* Espaço para separar dos acidentes */
-    font-weight: bold;
-}
-
-/* Garante que o botão Adicionar Pauta não fique mais isolado */
-.add-staff-control {
-    /* REMOVER ESTE BLOCO SE ESTAVA NO SEU CSS: text-align: center; margin-top: 20px; */
-}
-/*TRECHO PARA SCROLL HORIZONTAL CELULA*/
-#music-staff {
-    position: relative;
-    height: 280px;
-    min-width: 200%;
-    width: 200%;
     background: white;
-    padding: 40px 0;
 }
-/* Scroll personalizado */
+
+/* Scrollbar customizado */
 #bottom-section::-webkit-scrollbar {
     height: 8px;
-    overflow-x: auto;
-    overflow-y: hidden;
+    width: 8px;
 }
 
 #bottom-section::-webkit-scrollbar-track {
@@ -288,60 +192,129 @@ button {
     background: #764ba2;
 }
 
+/* Conteúdo interno maior → ativa scroll */
+#music-staff {
+    position: relative;
+    height: 280px;
+    min-width: 200%;
+    width: 200%;
+    background: white;
+    padding: 40px 0;
+}
+
+/* -------------------------------------------------- */
+
+.info {
+    text-align: center;
+    margin-top: 15px;
+    color: #666;
+    font-size: 14px;
+}
+
+.clef-image {
+    width: 40px;
+    height: 80px;
+    object-fit: contain;
+}
+
+/* Botão Harmonia */
+#harmony {
+    background: #2196F3;
+    color: white;
+}
+#harmony:hover {
+    background: #0c7cd5;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+}
+#harmony.active {
+    background: #4CAF50;
+    border: 2px solid #388E3C;
+}
+
+/* Botão adicionar pauta */
+.add-staff-control {
+    text-align: center;
+    margin-top: 20px;
+}
+#add-staff {
+    background: #9C27B0;
+    color: white;
+}
+#add-staff:hover {
+    background: #7B1FA2;
+}
+
+.accidental, #add-staff {
+    padding: 10px 15px;
+    margin-right: 5px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 50px;
+}
+.accidental:hover, #add-staff:hover {
+    background-color: #ddd;
+    transform: translateY(-1px);
+}
+.accidental.selected {
+    background-color: #FFA07A;
+    border-color: #FF6347;
+}
+
+.staff-label {
+    margin-left: 15px;
+    font-weight: bold;
+}
 
 @media (max-width: 768px) {
     .controls {
-        flex-direction: column; 
+        flex-direction: column;
         gap: 20px;
     }
     .palette, .buttons {
         width: 100%;
         justify-content: center;
     }
-    
-    /* CORREÇÃO CRÍTICA 1: Diminui os botões da paleta no celular */
+
     .fig {
-        width: 50px; /* Reduzido de 60px */
-        height: 50px; /* Reduzido de 60px */
-        font-size: 30px; /* Reduz o tamanho dos emojis (Semínima/Colcheia) */
+        width: 50px;
+        height: 50px;
+        font-size: 30px;
     }
-    
-    /* Ajusta o Canvas dentro dos botões (para os ícones desenhados) */
+
     .fig canvas {
-        transform: scale(0.85); /* Reduz o ícone desenhado no canvas para caber melhor */
+        transform: scale(0.85);
         transform-origin: center;
     }
 
     .palette-row {
-        justify-content: space-around; 
+        justify-content: space-around;
     }
     .palette-label {
         width: auto;
         min-width: 60px;
-        text-align: right;
-        font-size: 11px; /* Opcional: Diminuir um pouco o label */
+        font-size: 11px;
     }
-    
+
     .buttons {
-        /* Garante que os botões de Ação também sejam responsivos */
-        flex-wrap: wrap; 
+        flex-wrap: wrap;
     }
-    
-    /* Faz os botões de ação ocuparem mais espaço se necessário */
+
     .buttons button {
-        flex-grow: 1; 
+        flex-grow: 1;
         padding: 10px 15px;
     }
-    /* Ajuste de tamanho para caber a nova linha */
+
     .accidental, #add-staff {
         padding: 8px 10px !important;
         font-size: 16px !important;
         min-width: 45px !important;
     }
     .staff-label {
-        margin-left: 10px !important; 
+        margin-left: 10px !important;
     }
 }
-
-
-
