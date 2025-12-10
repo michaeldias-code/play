@@ -375,7 +375,11 @@ button {
         justify-content: flex-end; /* empurra o conteúdo para a direita */
         gap: 5px;               /* espaçamento entre texto e botão */
     }
+     #add-staff {
+        margin-left: 20px; /* ajusta distância do texto “Pauta” */
+    }
 }
+
 
 
 
