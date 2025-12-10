@@ -21,7 +21,7 @@ body {
     padding: 30px 15px;
     max-width: 950px;
     width: 100%;
-    overflow: hidden;
+    overflow-x: hidden;
 }
 
 h1 {
@@ -270,6 +270,8 @@ button {
 /* Scroll personalizado */
 #bottom-section::-webkit-scrollbar {
     height: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
 #bottom-section::-webkit-scrollbar-track {
@@ -340,5 +342,6 @@ button {
         margin-left: 10px !important; 
     }
 }
+
 
 
