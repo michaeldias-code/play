@@ -294,7 +294,8 @@ button {
 
     .palette, .buttons {
         width: 90%;
-        justify-content: center;
+        justify-content: flex-start;
+        padding-left: 0;
         flex-wrap: wrap;
     }
 
@@ -346,6 +347,7 @@ button {
         margin-left: 10px !important;
     }
 }
+
 
 
 
