@@ -142,17 +142,27 @@ button {
     box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
 }
 
-#score {
-    border: 2px solid #ddd;
+/* Regras para o Wrapper do Canvas */
+.score-wrapper {
+    width: 100%;
+    overflow-x: auto; /* Habilita o scroll horizontal */
+    -webkit-overflow-scrolling: touch; /* Melhor scroll no iOS */
+    margin: 15px auto;
+    border: 2px solid #ddd; /* A borda da pauta agora fica no wrapper */
     border-radius: 10px;
-    cursor: crosshair;
     background: #fefefe;
+}
+
+#score {
+    /* Remove a borda e o background pois eles estão no wrapper */
+    border: none;
+    background: none;
+    /* Remove a largura e altura fixas daqui, o JS irá definir */
+    width: auto !important;
+    height: 250px; /* Mantém a altura base de 250px */
     display: block;
-    margin: 0 auto;
-    
-    /* CORREÇÃO CRÍTICA: Faz o Canvas se ajustar à largura do container */
-    width: 100%; 
-    height: auto; /* Permite que o JS controle a altura baseada na largura */
+    cursor: crosshair;
+    margin: 0;
 }
 
 .info {
@@ -167,6 +177,35 @@ button {
     height: 80px;
     object-fit: contain;
 }
+
+/* Estilo para o novo botão de Harmonia */
+#harmony {
+    background: #2196F3; /* Azul */
+    color: white;
+}
+#harmony:hover {
+    background: #0c7cd5;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+}
+#harmony.active {
+    background: #4CAF50; /* Verde quando ativado */
+    border: 2px solid #388E3C;
+}
+
+/* Estilo para o botão Adicionar Pauta */
+.add-staff-control {
+    text-align: center;
+    margin-top: 20px;
+}
+#add-staff {
+    background: #9C27B0; /* Roxo */
+    color: white;
+}
+#add-staff:hover {
+    background: #7B1FA2;
+}
+
 @media (max-width: 768px) {
     .controls {
         flex-direction: column; 
@@ -211,4 +250,3 @@ button {
         padding: 10px 15px;
     }
 }
-
