@@ -21,6 +21,7 @@ body {
     padding: 30px 15px;
     max-width: 950px;
     width: 100%;
+    overflow: hidden;
 }
 
 h1 {
@@ -339,4 +340,5 @@ button {
         margin-left: 10px !important; 
     }
 }
+
 
