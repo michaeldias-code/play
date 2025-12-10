@@ -257,6 +257,34 @@ button {
 .add-staff-control {
     /* REMOVER ESTE BLOCO SE ESTAVA NO SEU CSS: text-align: center; margin-top: 20px; */
 }
+/*TRECHO PARA SCROLL HORIZONTAL CELULA*/
+#music-staff {
+    position: relative;
+    height: 280px;
+    min-width: 200%;
+    width: 200%;
+    background: white;
+    padding: 40px 0;
+}
+/* Scroll personalizado */
+#bottom-section::-webkit-scrollbar {
+    height: 8px;
+}
+
+#bottom-section::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+#bottom-section::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 10px;
+}
+
+#bottom-section::-webkit-scrollbar-thumb:hover {
+    background: #764ba2;
+}
+
 
 @media (max-width: 768px) {
     .controls {
@@ -311,3 +339,4 @@ button {
         margin-left: 10px !important; 
     }
 }
+
