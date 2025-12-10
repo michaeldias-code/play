@@ -376,6 +376,7 @@ button {
         gap: 5px;               /* espaçamento entre texto e botão */
     }
      #add-staff {
-        margin-left: 5px; /* ajusta distância do texto “Pauta” */
+        margin-left: 20px; /* ajusta distância do texto “Pauta” */
     }
 }
+
