@@ -295,7 +295,7 @@ drawKeySharps(staffIndex * STAFF_OFFSET);
     // Letra C para compasso
     ctx.font = "bold 40px Georgia, serif";
     ctx.fillStyle = "#333";
-    ctx.fillText("C", 90, 100 + yOffset);
+    ctx.fillText("C", 110, 100 + yOffset);
     
     // Linha vertical inicial (barra de compasso)
     ctx.beginPath();
@@ -319,8 +319,8 @@ function drawKeySharps(yOffset = 0) {
     if (keySharpsCount >= 1) {
         // O 1º sustenido é sempre F#
         // Linha ou espaço correspondente à nota F4 na clave de Sol
-        const x = 140; // Posição X depois da clave
-        const y = noteY["F4"] + yOffset; // Posição Y da nota F4
+        const x = 70; // Posição X depois da clave
+        const y = 100 //noteY["F4"] + yOffset; // Posição Y da nota F4
         
         ctx.font = "30px Arial";
         ctx.fillStyle = "#333";
@@ -598,6 +598,5 @@ document.getElementById("key-sharp-down").addEventListener("click", () => {
     keySharpsCount = 0;
     redraw();
 });
-
 
 
