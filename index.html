@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎵 Editor de Partituras Musical</h1>
+        <h1>?? Editor de Partituras Musical</h1>
         
         <div class="controls">
             <div class="palette">
@@ -20,8 +20,8 @@
                     <button class="fig" data-type="minima" data-dot="false" title="Mínima (1s)">
                         <canvas width="50" height="50"></canvas>
                     </button>
-                    <button class="fig" data-type="seminima" data-dot="false" title="Semínima (0.5s)">♩</button>
-                    <button class="fig" data-type="colcheia" data-dot="false" title="Colcheia (0.25s)">♪</button>
+                    <button class="fig" data-type="seminima" data-dot="false" title="Semínima (0.5s)">?</button>
+                    <button class="fig" data-type="colcheia" data-dot="false" title="Colcheia (0.25s)">?</button>
                 </div>
                 <div class="palette-row">
                     <span class="palette-label">Pontuada:</span>
@@ -41,19 +41,24 @@
             </div>
             
             <div class="buttons">
-                <button id="play">▶ Tocar</button>
-                <button id="undo">↶ Desfazer</button>
-                <button id="clear">✕ Limpar</button>
+                <button id="play">? Tocar</button>
+                <button id="harmony">?? Harmonia</button> <button id="undo">? Desfazer</button>
+                <button id="clear">? Limpar</button>
             </div>
         </div>
 
-        <canvas id="score" width="900" height="250"></canvas>
+        <div class="score-wrapper"> 
+            <canvas id="score" width="900" height="250"></canvas>
+        </div>
         
         <div class="info">
             Clique na pauta para adicionar notas | Selecione a figura musical desejada na paleta
         </div>
+        
+        <div class="add-staff-control">
+            <button id="add-staff">? Adicionar Pauta</button>
+        </div>
     </div>
-	<script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
-
