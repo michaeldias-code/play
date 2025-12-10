@@ -320,13 +320,16 @@ function drawKeySharps(yOffset = 0) {
         // O 1º sustenido é sempre F#
         // Linha ou espaço correspondente à nota F4 na clave de Sol
         const x = 80; // Posição X depois da clave
-        const y = 110 //noteY["F4"] + yOffset; // Posição Y da nota F4
+        const y = 90 //noteY["F4"] + yOffset; // Posição Y da nota F4
         
         ctx.font = "30px Arial";
         ctx.fillStyle = "#333";
         ctx.fillText("♯", x, y);
     }
 }
+
+
+
 
 
 
@@ -593,6 +596,7 @@ document.getElementById("key-sharp-down").addEventListener("click", () => {
     keySharpsCount = 0;
     redraw();
 });
+
 
 
 
