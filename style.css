@@ -241,7 +241,7 @@ button {
 /* Botão adicionar pauta */
 .add-staff-control {
     text-align: center;
-    /*margin-top: 20px;*/
+    margin-top: 10px;
 }
 #add-staff {
     background: #9C27B0;
@@ -379,6 +379,7 @@ button {
         margin-left: 5px; /* ajusta distância do texto “Pauta” */
     }
 }
+
 
 
 
