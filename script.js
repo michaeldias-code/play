@@ -274,15 +274,16 @@ function drawStaff(staffIndex) {
         ctx.stroke();
     }
 
-    // Clave de sol
-    if (clefImg.complete) {
-        ctx.drawImage(clefImg, 35, 75 + yOffset, 40, 80);
-    }
+    // --- Clave de Sol usando Unicode ---
+    ctx.font = "80px Arial, sans-serif"; // tamanho ajustável
+    ctx.fillStyle = "#333";
+    ctx.textBaseline = "top"; // importante para posicionar verticalmente
+    ctx.fillText("𝄞", 35, 75 + yOffset);
 
     // Letra C para compasso
     ctx.font = "bold 40px Georgia, serif";
     ctx.fillStyle = "#333";
-    ctx.fillText("C", 110, 135 + yOffset);
+    ctx.fillText("C", 90, 100 + yOffset);
     
     // Linha vertical inicial (barra de compasso)
     ctx.beginPath();
@@ -545,3 +546,4 @@ document.getElementById("add-staff").addEventListener("click", () => {
     const wrapper = document.querySelector('.score-wrapper');
     wrapper.scrollTop = wrapper.scrollHeight;
 });
+
