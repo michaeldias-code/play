@@ -305,10 +305,12 @@ button {
 
     /* No celular, alinhar os botões da paleta à esquerda */
     .palette {
-        padding-left: 5px; /* reduz o padding à esquerda */
+        padding-left: 0; /* reduz o padding à esquerda */
     }
+
     .palette-row {
-        justify-content: flex-start;;
+        justify-content: flex-start;
+        gap: 8px; /* mantém o espaçamento entre os botões */
     }
     .palette-label {
         width: auto;
@@ -337,4 +339,5 @@ button {
         margin-left: 10px !important;
     }
 }
+
 
