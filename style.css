@@ -149,6 +149,10 @@ button {
     background: #fefefe;
     display: block;
     margin: 0 auto;
+    
+    /* CORREÇÃO CRÍTICA: Faz o Canvas se ajustar à largura do container */
+    width: 100%; 
+    height: auto; /* Permite que o JS controle a altura baseada na largura */
 }
 
 .info {
