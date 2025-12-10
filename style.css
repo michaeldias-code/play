@@ -18,7 +18,7 @@ body {
     background: white;
     border-radius: 20px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    padding: 30px;
+    padding: 30px 15px;
     max-width: 950px;
     width: 100%;
 }
@@ -211,3 +211,4 @@ button {
         padding: 10px 15px;
     }
 }
+
