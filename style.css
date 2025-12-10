@@ -361,14 +361,22 @@ button {
     .staff-label {
         margin-left: 10px !important;
     }
-     .add-staff-control {
+    /* .add-staff-control {
         text-align: left;      /* mantém o botão à esquerda dentro do container */
-        margin-left: 45%;      /* empurra o container para direita, ajusta conforme precisar */
-        display: flex;
-        align-items: center;   /* centraliza verticalmente o texto e botão */
-        gap: 5px;              /* espaço entre texto e botão */
+     /*     margin-left: 45%;      /* empurra o container para direita, ajusta conforme precisar */
+      /*    display: flex;
+     /*     align-items: center;   /* centraliza verticalmente o texto e botão */
+      /*    gap: 5px;              /* espaço entre texto e botão */
+   /*   }*/
+
+    .add-staff-control {
+        display: flex;          /* mantém texto e botão na mesma linha */
+        align-items: center;    /* centraliza verticalmente */
+        justify-content: flex-end; /* empurra o conteúdo para a direita */
+        gap: 5px;               /* espaçamento entre texto e botão */
     }
 }
+
 
 
 
