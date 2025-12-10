@@ -1,51 +1,62 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editor de Partituras</title>
-	<link rel="stylesheet" href="style.css?v=16">
+	<link rel="stylesheet" href="style.css?v=17">
 </head>
 <body>
     <div class="container">
         <h1>🎵 Editor de Partituras Musical</h1>
         
-        <div class="controls">
-            <div class="palette">
-                <div class="palette-row">
-                    <span class="palette-label">Normal:</span>
-                    <button class="fig" data-type="semibreve" data-dot="false" title="Semibreve (2s)">
-                        <canvas width="50" height="50"></canvas>
-                    </button>
-                    <button class="fig" data-type="minima" data-dot="false" title="Mínima (1s)">
-                        <canvas width="50" height="50"></canvas>
-                    </button>
-                    <button class="fig" data-type="seminima" data-dot="false" title="Semínima (0.5s)">♩</button>
-                    <button class="fig" data-type="colcheia" data-dot="false" title="Colcheia (0.25s)">♪</button>
-                </div>
-                <div class="palette-row">
-                    <span class="palette-label">Pontuada:</span>
-                    <button class="fig" data-type="semibreve" data-dot="true" title="Semibreve Pontuada (3s)">
-                        <canvas width="50" height="50"></canvas>
-                    </button>
-                    <button class="fig" data-type="minima" data-dot="true" title="Mínima Pontuada (1.5s)">
-                        <canvas width="50" height="50"></canvas>
-                    </button>
-                    <button class="fig" data-type="seminima" data-dot="true" title="Semínima Pontuada (0.75s)">
-                        <canvas width="50" height="50"></canvas>
-                    </button>
-                    <button class="fig" data-type="colcheia" data-dot="true" title="Colcheia Pontuada (0.375s)">
-                        <canvas width="50" height="50"></canvas>
-                    </button>
-                </div>
-            </div>
+<div class="controls">
+    <div class="palette">
+        <div class="palette-row">
+            <span class="palette-label">Normal:</span>
+            <button class="fig" data-type="semibreve" data-dot="false" title="Semibreve (2s)">
+                <canvas width="50" height="50"></canvas>
+            </button>
+            <button class="fig" data-type="minima" data-dot="false" title="Mínima (1s)">
+                <canvas width="50" height="50"></canvas>
+            </button>
+            <button class="fig" data-type="seminima" data-dot="false" title="Semínima (0.5s)">♩</button>
+            <button class="fig" data-type="colcheia" data-dot="false" title="Colcheia (0.25s)">♪</button>
+        </div>
+        <div class="palette-row">
+            <span class="palette-label">Pontuada:</span>
+            <button class="fig" data-type="semibreve" data-dot="true" title="Semibreve Pontuada (3s)">
+                <canvas width="50" height="50"></canvas>
+            </button>
+            <button class="fig" data-type="minima" data-dot="true" title="Mínima Pontuada (1.5s)">
+                <canvas width="50" height="50"></canvas>
+            </button>
+            <button class="fig" data-type="seminima" data-dot="true" title="Semínima Pontuada (0.75s)">
+                <canvas width="50" height="50"></canvas>
+            </button>
+            <button class="fig" data-type="colcheia" data-dot="true" title="Colcheia Pontuada (0.375s)">
+                <canvas width="50" height="50"></canvas>
+            </button>
+        </div>
+        
+        <div class="palette-row">
+            <span class="palette-label">Acidente:</span>
+            <button class="accidental" id="acc-sharp" data-accidental="sharp" title="Sustenido">♯</button>
+            <button class="accidental" id="acc-flat" data-accidental="flat" title="Bemol">♭</button>
             
- 			<div class="buttons">
-    			<button id="play">▶ Tocar</button>
-    			<button id="harmony">🎵 Harmonia</button> <button id="undo">↶ Desfazer</button>
-    			<button id="clear">✕ Limpar</button>
-			</div>
-		</div>
+            <span class="palette-label staff-label">Pauta:</span>
+            <button id="add-staff" title="Adicionar Pauta">➕ Pauta</button>
+        </div>
+    </div>
+    
+    <div class="buttons">
+        <button id="play">▶ Tocar</button>
+        <button id="harmony">🎵 Harmonia</button>
+        <button id="undo">↶ Desfazer</button>
+        <button id="clear">✕ Limpar</button>
+    </div>
+</div>
 
         <canvas id="score" width="900" height="250"></canvas>
         
