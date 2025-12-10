@@ -278,11 +278,21 @@ button {
 
 /* ------------------- MEDIA QUERIES ------------------- */
 @media (max-width: 768px) {
+    body {
+        justify-content: flex-start; /* Força todo o conteúdo do body para esquerda */
+        align-items: flex-start;     /* Mantém alinhado no topo também */
+        padding-left: 10px;          /* Pequeno espaçamento da borda da tela */
+    }
     container {
-        padding-left: 5px;   /* quase encostado na borda */
-        padding-right: 5px;  /* opcional */
+        /*padding-left: 5px;   /* quase encostado na borda
+        padding-right: 5px;  
         padding-top: 20px;
-        padding-bottom: 20px;
+        padding-bottom: 20px;*/
+
+        max-width: 100%;             /* Ocupa a tela inteira */
+        margin: 0;                   /* Remove margem automática */
+        padding-left: 0;             /* Remove padding interno se quiser encostar mesmo */
+        padding-right: 0;
     }
 
 
@@ -290,6 +300,11 @@ button {
         flex-direction: column; 
         gap: 8px; /* reduzido para caber melhor */
         align-items: center; /* centraliza verticalmente no mobile */
+    }
+    .controls, .palette, .buttons {
+        justify-content: flex-start; /* Alinha tudo à esquerda */
+        align-items: flex-start;
+        padding-left: 0;
     }
 
     .palette, .buttons {
@@ -347,6 +362,7 @@ button {
         margin-left: 10px !important;
     }
 }
+
 
 
 
