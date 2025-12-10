@@ -1,7 +1,9 @@
 // ============================================================
 // DESENHAR ÍCONES DOS BOTÕES
+// (Manter esta função inalterada)
 // ============================================================
 function drawButtonIcons() {
+    // ... (Manter o código de drawButtonIcons anterior) ...
     const drawHead = (ctx, x, y, fill = false, scale = 1) => {
         ctx.beginPath();
         ctx.ellipse(x, y, 10 * scale, 7 * scale, -0.3, 0, Math.PI * 2);
@@ -93,11 +95,10 @@ function drawButtonIcons() {
         drawDotIcon(ctxCD, 0, 0, 1);
     }
 }
-
 drawButtonIcons();
 
 // ============================================================
-// ÁUDIO (AGORA COM ONDA TRIANGULAR E GANHO AJUSTADO)
+// ÁUDIO, TABELAS E CONSTANTES (Ajuste de Frequência para Acidentes)
 // ============================================================
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -106,13 +107,11 @@ function playFreq(freq, duration, startTime = audioCtx.currentTime) {
     const gain = audioCtx.createGain();
 
     osc.frequency.value = freq;
-    // MUDANÇA: Usando onda triangular para som mais suave
     osc.type = "triangle"; 
 
     osc.connect(gain);  
     gain.connect(audioCtx.destination);
 
-    // MUDANÇA: Ganho reduzido para 0.15 para evitar distorção digital
     gain.gain.setValueAtTime(0.15, startTime); 
     gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
 
@@ -120,20 +119,22 @@ function playFreq(freq, duration, startTime = audioCtx.currentTime) {
     osc.stop(startTime + duration);
 }
 
-// ============================================================
-// TABELAS E CONSTANTES
-// ============================================================
 const noteY = {
     "B5": 40, "A5": 50, "G5": 60, "F5": 70, "E5": 80,
     "D5": 90, "C5": 100, "B4": 110, "A4": 120, "G4": 130,
     "F4": 140, "E4": 150, "D4": 160, "C4": 170
 };
 
+// Frequências base (em HZ)
 const freqs = {
     "C4": 261.63, "D4": 293.66, "E4": 329.63, "F4": 349.23, "G4": 392.00,
     "A4": 440.00, "B4": 493.88, "C5": 523.25, "D5": 587.33, "E5": 659.25,
     "F5": 698.46, "G5": 783.99, "A5": 880.00, "B5": 987.77
 };
+// Fator para sustenido (multiplica por 2^(1/12) - um semitom)
+const SHARP_FACTOR = 1.059463; 
+// Fator para bemol (divide por 2^(1/12) - um semitom)
+const FLAT_FACTOR = 1 / SHARP_FACTOR; 
 
 const noteDurations = {
     "semibreve": 2.0,
@@ -143,31 +144,44 @@ const noteDurations = {
 };
 
 // ============================================================
-// CANVAS E PARTITURA
+// ESTRUTURA GLOBAL E CONSTANTES DA PAUTA
 // ============================================================
 const canvas = document.getElementById("score");
 const ctx = canvas.getContext("2d");
 
+// NOVA ESTRUTURA: Array de Pautas, cada uma contendo Array de Acordes
+let staffs = [[]]; // Inicia com uma pauta vazia
+
+let currentStaffIndex = 0; // Para saber onde a nota será adicionada
+
 let selectedType = "semibreve";
 let useDot = false;
-let isHarmonyMode = false; // ESTADO PARA HARMONIA
-
-// ESTRUTURA REESCRITA: `notes` armazena Acordes (Array de Arrays de notas)
-let notes = []; 
+let selectedAccidental = null; // NOVO: null, 'sharp' ou 'flat'
+let isHarmonyMode = false; 
 
 const SPACING = 50; 
 const MIN_SCORE_WIDTH = 900; 
 const CLEF_MARGIN = 160; 
+const STAFF_HEIGHT = 200; // Altura de cada pauta (do topo da 1ª linha ao final da 5ª)
+const STAFF_OFFSET = 250; // Espaço vertical total para cada staff (inclui margem)
 
 const clefImg = new Image();
-clefImg.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWCAYAAAA8AXHiAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHYklEQVR4nO2dS4hVVxiG/2NM1KgxRo0aH4OAQSQqiEYQBCEgCIIgCIIgCIIgCIIgCIIgCIIgCIIgCIIgCIIgCIIgCIIgCIIgCIIgCIL4SHxEjY/E3v7hW8uTk3vvvWfvfc5e+5z9fXDhzL1n77P+c+bfa6+91l5XQRAEQRAEQRAEQRAEQRAEQRAEQRAEQRAEQRAEQRAEQRAEQRAEQRAEQRAEQRAEQRAEQRAEQRAEQRAEQRAEQRAEQRAEQRAEQRAEQRAEQRAEQRAEQRCEq8EQM6b33G6Xg7wCRFZRYcQ0m8uP9cw0n8sR0ywuo0yjuUw1l0mmMVxGcBlmGvitH0F8Aotl7i/NZQgXJCtB9AErZaOZJOFtPBcgJPkQQQiCIAiCIEJEaxL9ELFqCX2vQVymUGsVNK0Q8dpC32oQtH4cL5fLr1+9evVv0/mXL1/+g/eMM50+ffo30/lLly79a7q4uPi/6ebNm0+Yzp07N8x08uTJkaazZ89ONp08eXKc6eTJk+NNwxrQgdZY6+rq+s7Xd2/UqFFDTcPqp59+Gm2ayOXHH38ca5rG5ccffxxnmsHlxx9/nGCaZjpz5swE0wwuP/zwwwTTbC4//PDDRNM8Lk+fPp1o+o7LkydPJprmc3ny5Mkk02IuT548mWRaYvruu+8mmZZyefz48STTt1wePXo0ybSCy4OHDyebVnF5+PDhZNN3XB48eDDZtIbLgwcPJpvWmoZp1Cg16tS+ffuGmO7evdtiun79eovp2rVrLaabN2+2mG7fvt1sunPnTrPp7t37zaZ79+41mx48eNBsevjwYbPp0aNHzaYnT540mx4/ftxsevr0abPp2bNnzaYXL140m16+fNlsevXqVbPp9evXzaa//vqr2XTlypUW09WrV1tM165dazHdvHmzxXTnzp0W0/3791tMDx8+bDE9efKkxfT8+fMW06tXr1pMb968aTG9ffu2xfTu3bsW03///ddi6i+bOK6vv/662fTnn382m1paWppNX355ZLPps88+aza1tra2mNrb21tMn376aYupa9euFtPHH3/cYpo4cWKL6YMPPmgxjR8/vsU0duzYFtOYMWNaTKNHj24xjRo1qsU0cuTIFtPw4cNbTMOGDWsxDR06tMU0ZMiQFtPgwYNbTB999FGLacCAAS2mvn37tpj69OnTYvrggw9aTL179/79xo0br00/8S8j19dff/3aNHLkyNemfv36vTaNGjXqtWncuHGvTVOmTHltet9YYGpqajZtWrSo2fTFF180m7766qtm0xdffNFsWrRoUbNp6dKlzaYVK1Y0m1avXt1sWr16dbNp3bp1zabNmzc3m3bt2tVs2rt3b7Pp0KFDzaYjR440m44fP95sOnXqVLPp7Nmzzaazp0+fbjGd43L69OkW0wUuZ86caTFd5vL7+fPnW0xXuJw7d67FdJ3LmTNnWky3uJw+fbrFdIfLqVOnWkz3uJw8ebLF9IDLoUOHWkx/cPnjwIEDLaaHXH7fv39/i+kxl9/37NnTYnrG5bfdu3e3mF5w+W3nzp0tppdc9u/Y0WJ6bZo6dWqzqampqdn00UcfNZsGDRrUbOpTp0+zqXv37s2mTp06NZuKxWKzKQ/h3/o2Njb+xmXr1q0tpq1bt7aYtm3b1mLatm1bi2nHjh0tpvXr17eY1q9f32Jat25di2nNmjUtpjVr1rSYVq1a1WJqbm5uMa1YsaLFtGzZshbT4sWLW0wLFy5sMS1YsKDF9NFHH7WYevTo0WLq1q1bi6lz584tpm+4HDx4sMV0hMuRI0daTE+5HD16tMV0ncvx48dbTL9yuXjxYovpMpcbN260mK5zuXXrVovpFpd79+61mG5zuXfvXovpDpcHDx60mO5yef78eYvpLpe3b9+2mO5xef/+fYvpAZe///67xfTY9Omnn/7KZevWrS2mLVu2tJg2b97cYtq4cWOLacOGDS2mdaZevXr9wqW5ubnFtGrVqhbTihQrWkzLly9vMS1durTFtHjx4hbTwoULW0zz589vMc2bN6/FNHfu3BbTnDlzWkyzZ89uMc2aNatFb+3Vq9cM0+zZs2eY5syZM8M0b968GaYFCxbMMC1atGiGafHixTNMS5cunWFavnz5DNPKlStnmFatWjXDtHr16hmm9evXzzBt2LBhhmnjxo0zTJs2bZph2rJlywzT1q1bZ5h27949w7R37965psOHD881HT58eK7pyJEjc01HjhyZazp+/Phc0/Hjx+eaTp06Ndd06tSpuaazZ8/ONZ09e3au6dy5c3NNFy5cmGu6ePHiXNPly5fnmq5cuTLXdO3atbmmmzdvzjXduXNnrunBgwdzTQ8fPpxrevz48VzT06dP55qePXs213Ty5MmppiNHHkw1HT58eKrp0KFD00yHDx+eZjp27Ng009GjR6eZTpw4Mc107ty5aaYLFy5MM12+fHma6dq1a9NMN27cmGa6devWNNP9+/enmR4+fDjN9OTJk2mm58+fTzO9ePFiqunVq1dTTW/evJlqevv27VRTf/P+qX79+k02ffbZZ5NNbW1tk01tbW2TTR0dHZNN7e3tk03/D7eVl3j6SggCAAAAAElFTkSuQmCC';
+clefImg.src = 'data:image/png;base64,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';
 
 // ============================================================
-// DESENHO DAS FIGURAS MUSICAIS (FIXO)
+// DESENHO DAS FIGURAS MUSICAIS E ACIDENTES
 // ============================================================
-// As funções de desenho aqui usam valores fixos e não precisam de escala.
-// ... (drawDot, drawSemibreve, drawMinima, drawSeminima, drawColcheia, drawNote)
-// ... (Mantido o código do bloco anterior)
+function drawAccidental(accidental, x, y) {
+    // Desenha o Sustenido (#) ou Bemol (♭)
+    ctx.font = "30px Arial";
+    ctx.fillStyle = "#333";
+    // Ajusta o posicionamento do texto para a esquerda da cabeça da nota
+    const symbol = accidental === 'sharp' ? '♯' : '♭';
+    ctx.fillText(symbol, x - 25, y + 10);
+}
+
+// ... (drawDot, drawSemibreve, drawMinima, drawSeminima, drawColcheia, drawNote mantidos)
+
 function drawDot(x, y) {
     ctx.beginPath();
     ctx.arc(x + 20, y, 3, 0, Math.PI * 2);
@@ -243,51 +257,86 @@ function drawNote(type, x, y, dot = false) {
 
 
 // ============================================================
-// DESENHAR PAUTA E REDRAW (Adaptado para Scroll Horizontal)
+// DESENHAR PAUTA E REDRAW (Suporte a Múltiplas Pautas)
 // ============================================================
-function drawStaff() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+function drawStaff(staffIndex) {
+    const yOffset = staffIndex * STAFF_OFFSET;
     
     ctx.strokeStyle = "#333";
     ctx.lineWidth = 1.5;
 
     // Linhas da pauta
     for (let i = 0; i < 5; i++) {
+        const y = 80 + i * 20 + yOffset;
         ctx.beginPath();
-        ctx.moveTo(20, 80 + i * 20);
-        ctx.lineTo(canvas.width - 20, 80 + i * 20);
+        ctx.moveTo(20, y);
+        ctx.lineTo(canvas.width - 20, y);
         ctx.stroke();
     }
 
     // Clave de sol
     if (clefImg.complete) {
-        ctx.drawImage(clefImg, 35, 75, 40, 80);
+        ctx.drawImage(clefImg, 35, 75 + yOffset, 40, 80);
     }
 
     // Letra C para compasso
     ctx.font = "bold 40px Georgia, serif";
     ctx.fillStyle = "#333";
-    ctx.fillText("C", 110, 135);
+    ctx.fillText("C", 110, 135 + yOffset);
+    
+    // Linha vertical inicial (barra de compasso)
+    ctx.beginPath();
+    ctx.moveTo(20, 80 + yOffset);
+    ctx.lineTo(20, 160 + yOffset);
+    ctx.stroke();
+
+    // Linha vertical final
+    ctx.beginPath();
+    ctx.moveTo(canvas.width - 20, 80 + yOffset);
+    ctx.lineTo(canvas.width - 20, 160 + yOffset);
+    ctx.stroke();
 }
 
 function redraw() {
-    const chordCount = notes.length;
-    // Largura mínima de 900px, ou a largura necessária para todas as notas.
-    let requiredWidth = CLEF_MARGIN + (chordCount * SPACING) + SPACING + 20;
-    
+    // 1. Calcular a Largura Máxima
+    let maxChordCount = 0;
+    for (const staff of staffs) {
+        if (staff.length > maxChordCount) {
+            maxChordCount = staff.length;
+        }
+    }
+    let requiredWidth = CLEF_MARGIN + (maxChordCount * SPACING) + SPACING + 20;
     canvas.width = Math.max(MIN_SCORE_WIDTH, requiredWidth); 
 
-    drawStaff();
+    // 2. Calcular a Altura Total
+    const requiredHeight = staffs.length * STAFF_OFFSET;
+    canvas.height = requiredHeight;
 
-    let x = CLEF_MARGIN;
-    for (const chord of notes) {
-        // Desenha todas as notas do acorde na mesma posição X
-        for (const note of chord) {
-            // Nota: O tipo e pontuação são definidos pela PRIMEIRA nota do acorde no modo "play"
-            drawNote(note.type, x, noteY[note.pitch], note.dot);
+    // 3. Desenhar Todas as Pautas e Acordes
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    staffs.forEach((staff, staffIndex) => {
+        drawStaff(staffIndex);
+        
+        const yOffset = staffIndex * STAFF_OFFSET;
+        let x = CLEF_MARGIN;
+        
+        for (const chord of staff) {
+            // Desenha todas as notas do acorde na mesma posição X
+            for (const note of chord) {
+                const noteYPos = noteY[note.pitch] + yOffset;
+                
+                // Desenha o acidente, se houver
+                if (note.accidental) {
+                    drawAccidental(note.accidental, x, noteYPos);
+                }
+                
+                // Desenha a nota
+                drawNote(note.type, x, noteYPos, note.dot);
+            }
+            x += SPACING;
         }
-        x += SPACING;
-    }
+    });
 }
 
 // Aguardar imagem carregar antes de desenhar
@@ -297,20 +346,28 @@ clefImg.onload = function() {
 redraw(); // Chamada inicial
 
 // ============================================================
-// INTERAÇÃO COM CANVAS (Harmonia)
+// INTERAÇÃO COM CANVAS
 // ============================================================
 canvas.addEventListener("click", e => {
     const rect = canvas.getBoundingClientRect();
-    // A posição X do clique dentro do canvas (importante para Harmonia)
-    const clickX = e.clientX - rect.left; 
-    const y = e.clientY - rect.top;
+    const clickY = e.clientY - rect.top;
+
+    // 1. Determina em qual pauta o clique ocorreu
+    let targetStaffIndex = Math.floor(clickY / STAFF_OFFSET);
+    if (targetStaffIndex >= staffs.length) {
+        targetStaffIndex = staffs.length - 1; // Garante que não ultrapasse
+    }
+    currentStaffIndex = targetStaffIndex;
+
+    const staffYOffset = targetStaffIndex * STAFF_OFFSET;
+    const relativeY = clickY - staffYOffset; // Y relativo à pauta
 
     let bestPitch = null;
     let bestDist = Infinity;
 
-    // Encontra a nota mais próxima
+    // 2. Encontra a nota mais próxima
     for (const p in noteY) {
-        const d = Math.abs(noteY[p] - y);
+        const d = Math.abs(noteY[p] - relativeY);
         if (d < bestDist) {
             bestDist = d;
             bestPitch = p;
@@ -319,22 +376,36 @@ canvas.addEventListener("click", e => {
     
     if (bestDist > 15) return; 
 
-    const newNote = { pitch: bestPitch, type: selectedType, dot: useDot };
+    // 3. Cria a nova nota com o acidente selecionado
+    const newNote = { 
+        pitch: bestPitch, 
+        type: selectedType, 
+        dot: useDot, 
+        accidental: selectedAccidental // Inclui o acidente
+    };
+    
+    const targetStaff = staffs[currentStaffIndex];
 
-    if (isHarmonyMode && notes.length > 0) {
-        // MODO HARMONIA: Adiciona a nota ao último acorde
-        const lastChord = notes[notes.length - 1];
+    if (isHarmonyMode && targetStaff.length > 0) {
+        // MODO HARMONIA: Adiciona a nota ao último acorde da pauta
+        const lastChord = targetStaff[targetStaff.length - 1];
         
-        // CORREÇÃO HARMONIA: Garante que a nota não seja repetida no mesmo acorde
-        const isPitchPresent = lastChord.some(note => note.pitch === bestPitch);
+        // Verifica se a nota já existe (pitch + accidental)
+        const isPitchPresent = lastChord.some(note => 
+            note.pitch === bestPitch && note.accidental === selectedAccidental
+        );
         if (!isPitchPresent) {
              lastChord.push(newNote);
         }
        
     } else {
         // MODO NORMAL: Inicia um novo acorde
-        notes.push([newNote]);
+        targetStaff.push([newNote]);
     }
+
+    // Deseleciona o acidente após o uso
+    selectedAccidental = null;
+    document.querySelectorAll(".accidental").forEach(b => b.classList.remove("selected"));
 
     redraw();
 });
@@ -375,11 +446,32 @@ document.querySelectorAll(".fig").forEach(btn => {
     });
 });
 
+// Seleção de Acidente
+document.querySelectorAll(".accidental").forEach(btn => {
+    btn.addEventListener("click", () => {
+        const accidentalType = btn.dataset.accidental;
+
+        if (selectedAccidental === accidentalType) {
+            // Desativa se já estiver selecionado
+            selectedAccidental = null;
+            btn.classList.remove("selected");
+        } else {
+            // Seleciona um novo
+            document.querySelectorAll(".accidental").forEach(b => b.classList.remove("selected"));
+            selectedAccidental = accidentalType;
+            btn.classList.add("selected");
+        }
+    });
+});
+
 document.querySelector(".fig[data-type='semibreve'][data-dot='false']").classList.add("selected");
 
-// Tocar
+// Tocar (Lógica adaptada para Acidentes e Múltiplas Pautas)
 document.getElementById("play").addEventListener("click", async () => {
-    if (notes.length === 0) {
+    // Constrói uma fila de todos os acordes de todas as pautas em ordem
+    const allChords = staffs.flat(); 
+    
+    if (allChords.length === 0) {
         alert("Adicione notas na partitura primeiro!");
         return;
     }
@@ -390,8 +482,7 @@ document.getElementById("play").addEventListener("click", async () => {
 
     let t = audioCtx.currentTime;
     
-    for (const chord of notes) {
-        // A duração é determinada pela primeira nota do acorde
+    for (const chord of allChords) {
         if (chord.length === 0) continue; 
         
         const baseNote = chord[0];
@@ -400,39 +491,57 @@ document.getElementById("play").addEventListener("click", async () => {
         
         // Toca todas as notas do acorde simultaneamente
         for(const note of chord) {
-            // Garantir que a duração seja aplicada a todas as notas do acorde
-            playFreq(freqs[note.pitch], duration, t);
+            let freq = freqs[note.pitch];
+            
+            // Aplica o acidente para ajustar a frequência
+            if (note.accidental === 'sharp') {
+                freq *= SHARP_FACTOR;
+            } else if (note.accidental === 'flat') {
+                freq *= FLAT_FACTOR;
+            }
+            
+            playFreq(freq, duration, t);
         }
 
         t += duration;
     }
 });
 
-// Limpar
+// Limpar (Limpa todas as pautas)
 document.getElementById("clear").addEventListener("click", () => {
-    if (notes.length > 0 && confirm("Deseja limpar toda a partitura?")) {
-        notes = [];
+    const allChords = staffs.flat(); 
+    if (allChords.length > 0 && confirm("Deseja limpar toda a partitura?")) {
+        staffs = [[]]; // Reinicia com uma única pauta vazia
+        currentStaffIndex = 0;
         redraw();
     }
 });
 
-// Desfazer
+// Desfazer (Remove o último acorde/nota da pauta atual)
 document.getElementById("undo").addEventListener("click", () => {
-    if (notes.length > 0) {
-        const lastChord = notes[notes.length - 1];
+    const targetStaff = staffs[currentStaffIndex];
+
+    if (targetStaff.length > 0) {
+        const lastChord = targetStaff[targetStaff.length - 1];
         
         if (lastChord.length > 1) {
             // Se for um acorde, remove apenas a última nota adicionada
             lastChord.pop();
         } else {
             // Se for uma nota única, remove o acorde/nota inteiro
-            notes.pop();
+            targetStaff.pop();
         }
         redraw();
     }
 });
 
-// Adicionar Pauta (Lógica de placeholder por enquanto)
+// Adicionar Pauta (Funcional!)
 document.getElementById("add-staff").addEventListener("click", () => {
-    alert("Funcionalidade 'Adicionar Pauta' requer mais refatoração e será implementada em seguida!");
+    staffs.push([]); // Adiciona uma nova pauta vazia
+    currentStaffIndex = staffs.length - 1; // Define a nova pauta como ativa
+    redraw();
+    
+    // Rola a página para baixo para ver a nova pauta
+    const wrapper = document.querySelector('.score-wrapper');
+    wrapper.scrollTop = wrapper.scrollHeight;
 });
