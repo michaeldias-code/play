@@ -1,3 +1,6 @@
+// Estado da Armadura da Clave (somente para sustenido 1º protótipo)
+let keySharpsCount = 0; // quantos sustenidos na armadura (0 ou 1)
+
 // ============================================================
 // DESENHAR ÍCONES DOS BOTÕES
 // (Manter esta função inalterada)
@@ -265,6 +268,15 @@ function drawStaff(staffIndex) {
     ctx.strokeStyle = "#333";
     ctx.lineWidth = 1.5;
 
+
+
+
+// Desenha a armadura da clave (somente 1º sustenido protótipo)
+drawKeySharps(staffIndex * STAFF_OFFSET);
+
+
+
+    
     // Linhas da pauta
     for (let i = 0; i < 5; i++) {
         const y = 80 + i * 20 + yOffset;
@@ -297,6 +309,31 @@ function drawStaff(staffIndex) {
     ctx.lineTo(canvas.width - 20, 160 + yOffset);
     ctx.stroke();
 }
+
+
+
+
+
+
+function drawKeySharps(yOffset = 0) {
+    if (keySharpsCount >= 1) {
+        // O 1º sustenido é sempre F#
+        // Linha ou espaço correspondente à nota F4 na clave de Sol
+        const x = 140; // Posição X depois da clave
+        const y = noteY["F4"] + yOffset; // Posição Y da nota F4
+        
+        ctx.font = "30px Arial";
+        ctx.fillStyle = "#333";
+        ctx.fillText("♯", x, y);
+    }
+}
+
+
+
+
+
+
+
 
 function redraw() {
     // 1. Calcular a Largura Máxima
@@ -546,4 +583,21 @@ document.getElementById("add-staff").addEventListener("click", () => {
     const wrapper = document.querySelector('.score-wrapper');
     wrapper.scrollTop = wrapper.scrollHeight;
 });
+
+
+
+
+// Adicionar 1º sustenido
+document.getElementById("key-sharp-up").addEventListener("click", () => {
+    keySharpsCount = 1; // Protótipo: só 1 sustenido
+    redraw();
+});
+
+// Remover sustenido
+document.getElementById("key-sharp-down").addEventListener("click", () => {
+    keySharpsCount = 0;
+    redraw();
+});
+
+
 
