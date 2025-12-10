@@ -379,27 +379,28 @@ button {
         margin-left: auto !important;
     }
       /* Garante que a linha onde está o botão possa quebrar */
-    .palette-row {
+    /*.palette-row {
         flex-wrap: wrap !important;
         overflow: visible !important;
-    }
+    }*/
 
     /* Força o botão a aparecer */
-    #add-staff {
+/*    #add-staff {
         display: inline-block !important;
         position: relative !important;
         opacity: 1 !important;
         visibility: visible !important;
 
         /* Remove qualquer margem que estava jogando ele para fora */
-        margin-left: 0 !important;
+  /*      margin-left: 0 !important;
         margin-right: 0 !important;
         margin-top: 6px !important;
 
         /* Evita que ele fique espremido */
-        min-width: 70px !important;
+    /*    min-width: 70px !important;*/
     }
 }
+
 
 
 
