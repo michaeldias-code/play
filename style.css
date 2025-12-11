@@ -27,7 +27,7 @@ body {
 h1 {
     text-align: center;
     /*color: #333;*/
-    color: #333;
+    color: red;
     margin-bottom: 20px;
     font-size: 28px;
 }
@@ -354,9 +354,9 @@ button {
         /*min-width: 45px !important;*/
     }
 
-    .staff-label {
+    /*.staff-label {
         margin-left: 10px !important;
-    }
+    }*/
 
     .add-staff-control {
         display: flex;          
@@ -371,6 +371,7 @@ button {
     body { outline: 4px dashed magenta !important; }
 
 }
+
 
 
 
