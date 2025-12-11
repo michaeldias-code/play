@@ -294,7 +294,8 @@ button {
 
     .controls {
         flex-direction: column; 
-        gap: 8px; /* reduzido para caber melhor */
+        /*gap: 8px;*/ /* reduzido para caber melhor */
+        gap: 5px; /* reduzido para caber melhor */
         align-items: center; /* centraliza verticalmente no mobile */
     }
     .controls, .palette, .buttons {
@@ -329,7 +330,8 @@ button {
 
     .palette-row {
         justify-content: flex-start;
-        gap: 8px; /* mantém o espaçamento entre os botões */
+        /*gap: 8px;*/ /* mantém o espaçamento entre os botões */
+        gap: 5px; /* mantém o espaçamento entre os botões */
     }
     .palette-label {
         width: auto;
@@ -371,6 +373,7 @@ button {
     body { outline: 4px dashed magenta !important; }
 
 }
+
 
 
 
