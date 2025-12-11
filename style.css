@@ -27,7 +27,7 @@ body {
 h1 {
     text-align: center;
     /*color: #333;*/
-    color: red;
+    color: #333;
     margin-bottom: 20px;
     font-size: 28px;
 }
@@ -351,7 +351,7 @@ button {
     .accidental, #add-staff {
         padding: 8px 10px !important;
         font-size: 16px !important;
-        min-width: 45px !important;
+        /*min-width: 45px !important;*/
     }
 
     .staff-label {
@@ -359,10 +359,10 @@ button {
     }
 
     .add-staff-control {
-        display: flex;          /* mantém texto e botão na mesma linha */
-        align-items: center;    /* centraliza verticalmente */
-        justify-content: flex-end; /* empurra o conteúdo para a direita */
-        gap: 5px;               /* espaçamento entre texto e botão */
+        display: flex;          
+        align-items: center;    
+        justify-content: flex-end;
+        gap: 5px;              
     }
     .palette-row #add-staff {
         margin-left: auto !important;
@@ -371,6 +371,7 @@ button {
     body { outline: 4px dashed magenta !important; }
 
 }
+
 
 
 
