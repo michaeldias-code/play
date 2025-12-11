@@ -285,17 +285,11 @@ button {
         padding-left: 5px;          /* Pequeno espaçamento da borda da tela */
     }
     container {
-        /*padding-left: 5px;   /* quase encostado na borda
-        padding-right: 5px;  
-        padding-top: 20px;
-        padding-bottom: 20px;*/
-
         max-width: 100%;             /* Ocupa a tela inteira */
         margin: 0;                   /* Remove margem automática */
         padding-left: 5px;             /* Remove padding interno se quiser encostar mesmo */
         padding-right: 0;
     }
-
 
     .controls {
         flex-direction: column; 
@@ -362,13 +356,6 @@ button {
     .staff-label {
         margin-left: 10px !important;
     }
-    /* .add-staff-control {
-        text-align: left;      /* mantém o botão à esquerda dentro do container */
-     /*     margin-left: 45%;      /* empurra o container para direita, ajusta conforme precisar */
-      /*    display: flex;
-     /*     align-items: center;   /* centraliza verticalmente o texto e botão */
-      /*    gap: 5px;              /* espaço entre texto e botão */
-   /*   }*/
 
     .add-staff-control {
         display: flex;          /* mantém texto e botão na mesma linha */
@@ -379,31 +366,11 @@ button {
     .palette-row #add-staff {
         margin-left: auto !important;
     }
-      /* Garante que a linha onde está o botão possa quebrar */
-    /*.palette-row {
-        flex-wrap: wrap !important;
-        overflow: visible !important;
-    }*/
 
-    /* Força o botão a aparecer */
-/*    #add-staff {
-        display: inline-block !important;
-        position: relative !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-
-        /* Remove qualquer margem que estava jogando ele para fora */
-  /*      margin-left: 0 !important;
-        margin-right: 0 !important;
-        margin-top: 6px !important;
-
-        /* Evita que ele fique espremido */
-    /*    min-width: 70px !important;
-    
-    }*/
     body { outline: 4px dashed magenta !important; }
 
 }
+
 
 
 
