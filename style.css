@@ -26,7 +26,8 @@ body {
 
 h1 {
     text-align: center;
-    color: #333;
+    /*color: #333;*/
+    color: red;
     margin-bottom: 20px;
     font-size: 28px;
 }
@@ -370,6 +371,7 @@ button {
     body { outline: 4px dashed magenta !important; }
 
 }
+
 
 
 
