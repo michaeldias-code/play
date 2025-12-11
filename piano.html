@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Piano JS Estendido e Grave (F3-F5)</title>
+    <style>
+        /* (Manter o CSS anterior para manter a aparência incrível!) */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-color: #f4f4f9;
+        }
+        h1 { color: #555; }
+        .piano-container {
+            margin-top: 30px;
+            display: inline-block;
+        }
+        .key {
+            width: 50px;
+            height: 150px;
+            background-color: white;
+            border: 1px solid #333;
+            display: inline-block;
+            cursor: pointer;
+            position: relative;
+            box-shadow: 3px 3px 7px rgba(0,0,0,0.3);
+            margin-left: -1px;
+            user-select: none;
+        }
+        .black-key {
+            width: 30px;
+            height: 100px;
+            background-color: black;
+            position: absolute;
+            left: -15px;
+            z-index: 10;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+        }
+        .active-white { background-color: #ccc; }
+        .active-black { background-color: #444; }
+        .key-label {
+            position: absolute;
+            bottom: 5px;
+            width: 100%;
+            font-size: 14px;
+            color: #333;
+            font-weight: bold;
+        }
+        .key-label.black {
+             color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🎹 Piano Cromático JS (Alcance F3 a F5)</h1>
+    <p>O piano está otimizado para o registro médio-grave. Ele começa no F3 e vai até o F5.</p>
+    <p>**Nota mais grave alcançada:** A2 ($\text{L}\text{a}2$) via teclas da extremidade esquerda.</p>
+    
+    <div style="font-weight: bold; margin-bottom: 20px; border: 1px solid #aaa; padding: 10px; display: inline-block; background: #fff;">
+        <h3>Registro Grave (A2 a E4)</h3>
+        <p>
+            **Naturais (Brancas):** A, S, D, F, G, H, J<br>
+            **Acidentais (Pretas):** W, E, T, Y, U
+        </p>
+        <hr>
+        <h3>Registro Médio (F4 a F5)</h3>
+        <p>
+            **Naturais (Brancas):** K, L, Ç, &Aacute;, *, ~, ^<br>
+            **Acidentais (Pretas):** O, P, [, ], \
+        </p>
+    </div>
+
+    <div class="piano-container" id="piano-visualizer">
+        </div>
+
+    <script>
+        // --- Mapeamento de Frequências (F3 a F5) ---
+        
+        // NOVA BASE: F3 = 174.61 Hz
+        // O F3 está 5 semitons acima do C3 (que é 130.81 Hz).
+        const F3_BASE_FREQ = 174.61;
+        const SEMITONE = Math.pow(2, 1/12);
+
+        // Funções para calcular as frequências
+        // O C3 está no semitom -5 relativo à F3.
+        const getFreq = (semitones) => F3_BASE_FREQ * Math.pow(SEMITONE, semitones);
+
+        // Teclas do Teclado e suas Frequências (25 teclas: F3 a F5)
+        const FREQUENCY_MAP = {
+            // --- OITAVA 3 (Começa em F3 - Semitons de 0 a 11) ---
+            
+            'A': getFreq(0),  // F3
+            'W': getFreq(1),  // F#3
+            'S': getFreq(2),  // G3
+            'E': getFreq(3),  // G#3
+            'D': getFreq(4),  // A3
+            'F': getFreq(5),  // A#3
+            'T': getFreq(6),  // B3
+            'G': getFreq(7),  // C4 (Dó Central)
+            'Y': getFreq(8),  // C#4
+            'H': getFreq(9),  // D4
+            'U': getFreq(10), // D#4
+            'J': getFreq(11), // E4
+
+            // --- OITAVA 4 (F4 a E5 - Semitons de 12 a 23) ---
+            
+            'K': getFreq(12), // F4
+            'O': getFreq(13), // F#4
+            'L': getFreq(14), // G4
+            'P': getFreq(15), // G#4
+            'Ç': getFreq(16), // A4 (Lá 440 Hz)
+            '~': getFreq(17), // A#4
+            '[': getFreq(18), // B4
+            '&Aacute;': getFreq(19), // C5
+            ']': getFreq(20), // C#5
+            '*': getFreq(21), // D5
+            '\\': getFreq(22), // D#5
+            '^': getFreq(23), // E5
+            'Z': getFreq(24) // F5
+        };
+
+        // Mapeamento de Teclas para Notas (para visualização)
+        const KEY_TO_NOTE = {
+            'A': 'F3', 'W': 'F#3', 'S': 'G3', 'E': 'G#3', 'D': 'A3', 'F': 'A#3', 'T': 'B3', 'G': 'C4', 'Y': 'C#4', 'H': 'D4', 'U': 'D#4', 'J': 'E4',
+            'K': 'F4', 'O': 'F#4', 'L': 'G4', 'P': 'G#4', 'Ç': 'A4', '~': 'A#4', '[': 'B4', '&Aacute;': 'C5', ']': 'C#5', '*': 'D5', '\\': 'D#5', '^': 'E5', 'Z': 'F5'
+        };
+
+        // --- Estado do Instrumento ---
+        let audioContext = null;
+        let activeNodes = {}; 
+
+        // --- FUNÇÕES DE ÁUDIO (Mantidas Polifônicas/Estáveis) ---
+        
+        function startNote(freq, key) {
+            if (activeNodes[key]) return;
+
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            const now = audioContext.currentTime;
+            const mainGain = audioContext.createGain();
+            mainGain.connect(audioContext.destination);
+            
+            const harmonicRatios = [
+                { ratio: 1, gain: 0.8 }, { ratio: 2, gain: 0.4 }, 
+                { ratio: 3, gain: 0.3 }, { ratio: 4, gain: 0.2 }, 
+            ];
+
+            const oscillators = [];
+            harmonicRatios.forEach(({ ratio, gain }) => {
+                const oscillator = audioContext.createOscillator();
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(freq * ratio, now);
+
+                const harmonicGain = audioContext.createGain();
+                harmonicGain.gain.setValueAtTime(gain, now);
+
+                oscillator.connect(harmonicGain).connect(mainGain);
+                oscillator.start(now);
+                oscillators.push(oscillator);
+            });
+            
+            const attackTime = 0.01;
+            const decayTime = 0.5;
+            const sustainLevel = 0.7;
+
+            mainGain.gain.setValueAtTime(0.001, now);
+            mainGain.gain.linearRampToValueAtTime(1.0, now + attackTime);
+            mainGain.gain.exponentialRampToValueAtTime(sustainLevel, now + attackTime + decayTime);
+
+            activeNodes[key] = { gain: mainGain, oscillators: oscillators };
+        }
+
+        function stopNote(key) {
+            const noteData = activeNodes[key];
+            if (!noteData) return;
+
+            const now = audioContext.currentTime;
+            const releaseTime = 1.5;
+
+            noteData.gain.gain.cancelScheduledValues(now);
+            noteData.gain.gain.setValueAtTime(noteData.gain.gain.value, now);
+            noteData.gain.gain.exponentialRampToValueAtTime(0.0001, now + releaseTime);
+
+            noteData.oscillators.forEach(osc => {
+                osc.stop(now + releaseTime + 0.1); 
+            });
+
+            delete activeNodes[key];
+            updateVisual(key, false);
+        }
+        
+        function updateVisual(key, isDown) {
+            const note = KEY_TO_NOTE[key];
+            if (!note) return;
+
+            const element = document.getElementById('key-' + note);
+            if (element) {
+                const isBlack = note.includes('#');
+                element.classList.toggle(isBlack ? 'active-black' : 'active-white', isDown);
+            }
+        }
+        
+        // --- Geração do Visualizador de Teclado ---
+        function generatePianoKeys() {
+            const container = document.getElementById('piano-visualizer');
+            // Ordem das notas de F3 a F5
+            const keysOrder = [
+                'F3', 'F#3', 'G3', 'G#3', 'A3', 'A#3', 'B3', 
+                'C4', 'C#4', 'D4', 'D#4', 'E4', 
+                'F4', 'F#4', 'G4', 'G#4', 'A4', 'A#4', 'B4', 
+                'C5', 'C#5', 'D5', 'D#5', 'E5', 'F5'
+            ];
+            const keyMapReverse = Object.fromEntries(Object.entries(KEY_TO_NOTE).map(([k, v]) => [v, k]));
+            
+            keysOrder.forEach(note => {
+                const key = keyMapReverse[note];
+                const isBlack = note.includes('#');
+                const element = document.createElement('div');
+                element.id = 'key-' + note;
+                element.classList.add('key');
+                if (isBlack) element.classList.add('black-key');
+                
+                // Mapeamento visual das teclas do teclado
+                const displayKey = key ? `(${key})` : '';
+                
+                const label = document.createElement('span');
+                label.classList.add('key-label');
+                if (isBlack) label.classList.add('black');
+                label.innerHTML = `${note.replace('sharp', '#')} ${displayKey}`;
+                element.appendChild(label);
+                
+                // Posição ajustada para teclas pretas
+                if (isBlack) {
+                    const prevWhiteKey = container.lastElementChild;
+                    if (prevWhiteKey) {
+                        prevWhiteKey.appendChild(element);
+                    }
+                } else {
+                    container.appendChild(element);
+                }
+            });
+        }
+        
+        generatePianoKeys();
+
+        // --- Event Listeners do Teclado (Com tratamento de layout BR) ---
+
+        document.addEventListener('keydown', (e) => {
+            let key = e.key.toUpperCase();
+            
+            // TRATAMENTO PARA TECLAS ESPECIAIS (layout BR)
+            if (e.key === 'ç') key = 'Ç';
+            if (e.key === 'ã') key = '&Aacute;';
+            if (e.key === ';') key = '*';
+            if (e.key === '`') key = '~';
+            if (e.key === ']') key = '^';
+            if (e.key === '\\') key = '\\';
+
+            const freq = FREQUENCY_MAP[key];
+
+            if (freq && !e.repeat) {
+                 if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                startNote(freq, key);
+                updateVisual(key, true);
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            let key = e.key.toUpperCase();
+            
+            // TRATAMENTO PARA TECLAS ESPECIAIS (layout BR)
+            if (e.key === 'ç') key = 'Ç';
+            if (e.key === 'ã') key = '&Aacute;';
+            if (e.key === ';') key = '*';
+            if (e.key === '`') key = '~';
+            if (e.key === ']') key = '^';
+            if (e.key === '\\') key = '\\';
+
+            if (FREQUENCY_MAP[key]) {
+                stopNote(key);
+            }
+        });
+    </script>
+</body>
+</html>
