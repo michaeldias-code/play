@@ -123,8 +123,10 @@
             'L': getFreq(14), // G4
             'P': getFreq(15), // G#4
             'Ç': getFreq(16), // A4 (Lá 440 Hz)
-            '~': getFreq(17), // A#4
-            '[': getFreq(18), // B4
+            //'~': getFreq(17), // A#4
+            '´': getFreq(17), // A#4
+            //'[': getFreq(18), // B4
+            '~': getFreq(18), // B4
             '&Aacute;': getFreq(19), // C5
             ']': getFreq(20), // C#5
             '*': getFreq(21), // D5
@@ -136,7 +138,7 @@
         // Mapeamento de Teclas para Notas (para visualização)
         const KEY_TO_NOTE = {
             'A': 'F3', 'W': 'F#3', 'S': 'G3', 'E': 'G#3', 'D': 'A3', 'R': 'A#3', 'F': 'B3', 'G': 'C4', 'Y': 'C#4', 'H': 'D4', 'U': 'D#4', 'J': 'E4',
-            'K': 'F4', 'O': 'F#4', 'L': 'G4', 'P': 'G#4', 'Ç': 'A4', '~': 'A#4', '[': 'B4', '&Aacute;': 'C5', ']': 'C#5', '*': 'D5', '\\': 'D#5', '^': 'E5', 'Z': 'F5'
+            'K': 'F4', 'O': 'F#4', 'L': 'G4', 'P': 'G#4', 'Ç': 'A4', '´': 'A#4', '~': 'B4', '&Aacute;': 'C5', ']': 'C#5', '*': 'D5', '\\': 'D#5', '^': 'E5', 'Z': 'F5'
         };
 
         // --- Estado do Instrumento ---
@@ -301,6 +303,7 @@
     </script>
 </body>
 </html>
+
 
 
 
