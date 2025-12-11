@@ -252,7 +252,8 @@ button {
 }
 
 .accidental, #add-staff {
-    padding: 10px 15px;
+    /*padding: 10px 15px;*//*v_11_dez*/
+    padding: 10px 5px;
     margin-right: 5px;
     background-color: #f0f0f0;
     border: 1px solid #ccc;
@@ -260,7 +261,7 @@ button {
     font-size: 18px;
     cursor: pointer;
     transition: all 0.2s;
-    min-width: 50px;
+    /*min-width: 50px;*/v_11_dez
 }
 .accidental:hover, #add-staff:hover {
     background-color: #ddd;
@@ -272,7 +273,7 @@ button {
 }
 
 .staff-label {
-    margin-left: 15px;
+    /*margin-left: 15px;*/ v_11_dez
     font-weight: bold;
 }
 
@@ -403,6 +404,7 @@ button {
     body { outline: 4px dashed magenta !important; }
 
 }
+
 
 
 
