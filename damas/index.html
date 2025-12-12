@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Damas Brasileiras — IA Aprendente</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+    margin:0;
+    background:#f0f0f0;
+    font-family:Arial;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:20px;
+}
+#board {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    width: 95vw;
+    max-width: 480px;
+    aspect-ratio: 1 / 1;
+    border:4px solid #333;
+    box-shadow:0 0 10px #0004;
+}
+.cell {
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:4vw;
+    cursor:pointer;
+    user-select:none;
+    box-sizing:border-box;
+}
+.dark {background:#7a4a2d;}
+.light{background:#eac99f;}
+.piece {
+    width:90%;
+    height:90%;
+    border-radius:50%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:white;
+    font-weight:bold;
+    box-shadow:0 0 5px #000;
+    transition: transform 0.2s;
+}
+.red{background:#d33;}
+.black{background:#777;color:#ffd;}
+.dama{border:4px solid gold;}
+.highlight {box-shadow: 0 0 15px yellow inset; transition: box-shadow 0.5s ease;}
+#status{margin-top:20px;font-size:22px;text-align:center;}
+button{margin-top:10px;padding:10px 20px;font-size:16px;}
+</style>
+</head>
+<body>
+<h1>Damas Brasileiras — IA Aprendente</h1>
+<div id="board"></div>
+<div id="status">Sua vez</div>
+<button onclick="resetMemory()">Resetar Memória da IA</button>
+<script>
+let board = Array(64).fill(null), playing=true, human="r", ai="b";
+let memory = JSON.parse(localStorage.getItem("ia_damas_memory")||"{}");
+let moveHistory=[], selected=null;
+const dirsP = {"r":[-7,-9],"b":[7,9]}, dirsD=[-7,-9,7,9];
+const boardDiv=document.getElementById("board");
+const status=document.getElementById("status");
+
+// ===== RENDER =====
+for(let i=0;i<64;i++){
+    const c=document.createElement("div");
+    c.className="cell "+(((Math.floor(i/8)+i)%2)?"dark":"light");
+    c.dataset.i=i;
+    c.onclick=()=>humanClick(i);
+    boardDiv.appendChild(c);
+}
+
+function render(){
+    for(let i=0;i<64;i++){
+        const c=boardDiv.children[i];
+        c.innerHTML="";
+        let p=board[i];
+        if(p){
+            const div=document.createElement("div");
+            div.className="piece "+(p.color==="r"?"red":"black")+(p.dama?" dama":"");
+            div.textContent = p.dama?"★":"";
+            c.appendChild(div);
+        }
+        c.className="cell "+(((Math.floor(i/8)+i)%2)?"dark":"light");
+        c.style.outline=(selected===i?"3px solid yellow":"none");
+    }
+}
+
+function makePiece(color,dama=false){return {color,dama};}
+function inside(i){return i>=0&&i<64;}
+function diagOk(a,b){return Math.abs((a%8)-(b%8))===1;}
+function diagLong(a,b){return Math.abs((a%8)-(b%8))===Math.abs(Math.floor(a/8)-Math.floor(b/8));}
+function cloneBoard(b){return JSON.parse(JSON.stringify(b));}
+
+// ===== MULTIPLE CAPTURES =====
+function multiCaps(b, pos, color, visited=[]) {
+    let p = b[pos], caps = [];
+    let directions = p.dama ? dirsD : dirsP[color];
+    
+    for (let d of directions) {
+        let mid = pos + d, land = pos + 2*d;
+        if (inside(mid) && inside(land) && diagOk(pos, mid) && diagOk(mid, land)) {
+            let e = b[mid];
+            if (e && e.color !== color && !b[land] && !visited.includes(mid)) {
+                let nb = cloneBoard(b);
+                nb[land] = cloneBoard(p);
+                nb[pos] = null;
+                nb[mid] = null;
+                let newVisited = visited.concat(mid);
+                let rest = multiCaps(nb, land, color, newVisited);
+                if (rest.length === 0) {
+                    caps.push({ end: land, caps: newVisited });
+                } else {
+                    rest.forEach(r => caps.push({ end: r.end, caps: newVisited.concat(r.caps) }));
+                }
+            }
+        }
+    }
+    return caps;
+}
+
+// ===== GET MOVES =====
+function getMoves(board, pos) {
+    let p = board[pos]; if (!p) return [];
+    let moves = [], captures = [];
+    let directions = p.dama ? dirsD : dirsP[p.color];
+
+    for (let d of directions) {
+        if (p.dama) {
+            let scan = pos + d;
+            while (inside(scan) && diagLong(scan - d, scan)) {
+                if (!board[scan]) moves.push([pos, scan]);
+                else {
+                    let enemy = board[scan];
+                    if (enemy && enemy.color !== p.color) {
+                        let land = scan + d;
+                        if (inside(land) && diagLong(scan, land) && !board[land]) {
+                            let newBoard = cloneBoard(board);
+                            newBoard[land] = cloneBoard(p);
+                            newBoard[pos] = null;
+                            newBoard[scan] = null;
+                            let multi = multiCaps(newBoard, land, p.color, [scan]);
+                            if (multi.length === 0) captures.push([pos, land, [scan]]);
+                            else multi.forEach(m => captures.push([pos, m.end, m.caps]));
+                        }
+                    }
+                    break;
+                }
+                scan += d;
+            }
+        } else {
+            let n = pos + d;
+            if (inside(n) && diagOk(pos, n) && !board[n]) moves.push([pos, n]);
+            let mid = pos + d, land = pos + 2*d;
+            if (inside(mid) && inside(land) && diagOk(pos, mid) && diagOk(mid, land)) {
+                let e = board[mid];
+                if (e && e.color !== p.color && !board[land]) {
+                    let newBoard = cloneBoard(board);
+                    newBoard[land] = cloneBoard(p);
+                    newBoard[pos] = null;
+                    newBoard[mid] = null;
+                    let multi = multiCaps(newBoard, land, p.color, [mid]);
+                    if (multi.length === 0) captures.push([pos, land, [mid]]);
+                    else multi.forEach(m => captures.push([pos, land, [mid, ...m.caps]]));
+                }
+            }
+        }
+    }
+
+    return captures.length ? captures : moves;
+}
+
+// ===== HUMAN INPUT =====
+function humanClick(i){
+    if(!playing) return;
+    if(!selected){
+        if(board[i]&&board[i].color===human) selected=i;
+    } else {
+        let legal=getMoves(board,selected);
+        let mandatory=legal.filter(m=>m.length===3);
+        if(mandatory.length>0) legal=mandatory;
+        let chosen=legal.find(m=>m[1]===i);
+        if(chosen){playMove(chosen,human,true);if(endCheck()) return; setTimeout(aiTurn,300);}
+        selected=null;
+    }
+    render();
+}
+
+// ===== PLAY MOVE =====
+function playMove(move,color,record=false){
+    let [from,to,caps]=move; let p=board[from]; board[from]=null; board[to]=p;
+    if(caps) for(let c of caps) board[c]=null;
+    if((color==="r"&&Math.floor(to/8)===0)||(color==="b"&&Math.floor(to/8)===7)) p.dama=true;
+    if(record) moveHistory.push({state:boardString(),move:{from,to}});
+    render();
+    if(color===ai){
+        const cell = boardDiv.children[to];
+        cell.classList.add("highlight");
+        setTimeout(()=>{cell.classList.remove("highlight");},800);
+    }
+}
+function boardString(){return board.map(p=>p?(p.color+(p.dama?"D":"")):"_").join("");}
+
+// ===== AI =====
+function aiTurn(){
+    let moves=getAllMoves(ai);
+    if(!moves.length){status.textContent="Você venceu!";learn(-10);saveMemory();return;}
+    let captures=moves.filter(m=>m.length===3);
+    if(captures.length){
+        let longest=Math.max(...captures.map(c=>c[2].length));
+        captures=captures.filter(c=>c[2].length===longest);
+        let move=chooseLearned(captures);
+        playMove(move,ai,true);if(endCheck()) return; status.textContent="Sua vez"; return;
+    }
+    let move=chooseLearned(moves);
+    playMove(move,ai,true);if(endCheck()) return; status.textContent="Sua vez";
+}
+function getAllMoves(color){let list=[];for(let i=0;i<64;i++){if(board[i]&&board[i].color===color){getMoves(board,i).forEach(x=>list.push(x));}}return list;}
+function chooseLearned(moves){let state=boardString();if(!memory[state])memory[state]={};let weighted=moves.map(m=>{let key=m[0]+"-"+m[1];return {move:m,w:(memory[state][key]||0)};});weighted.sort((a,b)=>b.w-a.w);if(weighted[0].w===0) return moves[Math.floor(Math.random()*moves.length)]; return weighted[0].move;}
+
+// ===== LEARNING =====
+function endCheck(){
+    let r=checkEnd(); if(!r) return false; playing=false;
+    if(r==="ai"){status.textContent="IA venceu!"; learn(+10);}
+    else if(r==="human"){status.textContent="Você venceu!"; learn(-10);}
+    else {status.textContent="Empate"; learn(+1);}
+    saveMemory(); setTimeout(resetGame,1500); return true;
+}
+function checkEnd(){
+    let hr=getAllMoves(human), ar=getAllMoves(ai);
+    if(hr.length===0) return "ai"; if(ar.length===0) return "human";
+    if(board.filter(p=>p&&p.color==="r").length===0) return "ai";
+    if(board.filter(p=>p&&p.color==="b").length===0) return "human";
+    return null;
+}
+function learn(base){let bonus=moveHistory.length*0.1; moveHistory.forEach((h,i)=>{let {state,move}=h; let key=move.from+"-"+move.to; if(!memory[state]) memory[state]={}; if(!memory[state][key]) memory[state][key]=0; memory[state][key]+=base+bonus+i*0.05;}); moveHistory=[];}
+function saveMemory(){localStorage.setItem("ia_damas_memory",JSON.stringify(memory));}
+
+// ===== RESET =====
+function resetGame(){board=Array(64).fill(null); setupPieces(); playing=true; selected=null; moveHistory=[]; status.textContent="Sua vez"; render();}
+function setupPieces(){
+    board.fill(null);
+    for(let r=0;r<3;r++){for(let c=0;c<8;c++){if((r+c)%2===1) board[r*8+c]=makePiece("b");}}
+    for(let r=5;r<8;r++){for(let c=0;c<8;c++){if((r+c)%2===1) board[r*8+c]=makePiece("r");}}
+}
+function resetMemory(){localStorage.removeItem("ia_damas_memory"); memory={}; alert("Memória da IA apagada!");}
+
+setupPieces(); render();
+</script>
+</body>
+</html>
