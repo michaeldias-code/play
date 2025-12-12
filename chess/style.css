@@ -1,0 +1,262 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;   
+    /* CHAVE 1: Faz o body rolar quando o conteúdo total exceder a altura da tela */
+    min-height: 100vh;
+    overflow-y: auto; /* Permite rolagem vertical quando necessário */
+    padding: 5px 0 15px 0; 
+    box-sizing: border-box;
+}
+/* TÍTULO E CONTROLES (Margens Otimizadas)
+============================ */
+h1 {
+    width: 100%;
+    text-align: center;
+    margin: 10px 0;
+    font-size: clamp(1.5em, 5vw, 2.5em);
+    color: #333;
+}
+#difficulty-container {
+    margin: 10px 0; 
+    font-size: 1.2em;
+}
+/* CONTAINER PRINCIPAL (GRID)
+============================ */
+#chess-container {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: 1fr auto;
+    gap: 0;
+    margin: 5px auto; 
+    /* CHAVE 2: Retorna o 90vmin para garantir o quadrado e responsividade geral */
+    width: 90vmin;
+    height: 90vmin;
+    /* CHAVE 3: Limita o tamanho máximo no DESKTOP para não ficar GIGANTE */
+    max-width: 600px; 
+    max-height: 600px;  
+    box-sizing: border-box;
+    position: relative;
+    border: none;
+    box-shadow: none; 
+}
+/*  RANKS, FILES E TABULEIRO (Permanece com Notações Externas)
+============================ */
+#rank-area {
+    grid-row: 1;
+    grid-column: 1;
+    display: grid;
+    grid-template-rows: repeat(8, 1fr);
+    align-items: center;
+    justify-items: center;
+    font-size: clamp(10px, 3vw, 20px); 
+    font-weight: bold;
+    padding-right: 8px;
+    margin-right: -1px;
+    height: 100%; 
+}
+#file-area {
+    grid-row: 2;
+    grid-column: 2;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    justify-items: center;
+    align-items: center;
+    font-size: clamp(12px, 3vw, 22px);
+    font-weight: bold;
+    padding-top: 8px;
+    margin-top: -1px;
+}
+/*   TABULEIRO >> CORREÇÃO FINAL DE PROPORÇÃO 1:1
+============================ */
+#chessboard {
+    grid-row: 1;
+    grid-column: 2;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    width: 100%;
+    height: 100%; /* Ocupa 100% do espaço da célula Grid */
+    /* CHAVE FINAL: FORÇA A PROPORÇÃO QUADRADA */
+    aspect-ratio: 1 / 1; 
+    border: 3px solid #000;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    box-sizing: border-box;
+    /* Adicionamos margem automática para garantir que ele esteja centralizado se o grid pai for maior */
+    margin: auto; 
+}
+/*   CELULAS E PEÇAS
+============================ */
+.cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Usa clamp para tamanho de fonte das peças/células */
+    font-size: clamp(28px, 6vw, 56px); 
+    user-select: none;
+    /*correção do tamanho da casa variável*/
+    aspect-ratio: 1 / 1; 
+}
+
+.white { background: #f0d9b5; }
+.black { background: #b58863; }
+.piece {
+    pointer-events: none;
+    font-size: 1em; /* Usa o tamanho da célula (herdado) */
+}
+.piece.brancas {
+    color: #ffffff;
+    text-shadow: 1px 1px 3px black;
+}
+.piece.pretas {
+    color: #000000;
+    text-shadow: 1px 1px 2px white;
+}
+/*  SELEÇÃO E ÚLTIMO LANCE
+============================ */
+.selected {
+    outline: 3px solid yellow;
+    outline-offset: -2px;
+}
+.ai-move {
+    background-color: rgba(255, 255, 0, 0.5);
+    transition: background-color 0.3s ease;
+}
+/* CONTROLES E UI
+============================ */
+#difficulty-container {
+   text-align: center;
+   margin-top: -30px;
+   margin-left: 20px;
+ }
+
+#difficulty {
+    padding: 8px;
+    font-size: 1em;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+/*  BOTÃO DE REINICIAR (Aumenta margem de segurança)
+============================ */
+#restart-btn {
+    /*display: block;*/
+    /* CHAVE 6: Aumenta a margem superior para garantir espaço abaixo do tabuleiro */
+    margin: 30px auto 10px auto; 
+    padding: 12px 24px;
+    background: #222;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+    margin-left: 40px;
+}
+#restart-btn:hover {
+    background: #444;
+    transform: scale(1.05);
+}
+/*  MODAL DE FIM DE JOGO
+============================ */
+.game-over-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+.game-over-content {
+    background-color: white;
+    padding: 20px 40px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+.replay-button, .no-button {
+    padding: 10px 20px;
+    margin: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    border: none;
+}
+.replay-button { background-color: #4CAF50; color: white; }
+.no-button { background-color: #f44336; color: white; }
+/* Modal de Promoção */
+.promotion-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+.promotion-box {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+.promo-piece {
+    font-size: 32px;
+    padding: 8px 12px;
+    margin: 0 5px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid #ccc;
+    background: #eee;
+    transition: background 0.2s;
+}
+.promo-piece:hover {
+    background: #ddd;
+    border-color: #aaa;
+}
+.cell.valid-move {
+    background-color: rgba(0, 128, 0, 0.4); 
+    cursor: pointer;   
+    border: 0.5px solid green; 
+}
+.cell.valid-move .piece {
+    box-shadow: 0 0 0 4px green inset;
+    border-radius: 5%; /* Mantém o formato circular do destaque */
+}
+/* AJUSTES PARA CELULAR (SOLUÇÃO DEFINITIVA DE ESTABILIDADE)
+============================ */
+@media (max-width: 600px) {
+    #chess-container {
+        width: 95vw; 
+        height: auto; 
+        aspect-ratio: 1 / 1; 
+        max-width: none;
+        max-height: none;
+        margin-bottom: 40px; 
+    }
+     #difficulty-container {
+        text-align: center;
+        margin-top: 0px;
+        margin-left: 0px;
+
+    }
+    #chessboard {
+        width: 100%;
+        height: 100%;
+        aspect-ratio: 1 / 1; 
+    }
+    .cell {
+        aspect-ratio: 1 / 1; 
+    }
+    .piece {
+        font-size: 1em; 
+    }
+}
