@@ -1,4 +1,4 @@
-// AI_Medium.js - v1
+// AI_Medium.js v1
 // Estratégia "Medium" com heurísticas: prefere capturas, evita casas atacadas,
 // não repete o último movimento sem motivo, avalia sacrifícios por valor.
 export class AI_Medium {
@@ -203,7 +203,7 @@ export class AI_Medium {
     	this.simulateMove(move, () => {
         	const enemyMoves = this.getAllMovesForColor(enemyColor);
         	attacked = enemyMoves.some(em => em.to === move.to);
-        	console.log(`Movimento de ${move.piece.tipo} ${move.from} -> ${move.to} ` +
+        	console.log(`Movimento de ${move.piece.tipo} ${this.indexToNotation(move.from)} -> ${this.indexToNotation(move.to)} ` +
                     `foi simulado, atacado depois? ${attacked}`);
     	});
     	return attacked;
