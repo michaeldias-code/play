@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-UTF-8">
+<title>Sudoku Avançado</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+/* ============================= */
+/* ESTILO GERAL (PC + MOBILE)   */
+/* ============================= */
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f0f0f0;
+    margin: 0;
+    padding: 20px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#container {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+h1 { margin-bottom: 5px; }
+
+#timer {
+    font-size: 20px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+#controls {
+    margin-bottom: 10px;
+}
+
+select, button {
+    padding: 8px 15px;
+    margin: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* ===================== */
+/*  TABULEIRO (DESKTOP)  */
+/* ===================== */
+#sudoku {
+    display: grid;
+    grid-template-columns: repeat(9, 45px);
+    grid-template-rows: repeat(9, 45px);
+
+    margin: 20px auto;
+    width: fit-content;
+    border: 4px solid black;
+    background: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.15);
+}
+
+.cell {
+    border: 1px solid #aaa;
+    text-align: center;
+    font-size: 22px;
+    background: white;
+}
+
+.cell:focus {
+    outline: 2px solid #4CAF50;
+    background: #e9ffe9;
+}
+
+.fixed {
+    background: #ddd;
+    font-weight: bold;
+}
+
+.box-top { border-top: 3px solid black !important; }
+.box-left { border-left: 3px solid black !important; }
+.box-right { border-right: 3px solid black !important; }
+.box-bottom { border-bottom: 3px solid black !important; }
+
+/* ===================== */
+/*   MODO MOBILE (≤480px)*/
+/* ===================== */
+@media (max-width: 480px) {
+
+    body {
+        padding: 10px;
+    }
+
+    #container {
+        max-width: 95%;
+    }
+
+    /* Tabuleiro menor */
+    #sudoku {
+        grid-template-columns: repeat(9, 32px);
+        grid-template-rows: repeat(9, 32px);
+        border-width: 3px;
+    }
+
+    .cell {
+        font-size: 16px;
+        padding: 0;
+    }
+
+    /* Botões menores */
+    select, button {
+        font-size: 14px;
+        padding: 6px 10px;
+    }
+
+    /* Teclado numérico mais compacto */
+    #numPad {
+        margin-top: 15px;
+        max-width: 230px;
+    }
+
+    #numPad button {
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+        margin: 4px;
+    }
+}
+
+/* ============================= */
+/*  MODO MÉDIO (481px–600px)     */
+/* ============================= */
+@media (min-width: 481px) and (max-width: 600px) {
+
+    #sudoku {
+        grid-template-columns: repeat(9, 38px);
+        grid-template-rows: repeat(9, 38px);
+    }
+
+    .cell {
+        font-size: 18px;
+    }
+
+    #numPad button {
+        width: 50px;
+        height: 50px;
+        font-size: 22px;
+    }
+}
+</style>
+</head>
+<body>
+
+<div id="container">
+
+    <h1>Sudoku</h1>
+    <div id="timer">00:00</div>
+
+    <div id="controls">
+        <select id="difficulty">
+            <option value="35">Fácil</option>
+            <option value="45">Médio</option>
+            <option value="55">Difícil</option>
+        </select>
+        <button onclick="startGame()">Novo Jogo</button>
+        <button onclick="checkSolution()">Verificar</button>
+    </div>
+
+    <div id="sudoku"></div>
+
+    <!-- TECLADO MOBILE -->
+    <div id="numPad">
+        <button onclick="insertNumber(1)">1</button>
+        <button onclick="insertNumber(2)">2</button>
+        <button onclick="insertNumber(3)">3</button>
+        <button onclick="insertNumber(4)">4</button>
+        <button onclick="insertNumber(5)">5</button>
+        <button onclick="insertNumber(6)">6</button>
+        <button onclick="insertNumber(7)">7</button>
+        <button onclick="insertNumber(8)">8</button>
+        <button onclick="insertNumber(9)">9</button>
+        <button onclick="insertNumber(0)">?</button>
+    </div>
+
+</div>
+
+<script>
+let timerInterval;
+let selectedCell = null;
+
+function pad(n){ return n < 10 ? "0"+n : n; }
+
+function startTimer() {
+    let secs = 0;
+    timerInterval = setInterval(() => {
+        secs++;
+        let m = Math.floor(secs/60);
+        let s = secs % 60;
+        document.getElementById("timer").innerText = `${pad(m)}:${pad(s)}`;
+    }, 1000);
+}
+
+function stopTimer() {
+    clearInterval(timerInterval);
+}
+
+function emptyBoard() {
+    return Array(9).fill().map(()=>Array(9).fill(0));
+}
+
+function canPlace(board, row, col, num) {
+    for (let x = 0; x < 9; x++) {
+        if (board[row][x] === num || board[x][col] === num) return false;
+    }
+    let r = Math.floor(row/3)*3;
+    let c = Math.floor(col/3)*3;
+    for (let i = r; i < r+3; i++) {
+        for (let j = c; j < c+3; j++) {
+            if (board[i][j] === num) return false;
+        }
+    }
+    return true;
+}
+
+function solve(board) {
+    for (let row=0; row<9; row++){
+        for (let col=0; col<9; col++){
+            if (board[row][col] === 0) {
+                for (let num=1; num<=9; num++){
+                    if (canPlace(board, row, col, num)) {
+                        board[row][col] = num;
+                        if (solve(board)) return true;
+                        board[row][col] = 0;
+                    }
+                }
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+function generateFullBoard() {
+    let board = emptyBoard();
+    solve(board);
+    return board;
+}
+
+function makePuzzle(board, holes) {
+    let puzzle = board.map(r => [...r]);
+    let removed = 0;
+    while (removed < holes) {
+        let r = Math.floor(Math.random()*9);
+        let c = Math.floor(Math.random()*9);
+        if (puzzle[r][c] !== 0) {
+            puzzle[r][c] = 0;
+            removed++;
+        }
+    }
+    return puzzle;
+}
+
+function renderBoard(puzzle) {
+    const grid = document.getElementById("sudoku");
+    grid.innerHTML = "";
+    
+    for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 9; c++) {
+            const cell = document.createElement("input");
+            cell.maxLength = 1;
+            cell.classList.add("cell");
+
+            if (puzzle[r][c] !== 0) {
+                cell.value = puzzle[r][c];
+                cell.disabled = true;
+                cell.classList.add("fixed");
+            } else {
+                cell.value = "";
+                cell.addEventListener("focus", () => selectedCell = cell);
+            }
+
+            if (r % 3 === 0) cell.classList.add("box-top");
+            if (r === 8) cell.classList.add("box-bottom");
+            if (c % 3 === 0) cell.classList.add("box-left");
+            if (c === 8) cell.classList.add("box-right");
+
+            grid.appendChild(cell);
+        }
+    }
+}
+
+function insertNumber(num) {
+    if (!selectedCell || selectedCell.disabled) return;
+    selectedCell.value = num === 0 ? "" : num;
+}
+
+function checkSolution() {
+    const cells = document.querySelectorAll(".cell");
+    const nums = [...cells].map(c => c.value || "0");
+
+    if (nums.includes("0")) return alert("Complete todos os espaços!");
+
+    if (isValidSudoku(nums)) {
+        stopTimer();
+        alert("🎉 Parabéns, você completou!");
+    } else {
+        alert("❌ Há erros no Sudoku.");
+    }
+}
+
+function isValidSudoku(board) {
+    for (let i=0;i<9;i++){
+        let row=new Set(), col=new Set(), box=new Set();
+        for (let j=0;j<9;j++){
+            let r=board[i*9+j], 
+                c=board[j*9+i],
+                b=board[3*Math.floor(i/3)*9 + 3*(i%3) + Math.floor(j/3)*9 + (j%3)];
+            if (row.has(r) || col.has(c) || box.has(b)) return false;
+            row.add(r); col.add(c); box.add(b);
+        }
+    }
+    return true;
+}
+
+function startGame() {
+    stopTimer();
+    document.getElementById("timer").innerText = "00:00";
+
+    let difficulty = Number(document.getElementById("difficulty").value);
+
+    let full = generateFullBoard();
+    let puzzle = makePuzzle(full, difficulty);
+
+    renderBoard(puzzle);
+    startTimer();
+}
+
+startGame();
+</script>
+</body>
+</html>
