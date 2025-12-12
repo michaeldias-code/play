@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jogo da Velha com IA Aprendente</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 40px;
+        background: #fafafa;
+    }
+
+    h1 {
+        font-weight: 300;
+        margin-bottom: 20px;
+    }
+
+    #board {
+        display: grid;
+        grid-template-columns: repeat(3, 120px);
+        grid-gap: 8px;
+    }
+
+    .cell {
+        width: 120px;
+        height: 120px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 60px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 0 8px #0003;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    .cell:hover {
+        background: #f0f0f0;
+    }
+
+    #status {
+        margin-top: 20px;
+        font-size: 20px;
+    }
+
+    /* ============================
+       📱 MODO CELULAR — ESCALA MAIOR
+       ============================ */
+    @media (max-width: 600px) {
+        body {
+            margin-top: 20px;
+        }
+
+        #board {
+            grid-template-columns: repeat(3, 28vw);
+            grid-gap: 3vw;
+        }
+
+        .cell {
+            width: 28vw;
+            height: 28vw;
+            font-size: 15vw;
+            border-radius: 4vw;
+        }
+
+        h1 {
+            font-size: 5vw;
+            margin-top: 5vw;
+        }
+
+        #status {
+            font-size: 6vw;
+            margin-top: 4vw;
+        }
+    }
+
+</style>
+</head>
+<body>
+
+<h1>Jogo da Velha com IA Aprendente</h1>
+<div id="board"></div>
+<div id="status">Sua vez!</div>
+
+<script>
+// --- SISTEMA DE APRENDIZADO DA IA ----
+let memory = JSON.parse(localStorage.getItem("ia_tictactoe_memory") || "{}");
+
+let board = Array(9).fill("");
+let playing = true;
+let human = "X";
+let ai = "O";
+let movesHistory = [];
+
+const boardDiv = document.getElementById("board");
+const statusDiv = document.getElementById("status");
+
+for (let i = 0; i < 9; i++) {
+    const cell = document.createElement("div");
+    cell.className = "cell";
+    cell.dataset.index = i;
+    cell.onclick = () => humanMove(i);
+    boardDiv.appendChild(cell);
+}
+
+function render() {
+    document.querySelectorAll(".cell").forEach((cell, i) => {
+        cell.textContent = board[i];
+    });
+}
+
+function checkWinner(b = board) {
+    const wins = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+    ];
+    for (const [a,b1,c] of wins) {
+        if (b[a] && b[a] === b[b1] && b[a] === b[c]) return b[a];
+    }
+    if (b.every(x => x)) return "V"; 
+    return null;
+}
+
+function findTacticalMove(player) {
+    const wins = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+    ];
+
+    for (const [a, b, c] of wins) {
+        const line = [board[a], board[b], board[c]];
+        if (line.filter(v => v === player).length === 2 && line.includes("")) {
+            return [a, b, c][line.indexOf("")];
+        }
+    }
+    return null;
+}
+
+function humanMove(i) {
+    if (!playing || board[i]) return;
+
+    board[i] = human;
+    render();
+
+    if (endCheck()) return;
+
+    setTimeout(aiMove, 250);
+}
+
+function aiMove() {
+    const state = board.join("");
+
+    const winMove = findTacticalMove(ai);
+    if (winMove !== null) {
+        movesHistory.push({ state, move: winMove });
+        board[winMove] = ai;
+        render();
+        endCheck();
+        return;
+    }
+
+    const blockMove = findTacticalMove(human);
+    if (blockMove !== null) {
+        movesHistory.push({ state, move: blockMove });
+        board[blockMove] = ai;
+        render();
+        endCheck();
+        return;
+    }
+
+    if (!memory[state]) memory[state] = {};
+
+    const moves = [];
+    for (let i = 0; i < 9; i++) {
+        if (!board[i]) {
+            const weight = memory[state][i] || 0;
+            moves.push({ i, weight });
+        }
+    }
+
+    moves.sort((a, b) => b.weight - a.weight);
+
+    const bestMove = moves[0].weight === 0
+        ? moves[Math.floor(Math.random() * moves.length)].i
+        : moves[0].i;
+
+    movesHistory.push({ state, move: bestMove });
+    board[bestMove] = ai;
+    render();
+
+    endCheck();
+}
+
+function endCheck() {
+    const res = checkWinner();
+
+    if (!res) return false;
+    playing = false;
+
+    if (res === ai) {
+        statusDiv.textContent = "A IA venceu!";
+        learn(+5);
+    } else if (res === human) {
+        statusDiv.textContent = "Você venceu!";
+        learn(-10);
+    } else {
+        statusDiv.textContent = "Deu velha!";
+        learn(+1);
+    }
+
+    localStorage.setItem("ia_tictactoe_memory", JSON.stringify(memory));
+    setTimeout(reset, 1200);
+    return true;
+}
+
+function learn(baseReward) {
+    const lengthBonus = movesHistory.length * 0.3;
+
+    movesHistory.forEach((play, index) => {
+        const { state, move } = play;
+        if (!memory[state]) memory[state] = {};
+        if (!memory[state][move]) memory[state][move] = 0;
+
+        const stepBonus = index * 0.1;
+        memory[state][move] += baseReward + lengthBonus + stepBonus;
+    });
+
+    movesHistory = [];
+}
+
+function reset() {
+    board = Array(9).fill("");
+    playing = true;
+    movesHistory = [];
+    statusDiv.textContent = "Sua vez!";
+    render();
+}
+
+render();
+</script>
+
+</body>
+</html>
+
+
