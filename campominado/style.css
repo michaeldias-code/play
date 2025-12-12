@@ -1,0 +1,174 @@
+/* Adiciona a fonte digital, se disponível, para os contadores */
+@font-face {
+    font-family: 'Digital-7';
+    src: url('digital-7.ttf'); /* Altere se tiver uma fonte específica */
+}
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #3f3f3f; /* Fundo mais escuro */
+    color: #000;
+    text-align: center;
+    padding: 20px 10px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+h1 {
+    color: #fff;
+    margin-bottom: 10px;
+}
+#controls-container {
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    color: #ddd;
+}
+#level-select {
+    padding: 5px;
+    border: 2px solid #808080;
+    background-color: #c0c0c0;
+}
+#game-container {
+    /* Estilo Clássico 3D */
+    display: inline-block; /* ESSENCIAL para ser centralizado pelo body */
+    padding: 8px;
+    background: #c0c0c0;
+    border-style: solid;
+    border-width: 4px;
+    border-color: #fff #808080 #808080 #fff;
+    box-shadow: 2px 2px 0px #303030;
+    max-width: 100vw; 
+    /* Permite rolagem horizontal no Expert/Intermediário quando a tela é pequena */
+    overflow-x: auto; 
+}
+#top-bar {
+    /* CORREÇÃO 2: Garante que a barra use 100% da largura do #game-container, 
+       resolvendo o alinhamento à esquerda. */
+    width: 100%; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #c0c0c0;
+    padding: 6px;
+    margin-bottom: 8px;
+    /* Estilo de moldura interna 3D */
+    border-style: solid;
+    border-width: 3px;
+    border-color: #808080 #fff #fff #808080;
+    height: 40px;
+}
+#mines-counter, #timer {
+    width: 60px;
+    background: black;
+    color: red;
+    font-family: 'Digital-7', monospace;
+    font-size: 28px;
+    line-height: 40px; /* Centraliza verticalmente o texto */
+    text-align: right;
+    padding: 0 5px;
+    overflow: hidden;
+}
+#reset-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 22px;
+    cursor: pointer;
+    background: #c0c0c0;
+    /* Estilo 3D do botão */
+    border-style: solid;
+    border-width: 3px;
+    border-color: #fff #808080 #808080 #fff;
+    outline: none;
+    line-height: 1;
+    padding: 0; /* Adicionado para evitar que o padding afete o emoji */
+    box-sizing: border-box; /* Adicionado para melhor controle do tamanho */
+}
+#reset-btn:active {
+    /* Efeito de clique: inverte a borda */
+    border-color: #808080 #fff #fff #808080;
+}
+/* --- TABULEIRO e CÉLULAS (Responsividade) --- */
+#board {
+    display: grid; 
+    /* CORREÇÃO 3: Removida a definição de grid-template-columns para usar a do JS (com 'auto'). */
+    gap: 1px;
+    max-width: 100%; 
+    margin: 0 auto;
+}
+.cell {
+   /* CORRIGIDO: Aumentei para 8vw para ser mais jogável no celular (Iniciante e outros) */
+    width: min(30px, 8vw); 
+    height: min(30px, 8vw);
+    background: #c0c0c0;
+    /*CORREÇÃO: Usamos 'content-box' para garantir que o tamanho (width/height) 
+    não seja afetado pela borda (border-box é geralmente usado, mas content-box
+    pode ajudar quando a alocação de espaço está conflitando com a borda 3D). */
+    /* Estilo 3D da célula fechada */
+    border-style: solid;
+    border-width: 3px;
+    border-color: #fff #808080 #808080 #fff;
+    font-size: min(18px, 5vw); 
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+}
+/* Aplicando o ajuste de borda para células abertas para uniformidade */
+.cell.open {
+    background: #e0e0e0;
+    /* Célula aberta: borda afundada */
+    border-style: solid;
+    border-width: 1px; /* Mantenha 1px */
+    border-color: #808080; 
+    cursor: default;
+    box-sizing: content-box; /* Garante que células abertas e fechadas usem o mesmo modelo */
+}
+.cell.flag {
+    background: #d0d0d0; /* Cor de fundo para a bandeira */
+    color: #ff0000;
+}
+.cell.bomb {
+    background: #ff6b6b; /* Fundo vermelho para a bomba explodida */
+    font-size: min(20px, 3.5vw);
+    border-width: 1px;
+    border-color: #808080;
+    content: "💥";
+}
+.cell.bomb-unrevealed {
+    background: #c0c0c0;
+    color: #000;
+}
+.cell.wrong-flag {
+    background: #e0e0e0;
+    color: #ff0000;
+    border-width: 1px;
+    border-color: #808080;
+}
+/* Cores dos números - Clássico Campo Minado */
+.cell.n1 { color: blue; }
+.cell.n2 { color: green; }
+.cell.n3 { color: red; }
+.cell.n4 { color: darkblue; }
+.cell.n5 { color: brown; }
+.cell.n6 { color: teal; }
+.cell.n7 { color: black; }
+.cell.n8 { color: gray; }
+footer {
+    margin-top: 20px;
+    color: #ddd;
+    font-size: 0.9em;
+}
+/* Medias Query para garantir que em telas muito pequenas o layout se mantenha */
+@media (max-width: 400px) {
+    #mines-counter, #timer {
+        width: 45px;
+        font-size: 24px;
+    }
+    #reset-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 18px;
+    }
+}

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campo Minado Clássico</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Campo Minado Clássico</h1>
+
+<div id="controls-container">
+    <label for="level-select">Nível:</label>
+    <select id="level-select"></select>
+</div>
+
+<div id="game-container">
+    <div id="top-bar">
+        <div id="mines-counter">010</div>
+        <button id="reset-btn" title="Novo Jogo (Clique)">🙂</button>
+        <div id="timer">000</div>
+    </div>
+
+    <div id="board"></div>
+</div>
+
+<footer>
+    <p>Clique: Abrir Célula | Clique Direito: Marcar/Desmarcar Bandeira</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
