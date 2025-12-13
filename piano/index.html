@@ -78,8 +78,8 @@ body {
     height: 130px;
     background: linear-gradient(to bottom, #1a1a1a 0%, #000000 100%);
     position: absolute;
-    margin-left: 35px;
     top: 0;
+	margin-left: 10px;
     z-index: 10;
     border-radius: 0 0 3px 3px;
     box-shadow: 0 5px 10px rgba(0,0,0,0.5);
@@ -175,19 +175,125 @@ body {
     to { opacity: 1; transform: scale(1); }
 }
 
-@media (max-width: 768px) {
-    .key {
-        width: 45px;
-        height: 160px;
+/* Mobile Portrait - Aviso para girar */
+@media (max-width: 768px) and (orientation: portrait) {
+    body {
+        padding: 20px;
+        justify-content: center;
     }
     
-    .black-key {
-        width: 28px;
-        height: 105px;
+    .header, .piano-wrapper, .currently-playing, .info-panel {
+        display: none;
+    }
+    
+    body::before {
+        content: "📱 ↻";
+        font-size: 5em;
+        display: block;
+        margin-bottom: 20px;
+    }
+    
+    body::after {
+        content: "Por favor, gire o dispositivo para o modo paisagem para tocar o piano";
+        font-size: 1.2em;
+        color: white;
+        text-align: center;
+        display: block;
+        max-width: 300px;
+    }
+}
+
+/* Mobile Landscape - Otimizado para piano */
+@media (max-width: 950px) and (orientation: landscape) {
+    body {
+        padding: 5px;
+        justify-content: flex-start;
+    }
+    
+    .header {
+        margin-bottom: 10px;
     }
     
     .header h1 {
-        font-size: 2em;
+        font-size: 1.5em;
+        margin-bottom: 5px;
+    }
+    
+    .header p {
+        font-size: 0.8em;
+    }
+    
+    .piano-wrapper {
+        padding: 15px 10px 10px;
+        margin-bottom: 5px;
+    }
+    
+    .piano-container {
+        padding: 0 5px;
+    }
+    
+    .key {
+        width: 40px;
+        height: 140px;
+    }
+    
+    .black-key {
+        width: 25px;
+        height: 90px;
+        margin-left: 23px;
+    }
+    
+    .key-label {
+        bottom: 5px;
+    }
+    
+    .key-label .note-name {
+        font-size: 10px;
+        margin-bottom: 2px;
+    }
+    
+    .key-label .key-code {
+        font-size: 7px;
+        padding: 1px 3px;
+    }
+    
+    .black-key .key-label {
+        bottom: 3px;
+    }
+    
+    .currently-playing {
+        margin-top: 10px;
+        padding: 8px 15px;
+        min-height: 35px;
+        font-size: 0.85em;
+    }
+    
+    .note-indicator {
+        padding: 3px 10px;
+        margin: 0 3px;
+        font-size: 0.85em;
+    }
+    
+    .info-panel {
+        margin-top: 10px;
+        font-size: 0.75em;
+    }
+}
+
+/* Tablets e telas médias */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .key {
+        width: 50px;
+        height: 180px;
+    }
+    
+    .black-key {
+        width: 32px;
+        height: 115px;
+    }
+    
+    .header h1 {
+        font-size: 2.3em;
     }
 }
 </style>
@@ -444,7 +550,7 @@ function generatePiano() {
         el.addEventListener("mouseleave", () => { if (active[code]) stopNote(code); });
 
         const position = blackPositions[note];
-        el.style.left = (position * 60 - 19) + "px";
+        el.style.left = (position * 60) + "px";
         piano.appendChild(el);
     });
 }
