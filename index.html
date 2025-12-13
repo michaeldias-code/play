@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Jogos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark {
+            background: #1a1a2e;
+        }
+
+        body.light {
+            background: #f5f5f5;
+            color: #1a1a2e;
+        }
+
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        body.dark .bg-gradient {
+            background: radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.5) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(255, 75, 145, 0.5) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 20%, rgba(138, 43, 226, 0.4) 0%, transparent 50%);
+        }
+
+        body.light .bg-gradient {
+            background: radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(255, 75, 145, 0.15) 0%, transparent 50%);
+        }
+
+        nav {
+            position: relative;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px 40px;
+            animation: slideDown 0.6s ease;
+        }
+
+        body.dark nav {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        body.light nav {
+            background: rgba(255, 255, 255, 0.8);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            cursor: pointer;
+        }
+
+        body.dark .nav-links a {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        body.light .nav-links a {
+            color: rgba(0, 0, 0, 0.7);
+        }
+
+        body.dark .nav-links a:hover {
+            color: white;
+        }
+
+        body.light .nav-links a:hover {
+            color: #1a1a2e;
+        }
+
+        .theme-toggle, .lang-toggle {
+            background: transparent;
+            border: 2px solid;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        body.dark .theme-toggle, body.dark .lang-toggle {
+            border-color: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        body.light .theme-toggle, body.light .lang-toggle {
+            border-color: rgba(0, 0, 0, 0.2);
+            color: #1a1a2e;
+        }
+
+        .theme-toggle:hover, .lang-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        body.dark .theme-toggle:hover, body.dark .lang-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        body.light .theme-toggle:hover, body.light .lang-toggle:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 80px 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 80px;
+            animation: fadeIn 1s ease;
+        }
+
+        .header h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: -2px;
+        }
+
+        body.dark .header h1 {
+            background: linear-gradient(135deg, #fff 0%, #a8a8a8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        body.light .header h1 {
+            color: #1a1a2e;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            font-weight: 300;
+        }
+
+        body.dark .header p {
+            color: #b0b0b0;
+        }
+
+        body.light .header p {
+            color: #666;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .game-card {
+            border-radius: 24px;
+            padding: 48px 40px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            animation: slideUp 0.6s ease forwards;
+            border: 2px solid transparent;
+        }
+
+        .game-card:nth-child(1) { animation-delay: 0.1s; }
+        .game-card:nth-child(2) { animation-delay: 0.2s; }
+        .game-card:nth-child(3) { animation-delay: 0.3s; }
+        .game-card:nth-child(4) { animation-delay: 0.4s; }
+
+        body.dark .game-card:nth-child(1) { 
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.15), rgba(120, 119, 198, 0.15));
+        }
+        body.dark .game-card:nth-child(2) { 
+            background: linear-gradient(135deg, rgba(255, 75, 145, 0.15), rgba(255, 100, 100, 0.15));
+        }
+        body.dark .game-card:nth-child(3) { 
+            background: linear-gradient(135deg, rgba(52, 211, 153, 0.15), rgba(34, 197, 94, 0.15));
+        }
+        body.dark .game-card:nth-child(4) { 
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.15));
+        }
+
+        body.light .game-card:nth-child(1) { 
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.08), rgba(120, 119, 198, 0.08));
+        }
+        body.light .game-card:nth-child(2) { 
+            background: linear-gradient(135deg, rgba(255, 75, 145, 0.08), rgba(255, 100, 100, 0.08));
+        }
+        body.light .game-card:nth-child(3) { 
+            background: linear-gradient(135deg, rgba(52, 211, 153, 0.08), rgba(34, 197, 94, 0.08));
+        }
+        body.light .game-card:nth-child(4) { 
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.08), rgba(245, 158, 11, 0.08));
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .game-card:hover::before {
+            left: 100%;
+        }
+
+        .game-card:nth-child(1):hover {
+            border-color: rgba(138, 43, 226, 0.5);
+            box-shadow: 0 8px 32px rgba(138, 43, 226, 0.3);
+        }
+        .game-card:nth-child(2):hover {
+            border-color: rgba(255, 75, 145, 0.5);
+            box-shadow: 0 8px 32px rgba(255, 75, 145, 0.3);
+        }
+        .game-card:nth-child(3):hover {
+            border-color: rgba(52, 211, 153, 0.5);
+            box-shadow: 0 8px 32px rgba(52, 211, 153, 0.3);
+        }
+        .game-card:nth-child(4):hover {
+            border-color: rgba(251, 191, 36, 0.5);
+            box-shadow: 0 8px 32px rgba(251, 191, 36, 0.3);
+        }
+
+        .game-card:hover {
+            transform: translateY(-8px);
+        }
+
+        .game-icon {
+            font-size: 3.5rem;
+            margin-bottom: 24px;
+            display: block;
+            transition: transform 0.4s ease;
+        }
+
+        .game-card:hover .game-icon {
+            transform: scale(1.1);
+        }
+
+        .game-card h2 {
+            font-size: 1.75rem;
+            margin-bottom: 12px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .game-card p {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+
+        body.dark .game-card p {
+            color: #b0b0b0;
+        }
+
+        body.light .game-card p {
+            color: #666;
+        }
+
+        .play-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        body.dark .play-btn {
+            background: white;
+            color: #1a1a2e;
+        }
+
+        body.light .play-btn {
+            background: #1a1a2e;
+            color: white;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+            border: 1px solid;
+        }
+
+        body.dark .modal-content {
+            background: rgba(26, 26, 46, 0.95);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body.light .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        body.dark .close-btn {
+            color: white;
+        }
+
+        body.light .close-btn {
+            color: #1a1a2e;
+        }
+
+        .close-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        body.dark .form-group input, body.dark .form-group textarea {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        body.light .form-group input, body.light .form-group textarea {
+            background: white;
+            border-color: rgba(0, 0, 0, 0.2);
+            color: #1a1a2e;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: rgba(138, 43, 226, 0.8);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        body.dark .submit-btn {
+            background: white;
+            color: #1a1a2e;
+        }
+
+        body.light .submit-btn {
+            background: #1a1a2e;
+            color: white;
+        }
+
+        .submit-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .success-message {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .success-message .icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .success-message h3 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 16px 20px;
+            }
+
+            .nav-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .nav-links {
+                gap: 16px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .container {
+                padding: 40px 20px;
+            }
+
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .games-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .game-card {
+                padding: 32px 24px;
+            }
+        }
+    </style>
+</head>
+<body class="dark">
+    <div class="bg-gradient"></div>
+    
+    <nav>
+        <div class="nav-content">
+            <div class="logo">
+                <span>🎮</span>
+                <span data-translate="title">Mini Jogos</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#jogos" data-translate="nav-play">Jogar</a></li>
+                <li><a onclick="openAbout()" data-translate="nav-about">Sobre</a></li>
+                <li><a onclick="openContact()" data-translate="nav-contact">Contato</a></li>
+                <li>
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                        <span id="theme-icon">🌙</span>
+                        <span id="theme-text" data-translate="theme-dark">Dark</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="lang-toggle" onclick="toggleLanguage()">
+                        <span id="lang-flag">🇧🇷</span>
+                        <span id="lang-text">BR</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1 data-translate="header-title">Escolha seu jogo</h1>
+            <p data-translate="header-subtitle">Clássicos que nunca saem de moda</p>
+        </div>
+
+        <div class="games-grid" id="jogos">
+            <div class="game-card" onclick="alert(translations[currentLang]['alert-chess'])">
+                <span class="game-icon">♟️</span>
+                <h2 data-translate="game-chess">Xadrez</h2>
+                <p data-translate="game-chess-desc">Estratégia clássica em 64 casas</p>
+                <button class="play-btn">
+                    <span data-translate="btn-play">Jogar</span>
+                    <span>→</span>
+                </button>
+            </div>
+
+            <div class="game-card" onclick="alert(translations[currentLang]['alert-minesweeper'])">
+                <span class="game-icon">💣</span>
+                <h2 data-translate="game-minesweeper">Campo Minado</h2>
+                <p data-translate="game-minesweeper-desc">Desvende o campo sem explodir</p>
+                <button class="play-btn">
+                    <span data-translate="btn-play">Jogar</span>
+                    <span>→</span>
+                </button>
+            </div>
+
+            <div class="game-card" onclick="alert(translations[currentLang]['alert-sudoku'])">
+                <span class="game-icon">🔢</span>
+                <h2 data-translate="game-sudoku">Sudoku</h2>
+                <p data-translate="game-sudoku-desc">Preencha a grade com lógica</p>
+                <button class="play-btn">
+                    <span data-translate="btn-play">Jogar</span>
+                    <span>→</span>
+                </button>
+            </div>
+
+            <div class="game-card" onclick="alert(translations[currentLang]['alert-checkers'])">
+                <span class="game-icon">⚫</span>
+                <h2 data-translate="game-checkers">Damas</h2>
+                <p data-translate="game-checkers-desc">Capture todas as peças adversárias</p>
+                <button class="play-btn">
+                    <span data-translate="btn-play">Jogar</span>
+                    <span>→</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Sobre -->
+    <div id="aboutModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 data-translate="about-title">Sobre</h2>
+                <button class="close-btn" onclick="closeModal('aboutModal')">×</button>
+            </div>
+            <p data-translate="about-text">Mini Jogos é uma plataforma que reúne os melhores jogos clássicos em um só lugar. Nosso objetivo é proporcionar diversão e entretenimento para todas as idades, com jogos que testam sua estratégia, lógica e raciocínio.</p>
+            <br>
+            <p data-translate="about-text2">Desenvolvido com carinho para trazer nostalgia e desafios atemporais.</p>
+        </div>
+    </div>
+
+    <!-- Modal Contato -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 data-translate="contact-title">Contato</h2>
+                <button class="close-btn" onclick="closeModal('contactModal')">×</button>
+            </div>
+            <form id="contactForm" onsubmit="submitContact(event)">
+                <div class="form-group">
+                    <label data-translate="form-name">Nome</label>
+                    <input type="text" required>
+                </div>
+                <div class="form-group">
+                    <label data-translate="form-email">E-mail</label>
+                    <input type="email" required>
+                </div>
+                <div class="form-group">
+                    <label data-translate="form-message">Mensagem</label>
+                    <textarea required></textarea>
+                </div>
+                <button type="submit" class="submit-btn" data-translate="form-submit">Enviar Mensagem</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Sucesso -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <div class="success-message">
+                <div class="icon">✓</div>
+                <h3 data-translate="success-title">Mensagem enviada!</h3>
+                <p data-translate="success-text">Obrigado pelo contato. Responderemos em breve.</p>
+                <br>
+                <button class="submit-btn" onclick="closeModal('successModal')" data-translate="success-btn">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTheme = 'dark';
+        let currentLang = 'pt';
+
+        const translations = {
+            pt: {
+                'title': 'Mini Jogos',
+                'nav-play': 'Jogar',
+                'nav-about': 'Sobre',
+                'nav-contact': 'Contato',
+                'theme-dark': 'Dark',
+                'theme-light': 'Light',
+                'header-title': 'Escolha seu jogo',
+                'header-subtitle': 'Clássicos que nunca saem de moda',
+                'game-chess': 'Xadrez',
+                'game-chess-desc': 'Estratégia clássica em 64 casas',
+                'game-minesweeper': 'Campo Minado',
+                'game-minesweeper-desc': 'Desvende o campo sem explodir',
+                'game-sudoku': 'Sudoku',
+                'game-sudoku-desc': 'Preencha a grade com lógica',
+                'game-checkers': 'Damas',
+                'game-checkers-desc': 'Capture todas as peças adversárias',
+                'btn-play': 'Jogar',
+                'about-title': 'Sobre',
+                'about-text': 'Mini Jogos é uma plataforma que reúne os melhores jogos clássicos em um só lugar. Nosso objetivo é proporcionar diversão e entretenimento para todas as idades, com jogos que testam sua estratégia, lógica e raciocínio.',
+                'about-text2': 'Desenvolvido com carinho para trazer nostalgia e desafios atemporais.',
+                'contact-title': 'Contato',
+                'form-name': 'Nome',
+                'form-email': 'E-mail',
+                'form-message': 'Mensagem',
+                'form-submit': 'Enviar Mensagem',
+                'success-title': 'Mensagem enviada!',
+                'success-text': 'Obrigado pelo contato. Responderemos em breve.',
+                'success-btn': 'Fechar',
+                'alert-chess': 'Xadrez em desenvolvimento',
+                'alert-minesweeper': 'Campo Minado em desenvolvimento',
+                'alert-sudoku': 'Sudoku em desenvolvimento',
+                'alert-checkers': 'Damas em desenvolvimento'
+            },
+            en: {
+                'title': 'Mini Games',
+                'nav-play': 'Play',
+                'nav-about': 'About',
+                'nav-contact': 'Contact',
+                'theme-dark': 'Dark',
+                'theme-light': 'Light',
+                'header-title': 'Choose your game',
+                'header-subtitle': 'Timeless classics',
+                'game-chess': 'Chess',
+                'game-chess-desc': 'Classic strategy in 64 squares',
+                'game-minesweeper': 'Minesweeper',
+                'game-minesweeper-desc': 'Clear the field without exploding',
+                'game-sudoku': 'Sudoku',
+                'game-sudoku-desc': 'Fill the grid with logic',
+                'game-checkers': 'Checkers',
+                'game-checkers-desc': 'Capture all opponent pieces',
+                'btn-play': 'Play',
+                'about-title': 'About',
+                'about-text': 'Mini Games is a platform that brings together the best classic games in one place. Our goal is to provide fun and entertainment for all ages, with games that test your strategy, logic and reasoning.',
+                'about-text2': 'Developed with love to bring nostalgia and timeless challenges.',
+                'contact-title': 'Contact',
+                'form-name': 'Name',
+                'form-email': 'Email',
+                'form-message': 'Message',
+                'form-submit': 'Send Message',
+                'success-title': 'Message sent!',
+                'success-text': 'Thank you for contacting us. We will respond shortly.',
+                'success-btn': 'Close',
+                'alert-chess': 'Chess in development',
+                'alert-minesweeper': 'Minesweeper in development',
+                'alert-sudoku': 'Sudoku in development',
+                'alert-checkers': 'Checkers in development'
+            }
+        };
+
+        function toggleTheme() {
+            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.body.className = currentTheme;
+            
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            
+            if (currentTheme === 'light') {
+                icon.textContent = '☀️';
+                text.textContent = translations[currentLang]['theme-light'];
+            } else {
+                icon.textContent = '🌙';
+                text.textContent = translations[currentLang]['theme-dark'];
+            }
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'pt' ? 'en' : 'pt';
+            
+            const flag = document.getElementById('lang-flag');
+            const text = document.getElementById('lang-text');
+            
+            if (currentLang === 'en') {
+                flag.textContent = '🇺🇸';
+                text.textContent = 'EN';
+            } else {
+                flag.textContent = '🇧🇷';
+                text.textContent = 'BR';
+            }
+            
+            updateTranslations();
+        }
+
+        function updateTranslations() {
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[currentLang][key]) {
+                    element.textContent = translations[currentLang][key];
+                }
+            });
+        }
+
+        function openAbout() {
+            document.getElementById('aboutModal').classList.add('active');
+        }
+
+        function openContact() {
+            document.getElementById('contactModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function submitContact(event) {
+            event.preventDefault();
+            closeModal('contactModal');
+            document.getElementById('successModal').classList.add('active');
+            document.getElementById('contactForm').reset();
+        }
+
+        // Fechar modal clicando fora
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body
