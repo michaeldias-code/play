@@ -195,9 +195,9 @@
 
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 24px;
-            max-width: 900px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
@@ -217,6 +217,8 @@
         .game-card:nth-child(2) { animation-delay: 0.2s; }
         .game-card:nth-child(3) { animation-delay: 0.3s; }
         .game-card:nth-child(4) { animation-delay: 0.4s; }
+        .game-card:nth-child(5) { animation-delay: 0.5s; }
+        .game-card:nth-child(6) { animation-delay: 0.6s; }
 
         body.dark .game-card:nth-child(1) { 
             background: linear-gradient(135deg, rgba(138, 43, 226, 0.15), rgba(120, 119, 198, 0.15));
@@ -230,6 +232,12 @@
         body.dark .game-card:nth-child(4) { 
             background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.15));
         }
+        body.dark .game-card:nth-child(5) { 
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.15));
+        }
+        body.dark .game-card:nth-child(6) { 
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(219, 39, 119, 0.15));
+        }
 
         body.light .game-card:nth-child(1) { 
             background: linear-gradient(135deg, rgba(138, 43, 226, 0.08), rgba(120, 119, 198, 0.08));
@@ -242,6 +250,12 @@
         }
         body.light .game-card:nth-child(4) { 
             background: linear-gradient(135deg, rgba(251, 191, 36, 0.08), rgba(245, 158, 11, 0.08));
+        }
+        body.light .game-card:nth-child(5) { 
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(37, 99, 235, 0.08));
+        }
+        body.light .game-card:nth-child(6) { 
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.08), rgba(219, 39, 119, 0.08));
         }
 
         .game-card::before {
@@ -274,6 +288,14 @@
         .game-card:nth-child(4):hover {
             border-color: rgba(251, 191, 36, 0.5);
             box-shadow: 0 8px 32px rgba(251, 191, 36, 0.3);
+        }
+        .game-card:nth-child(5):hover {
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+        }
+        .game-card:nth-child(6):hover {
+            border-color: rgba(236, 72, 153, 0.5);
+            box-shadow: 0 8px 32px rgba(236, 72, 153, 0.3);
         }
 
         .game-card:hover {
@@ -603,18 +625,17 @@
                 </button>
             </div>
 
-            <!--<div class="game-card" onclick="alert(translations[currentLang]['alert-minesweeper'])">-->
 			<div class="game-card" onclick="window.location.href='campominado/index.html'">         
-				<span class="game-icon">💣</span>
+                <span class="game-icon">💣</span>
                 <h2 data-translate="game-minesweeper">Campo Minado</h2>
                 <p data-translate="game-minesweeper-desc">Desvende o campo sem explodir</p>
-                <button class="play-btn">				
+                <button class="play-btn">
                     <span data-translate="btn-play">Jogar</span>
                     <span>→</span>
                 </button>
             </div>
 
-            <div class="game-card" onclick="alert(translations[currentLang]['alert-sudoku'])">
+			<div class="game-card" onclick="window.location.href='Sudoku/index.html'">         
                 <span class="game-icon">🔢</span>
                 <h2 data-translate="game-sudoku">Sudoku</h2>
                 <p data-translate="game-sudoku-desc">Preencha a grade com lógica</p>
@@ -624,10 +645,30 @@
                 </button>
             </div>
 
-            <div class="game-card" onclick="alert(translations[currentLang]['alert-checkers'])">
+			<div class="game-card" onclick="window.location.href='damas/index.html'">         
                 <span class="game-icon">⚫</span>
                 <h2 data-translate="game-checkers">Damas</h2>
                 <p data-translate="game-checkers-desc">Capture todas as peças adversárias</p>
+                <button class="play-btn">
+                    <span data-translate="btn-play">Jogar</span>
+                    <span>→</span>
+                </button>
+            </div>
+
+			<div class="game-card" onclick="window.location.href='piano/index.html'">         
+                <span class="game-icon">🎹</span>
+                <h2 data-translate="game-piano">Simulador de Piano</h2>
+                <p data-translate="game-piano-desc">Toque suas músicas favoritas</p>
+                <button class="play-btn">
+                    <span data-translate="btn-play">Jogar</span>
+                    <span>→</span>
+                </button>
+            </div>
+
+			<div class="game-card" onclick="window.location.href='partituras/index.html'">         
+                <span class="game-icon">🎼</span>
+                <h2 data-translate="game-sheet">Editor de Partituras</h2>
+                <p data-translate="game-sheet-desc">Crie e edite suas composições</p>
                 <button class="play-btn">
                     <span data-translate="btn-play">Jogar</span>
                     <span>→</span>
@@ -724,7 +765,13 @@
                 'alert-chess': 'Xadrez em desenvolvimento',
                 'alert-minesweeper': 'Campo Minado em desenvolvimento',
                 'alert-sudoku': 'Sudoku em desenvolvimento',
-                'alert-checkers': 'Damas em desenvolvimento'
+                'alert-checkers': 'Damas em desenvolvimento',
+                'alert-piano': 'Simulador de Piano em desenvolvimento',
+                'alert-sheet': 'Editor de Partituras em desenvolvimento',
+                'game-piano': 'Simulador de Piano',
+                'game-piano-desc': 'Toque suas músicas favoritas',
+                'game-sheet': 'Editor de Partituras',
+                'game-sheet-desc': 'Crie e edite suas composições'
             },
             en: {
                 'title': 'Mini Games',
@@ -758,7 +805,13 @@
                 'alert-chess': 'Chess in development',
                 'alert-minesweeper': 'Minesweeper in development',
                 'alert-sudoku': 'Sudoku in development',
-                'alert-checkers': 'Checkers in development'
+                'alert-checkers': 'Checkers in development',
+                'alert-piano': 'Piano Simulator in development',
+                'alert-sheet': 'Sheet Music Editor in development',
+                'game-piano': 'Piano Simulator',
+                'game-piano-desc': 'Play your favorite songs',
+                'game-sheet': 'Sheet Music Editor',
+                'game-sheet-desc': 'Create and edit your compositions'
             }
         };
 
