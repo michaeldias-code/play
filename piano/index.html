@@ -26,7 +26,7 @@ body {
 .header {
     text-align: center;
     margin-bottom: 40px;
-    color: black;
+    color: white;
 }
 
 .header h1 {
@@ -524,36 +524,46 @@ function generatePiano() {
         whiteIndex++;
     });
 
-    // Criar teclas pretas nas posições corretas
-    const blackPositions = {
-        "C#3": 0.5, "D#3": 1.5,
-        "F#3": 3.5, "G#3": 4.5, "A#3": 5.5,
-        "C#4": 7.5, "D#4": 8.5,
-        "F#4": 10.5, "G#4": 11.5, "A#4": 12.5
-    };
+// Criar teclas pretas nas posições corretas
+const blackPositions = {
+    "C#3": 0.5, "D#3": 1.5,
+    "F#3": 3.5, "G#3": 4.5, "A#3": 5.5,
+    "C#4": 7.5, "D#4": 8.5,
+    "F#4": 10.5, "G#4": 11.5, "A#4": 12.5
+};
 
-    BLACK_KEYS.forEach(({code, note, label}) => {
-        const el = document.createElement("div");
-        el.id = "key-" + note;
-        el.className = "key black-key";
-        el.dataset.code = code;
-
-        const labelEl = document.createElement("div");
-        labelEl.className = "key-label";
-        labelEl.innerHTML = `
-            <span class="note-name">${note}</span>
-            <span class="key-code">${label}</span>
-        `;
-        el.appendChild(labelEl);
-
-        el.addEventListener("mousedown", () => startNote(code));
-        el.addEventListener("mouseup", () => stopNote(code));
-        el.addEventListener("mouseleave", () => { if (active[code]) stopNote(code); });
-
-		const whiteKeyWidth = piano.querySelector('.key:not(.black-key)').offsetWidth;
-		el.style.left = (position * whiteKeyWidth) + "px";
-        piano.appendChild(el);
-    });
+	// 🔥 medir UMA vez
+	const firstWhiteKey = piano.querySelector('.key:not(.black-key)');
+	if (!firstWhiteKey) return;
+	
+	const whiteKeyWidth = firstWhiteKey.offsetWidth;
+	
+	BLACK_KEYS.forEach(({code, note, label}) => {
+		const el = document.createElement("div");
+		el.id = "key-" + note;
+		el.className = "key black-key";
+		el.dataset.code = code;
+	
+		const labelEl = document.createElement("div");
+		labelEl.className = "key-label";
+		labelEl.innerHTML = `
+			<span class="note-name">${note}</span>
+			<span class="key-code">${label}</span>
+		`;
+		el.appendChild(labelEl);
+	
+		el.addEventListener("mousedown", () => startNote(code));
+		el.addEventListener("mouseup", () => stopNote(code));
+		el.addEventListener("mouseleave", () => { if (active[code]) stopNote(code); });
+	
+		const position = blackPositions[note];
+		const blackKeyWidth = el.offsetWidth || 25;
+	
+		// ✅ POSIÇÃO CORRETA E RESPONSIVA
+		el.style.left = (position * whiteKeyWidth - blackKeyWidth / 2) + "px";
+	
+		piano.appendChild(el);
+	});
 }
 
 generatePiano();
