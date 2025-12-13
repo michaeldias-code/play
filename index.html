@@ -593,7 +593,7 @@
         </div>
 
         <div class="games-grid" id="jogos">
-            <div class="game-card" onclick="alert(translations[currentLang]['alert-chess'])">
+			<div class="game-card" onclick="window.location.href='chess/index.html'">         
                 <span class="game-icon">♟️</span>
                 <h2 data-translate="game-chess">Xadrez</h2>
                 <p data-translate="game-chess-desc">Estratégia clássica em 64 casas</p>
@@ -603,11 +603,12 @@
                 </button>
             </div>
 
-            <div class="game-card" onclick="alert(translations[currentLang]['alert-minesweeper'])">
-                <span class="game-icon">💣</span>
+            <!--<div class="game-card" onclick="alert(translations[currentLang]['alert-minesweeper'])">-->
+			<div class="game-card" onclick="window.location.href='campominado/index.html'">         
+				<span class="game-icon">💣</span>
                 <h2 data-translate="game-minesweeper">Campo Minado</h2>
                 <p data-translate="game-minesweeper-desc">Desvende o campo sem explodir</p>
-                <button onclick="window.location.href='chess/index.html'" class="play-btn">				
+                <button class="play-btn">				
                     <span data-translate="btn-play">Jogar</span>
                     <span>→</span>
                 </button>
