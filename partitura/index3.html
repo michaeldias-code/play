@@ -895,4 +895,341 @@
     <score-part id="P1"><part-name>Piano</part-name></score-part>
   </part-list>
   <part id="P1">`;
+
+            const noteTypeMap = {
+                'semibreve': 'whole', 'minima': 'half',
+                'seminima': 'quarter', 'colcheia': 'eighth'
+            };
+
+            staffs.forEach((staff, staffIndex) => {
+                xml += `
+    <measure number="${staffIndex + 1}">
+      <attributes>
+        <divisions>4</divisions>
+        <key><fifths>${keySharps - keyFlats}</fifths></key>
+        <time>
+          <beats>${timeSignature.top}</beats>
+          <beat-type>${timeSignature.bottom}</beat-type>
+        </time>
+        <clef><sign>G</sign><line>2</line></clef>
+      </attributes>
+      <sound tempo="${tempo}"/>`;
+
+                staff.forEach(chord => {
+                    if (chord.length === 1) {
+                        const note = chord[0];
+                        if (note.type.startsWith('pausa-')) {
+                            const restType = note.type.replace('pausa-', '');
+                            xml += `
+      <note>
+        <rest/>
+        <duration>4</duration>
+        <type>${noteTypeMap[restType]}</type>`;
+                            if (note.dot) xml += `\n        <dot/>`;
+                            xml += `\n      </note>`;
+                        } else {
+                            const pitch = note.pitch.charAt(0);
+                            const octave = note.pitch.charAt(1);
+                            xml += `
+      <note>
+        <pitch>
+          <step>${pitch}</step>`;
+                            if (note.accidental === 'sharp') xml += `\n          <alter>1</alter>`;
+                            else if (note.accidental === 'flat') xml += `\n          <alter>-1</alter>`;
+                            xml += `
+          <octave>${octave}</octave>
+        </pitch>
+        <duration>4</duration>
+        <type>${noteTypeMap[note.type]}</type>`;
+                            if (note.dot) xml += `\n        <dot/>`;
+                            if (note.accidental) {
+                                const accMap = { 'sharp': 'sharp', 'flat': 'flat', 'natural': 'natural' };
+                                xml += `\n        <accidental>${accMap[note.accidental]}</accidental>`;
+                            }
+                            xml += `\n      </note>`;
+                        }
+                    } else {
+                        chord.forEach((note, idx) => {
+                            if (note.type.startsWith('pausa-')) return;
+                            const pitch = note.pitch.charAt(0);
+                            const octave = note.pitch.charAt(1);
+                            xml += `\n      <note>`;
+                            if (idx > 0) xml += `\n        <chord/>`;
+                            xml += `
+        <pitch>
+          <step>${pitch}</step>`;
+                            if (note.accidental === 'sharp') xml += `\n          <alter>1</alter>`;
+                            else if (note.accidental === 'flat') xml += `\n          <alter>-1</alter>`;
+                            xml += `
+          <octave>${octave}</octave>
+        </pitch>
+        <duration>4</duration>
+        <type>${noteTypeMap[note.type]}</type>`;
+                            if (note.dot) xml += `\n        <dot/>`;
+                            if (note.accidental) {
+                                const accMap = { 'sharp': 'sharp', 'flat': 'flat', 'natural': 'natural' };
+                                xml += `\n        <accidental>${accMap[note.accidental]}</accidental>`;
+                            }
+                            xml += `\n      </note>`;
+                        });
+                    }
+                });
+                xml += `\n    </measure>`;
+            });
+
+            xml += `\n  </part>\n</score-partwise>`;
+            const blob = new Blob([xml], { type: 'application/xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${title.replace(/\s+/g, '_')}.musicxml`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportToPDF() {
+            const title = document.getElementById('title-input').value;
+            const composer = document.getElementById('composer-input').value;
+            const pdfCanvas = document.createElement('canvas');
+            pdfCanvas.width = canvas.width;
+            pdfCanvas.height = canvas.height + 100;
+            const pdfCtx = pdfCanvas.getContext('2d');
+            
+            pdfCtx.fillStyle = 'white';
+            pdfCtx.fillRect(0, 0, pdfCanvas.width, pdfCanvas.height);
+            pdfCtx.fillStyle = 'black';
+            pdfCtx.font = 'bold 24px Arial';
+            pdfCtx.textAlign = 'center';
+            pdfCtx.fillText(title, pdfCanvas.width / 2, 40);
+            
+            if (composer) {
+                pdfCtx.font = '16px Arial';
+                pdfCtx.fillText(composer, pdfCanvas.width / 2, 70);
+            }
+            
+            pdfCtx.drawImage(canvas, 0, 100);
+            
+            pdfCanvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${title.replace(/\s+/g, '_')}.png`;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        // Event Listeners
+        drawButtonIcons();
+        redraw();
+
+        document.getElementById('time-top').addEventListener('change', (e) => {
+            timeSignature.top = parseInt(e.target.value);
+            redraw();
+        });
+
+        document.getElementById('time-bottom').addEventListener('change', (e) => {
+            timeSignature.bottom = parseInt(e.target.value);
+            redraw();
+        });
+
+        document.getElementById('tempo-input').addEventListener('change', (e) => {
+            tempo = parseInt(e.target.value);
+        });
+
+        document.querySelectorAll('.fig-button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.fig-button').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                selectedType = btn.dataset.type;
+                useDot = btn.dataset.dot === 'true';
+                isHarmonyMode = false;
+                document.getElementById('harmony-btn').classList.remove('active');
+            });
+        });
+
+        document.querySelectorAll('.accidental-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const accType = btn.dataset.accidental;
+                if (selectedAccidental === accType) {
+                    selectedAccidental = null;
+                    btn.classList.remove('selected');
+                } else {
+                    document.querySelectorAll('.accidental-btn').forEach(b => b.classList.remove('selected'));
+                    selectedAccidental = accType;
+                    btn.classList.add('selected');
+                }
+            });
+        });
+
+        document.getElementById('key-sharp-up').addEventListener('click', () => {
+            if (keyFlats > 0) {
+                alert('Remova os bemóis antes');
+                return;
+            }
+            if (keySharps < 7) {
+                keySharps++;
+                redraw();
+            }
+        });
+
+        document.getElementById('key-sharp-down').addEventListener('click', () => {
+            if (keySharps > 0) {
+                keySharps--;
+                redraw();
+            }
+        });
+
+        document.getElementById('key-flat-up').addEventListener('click', () => {
+            if (keySharps > 0) {
+                alert('Remova os sustenidos antes');
+                return;
+            }
+            if (keyFlats < 7) {
+                keyFlats++;
+                redraw();
+            }
+        });
+        document.getElementById('key-flat-down').addEventListener('click', () => {
+            if (keyFlats > 0) {
+                keyFlats--;
+                redraw();
+            }
+        });
+
+        document.getElementById('key-reset').addEventListener('click', () => {
+            keySharps = 0;
+            keyFlats = 0;
+            redraw();
+        });
+
+        document.getElementById('harmony-btn').addEventListener('click', () => {
+            isHarmonyMode = !isHarmonyMode;
+            document.getElementById('harmony-btn').classList.toggle('active');
+        });
+
+        document.getElementById('add-staff-btn').addEventListener('click', () => {
+            staffs.push([]);
+            currentStaffIndex = staffs.length - 1;
+            redraw();
+        });
+
+        document.getElementById('play-btn').addEventListener('click', playScore);
+
+        document.getElementById('undo-btn').addEventListener('click', () => {
+            const targetStaff = staffs[currentStaffIndex];
+            if (targetStaff.length > 0) {
+                const lastChord = targetStaff[targetStaff.length - 1];
+                if (lastChord.length > 1) lastChord.pop();
+                else targetStaff.pop();
+                redraw();
+            }
+        });
+
+        document.getElementById('clear-btn').addEventListener('click', () => {
+            if (staffs.flat().length > 0 && confirm("Limpar tudo?")) {
+                staffs = [[]];
+                currentStaffIndex = 0;
+                redraw();
+            }
+        });
+
+        document.getElementById('download-btn').addEventListener('click', () => {
+            document.getElementById('export-modal').classList.add('active');
+        });
+
+        document.getElementById('export-json').addEventListener('click', () => {
+            exportToJSON();
+            document.getElementById('export-modal').classList.remove('active');
+        });
+
+        document.getElementById('export-musicxml').addEventListener('click', () => {
+            exportToMusicXML();
+            document.getElementById('export-modal').classList.remove('active');
+        });
+
+        document.getElementById('export-pdf').addEventListener('click', () => {
+            exportToPDF();
+            document.getElementById('export-modal').classList.remove('active');
+        });
+
+        document.getElementById('export-cancel').addEventListener('click', () => {
+            document.getElementById('export-modal').classList.remove('active');
+        });
+
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const clickX = (e.clientX - rect.left) * scaleX;
+            const clickY = (e.clientY - rect.top) * scaleY;
+
+            let targetStaffIndex = Math.floor(clickY / STAFF_OFFSET);
+            if (targetStaffIndex >= staffs.length) targetStaffIndex = staffs.length - 1;
+            currentStaffIndex = targetStaffIndex;
+
+            const staffYOffset = targetStaffIndex * STAFF_OFFSET;
+            const relativeY = clickY - staffYOffset;
+
+            if (selectedType.startsWith('pausa-')) {
+                const newNote = {
+                    type: selectedType,
+                    dot: useDot,
+                    pitch: null,
+                    accidental: null
+                };
+                const targetStaff = staffs[currentStaffIndex];
+                if (isHarmonyMode && targetStaff.length > 0) {
+                    alert('Pausas não podem ser adicionadas em harmonia');
+                    return;
+                }
+                targetStaff.push([newNote]);
+                redraw();
+                return;
+            }
+
+            let bestPitch = null;
+            let bestDist = Infinity;
+            for (const p in noteY) {
+                const d = Math.abs(noteY[p] - relativeY);
+                if (d < bestDist) {
+                    bestDist = d;
+                    bestPitch = p;
+                }
+            }
+            
+            if (bestDist > 15) return;
+
+            const newNote = {
+                pitch: bestPitch,
+                type: selectedType,
+                dot: useDot,
+                accidental: selectedAccidental
+            };
+            
+            const targetStaff = staffs[currentStaffIndex];
+
+            if (isHarmonyMode && targetStaff.length > 0) {
+                const lastChord = targetStaff[targetStaff.length - 1];
+                const isPitchPresent = lastChord.some(note =>
+                    note.pitch === bestPitch && note.accidental === selectedAccidental
+                );
+                if (!isPitchPresent) lastChord.push(newNote);
+            } else {
+                targetStaff.push([newNote]);
+            }
+
+            selectedAccidental = null;
+            document.querySelectorAll('.accidental-btn').forEach(b => b.classList.remove('selected'));
+            redraw();
+        });
+
+        document.getElementById('export-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'export-modal') {
+                e.target.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
             
