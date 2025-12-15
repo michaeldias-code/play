@@ -1,596 +1,671 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Mini Games Hub</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Jogos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-<style>
-  :root {
-    --bg: #020617;
-    --bg-grad: radial-gradient(circle at top, #1d2540 0, #020617 55%);
-    --glass: rgba(15,23,42,0.82);
-    --glass-strong: rgba(15,23,42,0.95);
-    --border: rgba(148,163,184,0.4);
-    --border-soft: rgba(148,163,184,0.25);
-    --accent: #38bdf8;
-    --accent-soft: rgba(56,189,248,0.14);
-    --accent-strong: rgba(56,189,248,0.55);
-    --accent-2: #22c55e;
-    --text: #e5e7eb;
-    --text-soft: #9ca3af;
-    --radius-big: 22px;
-    --radius: 18px;
-    --radius-small: 12px;
-  }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+            padding-bottom: 80px;
+        }
 
-  * {
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-  }
+        /* Header do App */
+        .app-header {
+            padding: 20px 20px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
 
-  body {
-    margin: 0;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background: var(--bg-grad);
-    color: var(--text);
-    height: 100vh;
-    /*overflow: hidden;*/
-    display: flex;
-    justify-content: center;
-    align-items: stretch;
-  }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
-  .app-shell {
-    position: relative;
-    width: 100%;
-    max-width: 480px;
-    height: 100vh;
-    padding: 10px 10px 14px;
-    display: flex;
-    justify-content: center;
-    align-items: stretch;
-  }
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
 
-  .phone-frame {
-    position: relative;
-    width: 100%;
-    border-radius: 32px;
-    padding: 8px;
-    background: radial-gradient(circle at top, rgba(148,163,184,0.3), rgba(15,23,42,1));
-    box-shadow:
-      0 0 0 1px rgba(15,23,42,0.9),
-      0 22px 60px rgba(15,23,42,0.95),
-      0 0 40px rgba(56,189,248,0.18);
-    display: flex;
-    align-items: stretch;
-    justify-content: center;
-  }
+        .greeting {
+            display: flex;
+            flex-direction: column;
+        }
 
-  .phone-inner {
-    position: relative;
-    flex: 1;
-    border-radius: 26px;
-    overflow: hidden;
-    background: linear-gradient(145deg, #020617, #020617);
-    border: 1px solid rgba(15,23,42,1);
-  }
+        .greeting-text {
+            font-size: 12px;
+            opacity: 0.8;
+        }
 
-  /* Notch / status fake */
-  .notch {
-    position: absolute;
-    top: 6px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100px;
-    height: 16px;
-    border-radius: 999px;
-    background: rgba(15,23,42,0.95);
-    box-shadow: 0 0 0 1px rgba(15,23,42,0.8);
-    z-index: 20;
-  }
+        .user-name {
+            font-size: 16px;
+            font-weight: 600;
+        }
 
-  /* Contêiner das telas */
-  .screens-wrapper {
-    position: absolute;
-    inset: 18px 10px 10px;
-    overflow: hidden;
-  }
+        .header-icons {
+            display: flex;
+            gap: 12px;
+        }
 
-  .screen {
-    position: absolute;
-    inset: 0;
-    padding: 16px 14px 12px;
-    display: flex;
-    flex-direction: column;
-    background: radial-gradient(circle at top, rgba(15,23,42,1), #020617 60%);
-    transition: transform 0.35s ease, opacity 0.35s ease;
-    will-change: transform, opacity;
-  }
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
 
-  #menuScreen {
-    transform: translateX(0);
-    opacity: 1;
-  }
+        .icon-btn:active {
+            transform: scale(0.9);
+            background: rgba(255, 255, 255, 0.3);
+        }
 
-  #gameScreen {
-    transform: translateX(100%);
-    opacity: 0;
-  }
+        /* Search Bar */
+        .search-container {
+            padding: 20px;
+        }
 
-  /* Top bar chique */
-  .top-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-  }
+        .search-bar {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: none;
+        }
 
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
+        .search-icon {
+            font-size: 18px;
+            opacity: 0.7;
+        }
 
-  .brand-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 14px;
-    background:
-      radial-gradient(circle at 20% 0, #e0f2fe, #38bdf8),
-      radial-gradient(circle at 80% 120%, #22c55e, #0f172a);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #020617;
-    font-weight: 700;
-    font-size: 18px;
-    box-shadow:
-      0 0 20px rgba(56,189,248,0.7),
-      0 10px 25px rgba(15,23,42,0.9);
-  }
+        .search-input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 15px;
+            outline: none;
+        }
 
-  .brand-text {
-    display: flex;
-    flex-direction: column;
-  }
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
 
-  .brand-title {
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-  }
+        /* Categories Pills */
+        .categories {
+            padding: 0 20px 20px;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
 
-  .brand-sub {
-    font-size: 11px;
-    color: var(--text-soft);
-  }
+        .categories::-webkit-scrollbar {
+            display: none;
+        }
 
-  .status-chip {
-    padding: 4px 8px;
-    border-radius: 999px;
-    font-size: 11px;
-    background: rgba(22,163,74,0.16);
-    color: #4ade80;
-    border: 1px solid rgba(34,197,94,0.6);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
+        .category-pill {
+            padding: 10px 20px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
 
-  .status-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 999px;
-    background: #4ade80;
-    box-shadow: 0 0 7px rgba(74,222,128,0.9);
-  }
+        .category-pill.active {
+            background: white;
+            color: #667eea;
+        }
 
-  /* Título da tela */
-  .screen-title {
-    font-size: 22px;
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
+        .category-pill:active {
+            transform: scale(0.95);
+        }
 
-  .screen-subtitle {
-    font-size: 12px;
-    color: var(--text-soft);
-    margin-bottom: 16px;
-  }
+        /* Section Title */
+        .section-header {
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-  /* Lista de jogos */
-  .game-list {
-    flex: 1;
-    overflow-y: auto;
-    padding-right: 2px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
 
-  .game-card {
-    position: relative;
-    border-radius: var(--radius);
-    padding: 12px 12px 12px 14px;
-    background: var(--glass);
-    border: 1px solid var(--border-soft);
-    backdrop-filter: blur(18px);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-    box-shadow:
-      0 12px 28px rgba(15,23,42,0.9),
-      0 0 0 1px rgba(15,23,42,0.8);
-    transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.18s ease, background 0.18s ease;
-  }
+        .see-all {
+            font-size: 14px;
+            opacity: 0.8;
+            text-decoration: none;
+            color: white;
+        }
 
-  .game-card::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    border: 1px solid transparent;
-    background: radial-gradient(circle at top left, rgba(56,189,248,0.36), transparent 60%);
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    pointer-events: none;
-  }
+        /* Games Grid */
+        .games-container {
+            padding: 0 20px 20px;
+        }
 
-  .game-card:hover {
-    transform: translateY(-2px);
-    border-color: rgba(56,189,248,0.65);
-    background: rgba(15,23,42,0.9);
-    box-shadow:
-      0 16px 36px rgba(15,23,42,1),
-      0 0 24px rgba(56,189,248,0.34);
-  }
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
 
-  .game-card:hover::before {
-    opacity: 1;
-  }
+        .game-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
 
-  .game-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 16px;
-    background: radial-gradient(circle at 30% 0, #1f2937, #020617);
-    border: 1px solid rgba(148,163,184,0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-  }
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0));
+            border-radius: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
 
-  .game-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
+        .game-card:active {
+            transform: scale(0.95);
+        }
 
-  .game-name {
-    font-size: 15px;
-    font-weight: 500;
-  }
+        .game-card:active::before {
+            opacity: 1;
+        }
 
-  .game-desc {
-    font-size: 11px;
-    color: var(--text-soft);
-  }
+        .game-icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 12px;
+        }
 
-  .game-badges {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 4px;
-  }
+        .game-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
 
-  .badge {
-    font-size: 10px;
-    padding: 3px 8px;
-    border-radius: 999px;
-    border: 1px solid rgba(148,163,184,0.5);
-    color: var(--text-soft);
-    background: rgba(15,23,42,0.9);
-  }
+        .game-subtitle {
+            font-size: 12px;
+            opacity: 0.7;
+            line-height: 1.4;
+        }
 
-  .badge.accent {
-    border-color: var(--accent-strong);
-    color: var(--accent);
-    background: var(--accent-soft);
-  }
+        .game-stats {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+            font-size: 11px;
+            opacity: 0.7;
+        }
 
-  .badge.level {
-    border-color: rgba(52,211,153,0.7);
-    color: #6ee7b7;
-    background: rgba(16,185,129,0.18);
-  }
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
 
-  /* TELA DO JOGO */
-  .game-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 12px 0;
+            display: flex;
+            justify-content: space-around;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            z-index: 100;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+        }
 
-  .back-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 7px 11px;
-    border-radius: 999px;
-    background: var(--glass-strong);
-    border: 1px solid var(--border);
-    backdrop-filter: blur(18px);
-    font-size: 13px;
-    color: var(--text-soft);
-    cursor: pointer;
-    box-shadow: 0 8px 18px rgba(15,23,42,0.85);
-  }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            flex: 1;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            background: none;
+            color: #999;
+        }
 
-  .back-btn span {
-    font-size: 15px;
-  }
+        .nav-item.active {
+            color: #667eea;
+        }
 
-  .game-header-info {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 2px;
-  }
+        .nav-item:active {
+            transform: scale(0.9);
+        }
 
-  .game-title {
-    font-size: 14px;
-    font-weight: 500;
-  }
+        .nav-icon {
+            font-size: 24px;
+        }
 
-  .game-subtitle {
-    font-size: 11px;
-    color: var(--text-soft);
-  }
+        .nav-label {
+            font-size: 11px;
+            font-weight: 500;
+        }
 
-  .game-frame-wrapper {
-    flex: 1;
-    border-radius: var(--radius-big);
-    background: radial-gradient(circle at top, #020617, #020617 60%);
-    border: 1px solid rgba(15,23,42,0.9);
-    overflow: hidden;
-    box-shadow:
-      0 22px 45px rgba(15,23,42,1),
-      0 0 30px rgba(15,23,42,0.9);
-    position: relative;
-  }
+        /* Featured Game Card */
+        .featured-card {
+            margin: 0 20px 20px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 24px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
 
-  iframe {
-    border: none;
-    width: 100%;
-    height: 100%;
-    background: black;
-  }
+        .featured-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
 
-  .placeholder {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-soft);
-    font-size: 12px;
-    gap: 8px;
-    pointer-events: none;
-  }
+        .featured-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-  .placeholder-icon {
-    font-size: 28px;
-    filter: drop-shadow(0 0 10px rgba(56,189,248,0.8));
-  }
+        .featured-info {
+            flex: 1;
+        }
 
-  /* Scroll da lista */
-  .game-list::-webkit-scrollbar {
-    width: 3px;
-  }
-  .game-list::-webkit-scrollbar-thumb {
-    background: rgba(148,163,184,0.4);
-    border-radius: 999px;
-  }
+        .featured-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
 
-</style>
+        .featured-desc {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 16px;
+        }
+
+        .play-now-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .play-now-btn:active {
+            transform: scale(0.95);
+        }
+
+        .featured-icon-large {
+            font-size: 80px;
+            opacity: 0.3;
+        }
+
+        /* Language Toggle */
+        .lang-toggle {
+            display: flex;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .lang-btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn.active {
+            background: white;
+            color: #667eea;
+        }
+
+        /* Animations */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .game-card {
+            animation: slideUp 0.4s ease backwards;
+        }
+
+        .game-card:nth-child(1) { animation-delay: 0.1s; }
+        .game-card:nth-child(2) { animation-delay: 0.15s; }
+        .game-card:nth-child(3) { animation-delay: 0.2s; }
+        .game-card:nth-child(4) { animation-delay: 0.25s; }
+        .game-card:nth-child(5) { animation-delay: 0.3s; }
+        .game-card:nth-child(6) { animation-delay: 0.35s; }
+    </style>
 </head>
 <body>
-<div class="app-shell">
-  <div class="phone-frame">
-    <div class="phone-inner">
-      <div class="notch"></div>
-
-      <div class="screens-wrapper">
-        <!-- TELA 1: MENU -->
-        <div id="menuScreen" class="screen">
-          <div class="top-bar">
-            <div class="brand">
-              <div class="brand-icon">MG</div>
-              <div class="brand-text">
-                <span class="brand-title">Mini Games Hub</span>
-                <span class="brand-sub">Coleção de lógica e música</span>
-              </div>
+    <!-- Header -->
+    <div class="app-header">
+        <div class="header-left">
+            <div class="profile-pic">🎮</div>
+            <div class="greeting">
+                <div class="greeting-text" data-translate="greeting">Bem-vindo</div>
+                <div class="user-name" data-translate="user">Jogador</div>
             </div>
-            <div class="status-chip">
-              <span class="status-dot"></span>
-              <span>Pronto</span>
-            </div>
-          </div>
-
-          <div class="screen-title">Escolha um jogo</div>
-          <div class="screen-subtitle">
-            Toque em um dos cartões para abrir o jogo em tela cheia.
-          </div>
-
-          <div class="game-list">
-            <div class="game-card" onclick="openGame('games/xadrez.html','Xadrez','Estratégia clássica de tabuleiro')">
-              <div class="game-icon">♞</div>
-              <div class="game-info">
-                <div class="game-name">Xadrez</div>
-                <div class="game-desc">Controle peças e planeje vários lances à frente.</div>
-              </div>
-              <div class="game-badges">
-                <div class="badge accent">Estratégia</div>
-                <div class="badge level">Avançado</div>
-              </div>
-            </div>
-
-            <div class="game-card" onclick="openGame('games/damas.html','Damas','Movimentos diagonais e capturas')">
-              <div class="game-icon">⛀</div>
-              <div class="game-info">
-                <div class="game-name">Damas</div>
-                <div class="game-desc">Capture as peças inimigas pulando por cima.</div>
-              </div>
-              <div class="game-badges">
-                <div class="badge accent">Tabuleiro</div>
-                <div class="badge">Clássico</div>
-              </div>
-            </div>
-
-            <div class="game-card" onclick="openGame('games/campo-minado.html','Campo Minado','Lógica e atenção ao detalhe')">
-              <div class="game-icon">💣</div>
-              <div class="game-info">
-                <div class="game-name">Campo Minado</div>
-                <div class="game-desc">Descubra campos seguros sem acionar as minas.</div>
-              </div>
-              <div class="game-badges">
-                <div class="badge accent">Lógica</div>
-                <div class="badge">Clássico</div>
-              </div>
-            </div>
-
-            <div class="game-card" onclick="openGame('games/jogo-da-velha.html','Jogo da Velha','Partidas rápidas de 3x3')">
-              <div class="game-icon">⭕</div>
-              <div class="game-info">
-                <div class="game-name">Jogo da Velha</div>
-                <div class="game-desc">Três em linha antes do seu oponente.</div>
-              </div>
-              <div class="game-badges">
-                <div class="badge accent">Rápido</div>
-                <div class="badge">2 Jogadores</div>
-              </div>
-            </div>
-
-            <div class="game-card" onclick="openGame('games/sudoku.html','Sudoku','Desafios numéricos crescentes')">
-              <div class="game-icon">➕</div>
-              <div class="game-info">
-                <div class="game-name">Sudoku</div>
-                <div class="game-desc">Complete a grade sem repetir números.</div>
-              </div>
-              <div class="game-badges">
-                <div class="badge accent">Numérico</div>
-                <div class="badge level">Desafio</div>
-              </div>
-            </div>
-
-            <div class="game-card" onclick="openGame('games/piano.html','Piano Virtual','Toque e experimente melodias')">
-              <div class="game-icon">🎹</div>
-              <div class="game-info">
-                <div class="game-name">Simulador de Piano</div>
-                <div class="game-desc">Toque notas e explore acordes no teclado.</div>
-              </div>
-              <div class="game-badges">
-                <div class="badge accent">Música</div>
-                <div class="badge">Interativo</div>
-              </div>
-            </div>
-
-            <div class="game-card" onclick="openGame('games/editor-partituras.html','Editor de Partituras','Crie e edite suas músicas')">
-              <div class="game-icon">🎼</div>
-              <div class="game-info">
-                <div class="game-name">Editor de Partituras</div>
-                <div class="game-desc">Escreva, edite e estude partituras musicais.</div>
-              </div>
-              <div class="game-badges">
-                <div class="badge accent">Criação</div>
-                <div class="badge">Estudo</div>
-              </div>
-            </div>
-          </div>
         </div>
-
-        <!-- TELA 2: JOGO -->
-        <div id="gameScreen" class="screen">
-          <div class="top-bar">
-            <div class="brand">
-              <div class="brand-icon">MG</div>
-              <div class="brand-text">
-                <span class="brand-title">Mini Games Hub</span>
-                <span class="brand-sub">Jogando agora</span>
-              </div>
+        <div class="header-icons">
+            <div class="lang-toggle">
+                <button class="lang-btn active" onclick="setLanguage('pt')">PT</button>
+                <button class="lang-btn" onclick="setLanguage('en')">EN</button>
             </div>
-            <div class="status-chip">
-              <span class="status-dot"></span>
-              <span>Em jogo</span>
-            </div>
-          </div>
-
-          <div class="game-header">
-            <button class="back-btn" onclick="goBack()">
-              <span>←</span> <span>Menu</span>
-            </button>
-            <div class="game-header-info">
-              <span id="currentGameTitle" class="game-title">Jogo</span>
-              <span id="currentGameSubtitle" class="game-subtitle">Descrição</span>
-            </div>
-          </div>
-
-          <div class="game-frame-wrapper">
-            <iframe id="gameFrame" src="about:blank"></iframe>
-            <div id="placeholder" class="placeholder">
-              <div class="placeholder-icon">🎮</div>
-              <div>Carregando jogo...</div>
-            </div>
-          </div>
         </div>
-      </div>
-
     </div>
-  </div>
-</div>
 
-<script>
-  const menuScreen = document.getElementById("menuScreen");
-  const gameScreen = document.getElementById("gameScreen");
-  const frame = document.getElementById("gameFrame");
-  const placeholder = document.getElementById("placeholder");
-  const titleEl = document.getElementById("currentGameTitle");
-  const subtitleEl = document.getElementById("currentGameSubtitle");
+    <!-- Search Bar -->
+    <div class="search-container">
+        <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" placeholder="Buscar jogos..." data-placeholder="search">
+        </div>
+    </div>
 
-  function openGame(src, title, subtitle) {
-    titleEl.textContent = title || "Jogo";
-    subtitleEl.textContent = subtitle || "";
+    <!-- Categories -->
+    <div class="categories">
+        <button class="category-pill active" data-translate="cat-all">Todos</button>
+        <button class="category-pill" data-translate="cat-strategy">Estratégia</button>
+        <button class="category-pill" data-translate="cat-puzzle">Puzzle</button>
+        <button class="category-pill" data-translate="cat-music">Música</button>
+    </div>
 
-    placeholder.style.display = "flex";
-    frame.src = src;
+    <!-- Featured Game -->
+    <div class="featured-card">
+        <div class="featured-badge" data-translate="featured">✨ Em Destaque</div>
+        <div class="featured-content">
+            <div class="featured-info">
+                <div class="featured-title" data-translate="game-chess">Xadrez</div>
+                <div class="featured-desc" data-translate="game-chess-desc">Estratégia clássica em 64 casas</div>
+                <button class="play-now-btn" onclick="window.location.href='chess/index.html'">
+                    <span data-translate="btn-play-now">Jogar Agora</span>
+                    <span>→</span>
+                </button>
+            </div>
+            <div class="featured-icon-large">♟️</div>
+        </div>
+    </div>
 
-    // animação: menu sai para esquerda, jogo entra
-    menuScreen.style.transform = "translateX(-100%)";
-    menuScreen.style.opacity = "0";
-    gameScreen.style.transform = "translateX(0)";
-    gameScreen.style.opacity = "1";
-  }
+    <!-- Section Header -->
+    <div class="section-header">
+        <div class="section-title" data-translate="popular">Populares</div>
+    </div>
 
-  function goBack() {
-    frame.src = "about:blank";
-    placeholder.style.display = "flex";
+    <!-- Games Grid -->
+    <div class="games-container">
+        <div class="games-grid">
+            <div class="game-card" onclick="window.location.href='campominado/index.html'">
+                <span class="game-icon">💣</span>
+                <div class="game-title" data-translate="game-minesweeper">Campo Minado</div>
+                <div class="game-subtitle" data-translate="game-minesweeper-desc">Desvende o campo</div>
+                <div class="game-stats">
+                    <div class="stat">⭐ 4.8</div>
+                    <div class="stat">👥 2.3k</div>
+                </div>
+            </div>
 
-    menuScreen.style.transform = "translateX(0)";
-    menuScreen.style.opacity = "1";
-    gameScreen.style.transform = "translateX(100%)";
-    gameScreen.style.opacity = "0";
-  }
+            <div class="game-card" onclick="window.location.href='Sudoku/index.html'">
+                <span class="game-icon">🔢</span>
+                <div class="game-title" data-translate="game-sudoku">Sudoku</div>
+                <div class="game-subtitle" data-translate="game-sudoku-desc">Preencha a grade</div>
+                <div class="game-stats">
+                    <div class="stat">⭐ 4.7</div>
+                    <div class="stat">👥 1.8k</div>
+                </div>
+            </div>
 
-  frame.addEventListener("load", () => {
-    // some o placeholder quando o jogo carregar
-    placeholder.style.display = "none";
-  });
-</script>
+            <div class="game-card" onclick="window.location.href='damas/index.html'">
+                <span class="game-icon">⚫</span>
+                <div class="game-title" data-translate="game-checkers">Damas</div>
+                <div class="game-subtitle" data-translate="game-checkers-desc">Capture as peças</div>
+                <div class="game-stats">
+                    <div class="stat">⭐ 4.6</div>
+                    <div class="stat">👥 1.5k</div>
+                </div>
+            </div>
+
+            <div class="game-card" onclick="window.location.href='piano/index.html'">
+                <span class="game-icon">🎹</span>
+                <div class="game-title" data-translate="game-piano">Piano</div>
+                <div class="game-subtitle" data-translate="game-piano-desc">Toque músicas</div>
+                <div class="game-stats">
+                    <div class="stat">⭐ 4.9</div>
+                    <div class="stat">👥 3.1k</div>
+                </div>
+            </div>
+
+            <div class="game-card" onclick="window.location.href='partitura/index.html'">
+                <span class="game-icon">🎼</span>
+                <div class="game-title" data-translate="game-sheet">Partituras</div>
+                <div class="game-subtitle" data-translate="game-sheet-desc">Crie composições</div>
+                <div class="game-stats">
+                    <div class="stat">⭐ 4.5</div>
+                    <div class="stat">👥 980</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <button class="nav-item active">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label" data-translate="nav-home">Início</span>
+        </button>
+        <button class="nav-item">
+            <span class="nav-icon">🎯</span>
+            <span class="nav-label" data-translate="nav-categories">Categorias</span>
+        </button>
+        <button class="nav-item">
+            <span class="nav-icon">⭐</span>
+            <span class="nav-label" data-translate="nav-favorites">Favoritos</span>
+        </button>
+        <button class="nav-item">
+            <span class="nav-icon">👤</span>
+            <span class="nav-label" data-translate="nav-profile">Perfil</span>
+        </button>
+    </div>
+
+    <script>
+        let currentLang = 'pt';
+
+        const translations = {
+            pt: {
+                'greeting': 'Bem-vindo',
+                'user': 'Jogador',
+                'search': 'Buscar jogos...',
+                'cat-all': 'Todos',
+                'cat-strategy': 'Estratégia',
+                'cat-puzzle': 'Puzzle',
+                'cat-music': 'Música',
+                'featured': '✨ Em Destaque',
+                'popular': 'Populares',
+                'game-chess': 'Xadrez',
+                'game-chess-desc': 'Estratégia clássica em 64 casas',
+                'game-minesweeper': 'Campo Minado',
+                'game-minesweeper-desc': 'Desvende o campo',
+                'game-sudoku': 'Sudoku',
+                'game-sudoku-desc': 'Preencha a grade',
+                'game-checkers': 'Damas',
+                'game-checkers-desc': 'Capture as peças',
+                'game-piano': 'Piano',
+                'game-piano-desc': 'Toque músicas',
+                'game-sheet': 'Partituras',
+                'game-sheet-desc': 'Crie composições',
+                'btn-play-now': 'Jogar Agora',
+                'nav-home': 'Início',
+                'nav-categories': 'Categorias',
+                'nav-favorites': 'Favoritos',
+                'nav-profile': 'Perfil'
+            },
+            en: {
+                'greeting': 'Welcome',
+                'user': 'Player',
+                'search': 'Search games...',
+                'cat-all': 'All',
+                'cat-strategy': 'Strategy',
+                'cat-puzzle': 'Puzzle',
+                'cat-music': 'Music',
+                'featured': '✨ Featured',
+                'popular': 'Popular',
+                'game-chess': 'Chess',
+                'game-chess-desc': 'Classic strategy in 64 squares',
+                'game-minesweeper': 'Minesweeper',
+                'game-minesweeper-desc': 'Clear the field',
+                'game-sudoku': 'Sudoku',
+                'game-sudoku-desc': 'Fill the grid',
+                'game-checkers': 'Checkers',
+                'game-checkers-desc': 'Capture pieces',
+                'game-piano': 'Piano',
+                'game-piano-desc': 'Play songs',
+                'game-sheet': 'Sheet Music',
+                'game-sheet-desc': 'Create compositions',
+                'btn-play-now': 'Play Now',
+                'nav-home': 'Home',
+                'nav-categories': 'Categories',
+                'nav-favorites': 'Favorites',
+                'nav-profile': 'Profile'
+            }
+        };
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            
+            // Update language buttons
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            updateTranslations();
+        }
+
+        function updateTranslations() {
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[currentLang][key]) {
+                    element.textContent = translations[currentLang][key];
+                }
+            });
+            
+            // Update placeholder
+            const searchInput = document.querySelector('.search-input');
+            if (searchInput) {
+                searchInput.placeholder = translations[currentLang]['search'];
+            }
+        }
+
+        // Category pills interaction
+        document.querySelectorAll('.category-pill').forEach(pill => {
+            pill.addEventListener('click', function() {
+                document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Bottom nav interaction
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Search functionality
+        document.querySelector('.search-input').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            document.querySelectorAll('.game-card').forEach(card => {
+                const title = card.querySelector('.game-title').textContent.toLowerCase();
+                const subtitle = card.querySelector('.game-subtitle').textContent.toLowerCase();
+                
+                if (title.includes(searchTerm) || subtitle.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = searchTerm ? 'none' : 'block';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
