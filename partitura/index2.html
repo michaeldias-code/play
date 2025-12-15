@@ -459,8 +459,8 @@
     </div>
 
     <script>
-        // Estado
-        let staffs = [[]];
+
+  let staffs = [[]];
         let currentStaffIndex = 0;
         let selectedType = "semibreve";
         let useDot = false;
@@ -524,7 +524,8 @@
                 ctx.lineWidth = 2 * scale;
                 ctx.stroke();
             };
-             const drawDot = (ctx, x, y, scale = 1) => {
+
+            const drawDot = (ctx, x, y, scale = 1) => {
                 ctx.beginPath();
                 ctx.arc(x + 14 * scale, y, 2 * scale, 0, Math.PI * 2);
                 ctx.fill();
@@ -614,7 +615,7 @@
             if (dot) drawDot(x, y);
         }
 
-       function drawMinima(x, y, dot = false) {
+        function drawMinima(x, y, dot = false) {
             ctx.lineWidth = 2;
             ctx.strokeStyle = "#333";
             ctx.beginPath();
@@ -717,7 +718,7 @@
             ctx.fillText(timeSignature.top.toString(), x, centerY - 12);
             ctx.fillText(timeSignature.bottom.toString(), x, centerY + 22);
             ctx.textAlign = "left";
-        }
+                }
 
         function drawStaff(staffIndex) {
             const yOffset = staffIndex * STAFF_OFFSET;
@@ -837,6 +838,25 @@
         }
 
         // Exportação
+        function exportToJSON() {
+            const data = {
+                version: "1.0",
+                title: document.getElementById('title-input').value,
+                composer: document.getElementById('composer-input').value,
+                tempo: tempo,
+                timeSignature: timeSignature,
+                keySignature: { sharps: keySharps, flats: keyFlats },
+                staffs: staffs
+            };
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${data.title.replace(/\s+/g, '_')}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
         function exportToJSON() {
             const data = {
                 version: "1.0",
@@ -1029,7 +1049,7 @@
             });
         });
 
-           document.querySelectorAll('.accidental-btn').forEach(btn => {
+        document.querySelectorAll('.accidental-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const accType = btn.dataset.accidental;
                 if (selectedAccidental === accType) {
@@ -1071,7 +1091,6 @@
                 redraw();
             }
         });
-
         document.getElementById('key-flat-down').addEventListener('click', () => {
             if (keyFlats > 0) {
                 keyFlats--;
@@ -1131,8 +1150,6 @@
         });
 
         document.getElementById('export-pdf').addEventListener('click', () => {
-            exportToPDF();
-            ', () => {
             exportToPDF();
             document.getElementById('export-modal').classList.remove('active');
         });
