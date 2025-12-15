@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Jogos</title>
+
+<style>
+    /* Reset básico */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        min-height: 100vh;
+        color: #1a1a2e;
+        background: #f5f5f5;
+        overflow-x: hidden;
+        transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    body.dark {
+        background: #1a1a2e;
+        color: white;
+    }
+
+    /* Gradiente de fundo simplificado */
+    .bg-gradient {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    body.dark .bg-gradient {
+        background: radial-gradient(circle at 30% 40%, rgba(120,119,198,0.3), transparent 60%);
+    }
+
+    body.light .bg-gradient {
+        background: radial-gradient(circle at 30% 40%, rgba(120,119,198,0.1), transparent 60%);
+    }
+
+    /* Navbar */
+    nav {
+        position: relative;
+        z-index: 10;
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding: 16px 24px;
+        border-radius: 0 0 16px 16px;
+        background: rgba(255,255,255,0.95);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        transition: background 0.3s ease;
+    }
+
+    body.dark nav {
+        background: rgba(26,26,46,0.9);
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .nav-links {
+        display: flex;
+        gap: 20px;
+        list-style: none;
+    }
+
+    .nav-links a {
+        text-decoration: none;
+        font-weight: 500;
+        color: inherit;
+        transition: color 0.2s ease;
+        cursor: pointer;
+    }
+
+    .nav-links a:hover {
+        color: #6366f1; /* lilás moderno */
+    }
+
+    /* Botões */
+    .theme-toggle, .lang-toggle {
+        background: transparent;
+        border: 2px solid;
+        border-radius: 12px;
+        padding: 6px 14px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    body.dark .theme-toggle, body.dark .lang-toggle {
+        border-color: rgba(255,255,255,0.3);
+        color: white;
+    }
+
+    body.light .theme-toggle, body.light .lang-toggle {
+        border-color: rgba(0,0,0,0.2);
+        color: #1a1a2e;
+    }
+
+    .theme-toggle:hover, .lang-toggle:hover {
+        transform: scale(1.05);
+        background: rgba(99,102,241,0.1);
+    }
+
+    /* Container geral */
+    .container {
+        position: relative;
+        z-index: 1;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 60px 24px;
+    }
+
+    /* Header */
+    .header {
+        text-align: center;
+        margin-bottom: 60px;
+    }
+
+    .header h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+
+    .header p {
+        font-size: 1rem;
+        color: #666;
+    }
+
+    body.dark .header p {
+        color: #b0b0b0;
+    }
+
+    /* Grid de cards */
+    .games-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 20px;
+    }
+
+    .game-card {
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 32px 24px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+    }
+
+    body.dark .game-card {
+        background: #262646;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+
+    .game-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 10px 28px rgba(0,0,0,0.1);
+    }
+
+    .game-icon {
+        font-size: 3rem;
+        margin-bottom: 16px;
+    }
+
+    .game-card h2 {
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+
+    .game-card p {
+        font-size: 0.9rem;
+        color: #555;
+    }
+
+    body.dark .game-card p {
+        color: #ccc;
+    }
+
+    .play-btn {
+        padding: 10px 20px;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s ease;
+        display: inline-block;
+    }
+
+    body.light .play-btn {
+        background: #1a1a2e;
+        color: white;
+    }
+
+    body.dark .play-btn {
+        background: #ffffff;
+        color: #1a1a2e;
+    }
+
+    .play-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+
+    /* Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.6);
+        z-index: 100;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal.active {
+        display: flex;
+    }
+
+    .modal-content {
+        background: #fff;
+        border-radius: 24px;
+        padding: 32px;
+        max-width: 400px;
+        width: 90%;
+        backdrop-filter: blur(12px);
+    }
+
+    body.dark .modal-content {
+        background: #1a1a2e;
+        color: white;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: inherit;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-group input, .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border-radius: 12px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+        transition: border 0.2s ease;
+    }
+
+    .form-group input:focus, .form-group textarea:focus {
+        outline: none;
+        border-color: #6366f1;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 12px;
+        border-radius: 12px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    body.light .submit-btn {
+        background: #1a1a2e;
+        color: white;
+    }
+
+    body.dark .submit-btn {
+        background: #ffffff;
+        color: #1a1a2e;
+    }
+
+    .submit-btn:hover {
+        transform: scale(1.02);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+
+    /* Responsivo */
+    @media (max-width: 768px) {
+        .container {
+            padding: 40px 16px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+        }
+    }
+</style>
+
+
+</head>
+<body class="dark">
+    <div class="bg-gradient"></div>
+    
+    <nav>
+        <div class="nav-content">
+            <div class="logo">
+                <span>🎮</span>
+                <span data-translate="title">Mini Jogos</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#jogos" data-translate="nav-play">Jogar</a></li>
+                <li><a onclick="openAbout()" data-translate="nav-about">Sobre</a></li>
+                <li><a onclick="openContact()" data-translate="nav-contact">Contato</a></li>
+                <li>
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                        <span id="theme-icon">🌙</span>
+                        <span id="theme-text" data-translate="theme-dark">Dark</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="lang-toggle" onclick="toggleLanguage()">
+                        <span id="lang-flag">🇧🇷</span>
+                        <span id="lang-text">BR</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1 data-translate="header-title">Escolha seu jogo</h1>
+            <p data-translate="header-subtitle">Clássicos que nunca saem de moda</p>
+        </div>
+
+        <div class="games-grid" id="jogos">
+			<div class="game-card" onclick="window.location.href='chess/index.html'">         
+                <span class="game-icon">♟️</span>
+                <h2 data-translate="game-chess">Xadrez</h2>
+                <p data-translate="game-chess-desc">Estratégia clássica em 64 casas</p>
+                <button class="play-btn">
+                    <span data-translate="btn-play">Jogar</span>
+                    <span>→</span>
+                </button>
+            </div>
+
+			<div class="game-card" onclick="window.location.href='campominado/index.html'">         
+                <span class="game-icon">💣</span>
+                <h2 data-translate="game-minesweeper">Campo Minado</h2>
+                <p data-translate="game-minesweeper-desc">Desvende o campo sem explodir</p>
+                <button class="play-btn">
+                    <span data-translate="btn-play">Jogar</span>
+                    <span>→</span>
+                </button>
+            </div>
+
+			<div class="game-card" onclick="window.location.href='Sudoku/index.html'">         
+                <span class="game-icon">🔢</span>
+                <h2 data-translate="game-sudoku">Sudoku</h2>
+                <p data-translate="game-sudoku-desc">Preencha a grade com lógica</p>
+                <button class="play-btn">
+                    <span data-translate="btn-play">Jogar</span>
+                    <span>→</span>
+                </button>
+            </div>
+
+			<div class="game-card" onclick="window.location.href='damas/index.html'">         
+                <span class="game-icon">⚫</span>
+                <h2 data-translate="game-checkers">Damas</h2>
+                <p data-translate="game-checkers-desc">Capture todas as peças adversárias</p>
+                <button class="play-btn">
+                    <span data-translate="btn-play">Jogar</span>
+                    <span>→</span>
+                </button>
+            </div>
+
+			<div class="game-card" onclick="window.location.href='piano/index.html'">         
+                <span class="game-icon">🎹</span>
+                <h2 data-translate="game-piano">Simulador de Piano</h2>
+                <p data-translate="game-piano-desc">Toque suas músicas favoritas</p>
+                <button class="play-btn">
+                    <span data-translate="btn-play">Jogar</span>
+                    <span>→</span>
+                </button>
+            </div>
+
+			<div class="game-card" onclick="window.location.href='partitura/index.html'">         
+                <span class="game-icon">🎼</span>
+                <h2 data-translate="game-sheet">Editor de Partituras</h2>
+                <p data-translate="game-sheet-desc">Crie e edite suas composições</p>
+                <button class="play-btn">
+                    <span data-translate="btn-play">Jogar</span>
+                    <span>→</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Sobre -->
+    <div id="aboutModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 data-translate="about-title">Sobre</h2>
+                <button class="close-btn" onclick="closeModal('aboutModal')">×</button>
+            </div>
+            <p data-translate="about-text">Mini Jogos é uma plataforma que reúne os melhores jogos clássicos em um só lugar. Nosso objetivo é proporcionar diversão e entretenimento para todas as idades, com jogos que testam sua estratégia, lógica e raciocínio.</p>
+            <br>
+            <p data-translate="about-text2">Desenvolvido com carinho para trazer nostalgia e desafios atemporais.</p>
+        </div>
+    </div>
+
+    <!-- Modal Contato -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 data-translate="contact-title">Contato</h2>
+                <button class="close-btn" onclick="closeModal('contactModal')">×</button>
+            </div>
+            <form id="contactForm" onsubmit="submitContact(event)">
+                <div class="form-group">
+                    <label data-translate="form-name">Nome</label>
+                    <input type="text" required>
+                </div>
+                <div class="form-group">
+                    <label data-translate="form-email">E-mail</label>
+                    <input type="email" required>
+                </div>
+                <div class="form-group">
+                    <label data-translate="form-message">Mensagem</label>
+                    <textarea required></textarea>
+                </div>
+                <button type="submit" class="submit-btn" data-translate="form-submit">Enviar Mensagem</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Sucesso -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <div class="success-message">
+                <div class="icon">✓</div>
+                <h3 data-translate="success-title">Mensagem enviada!</h3>
+                <p data-translate="success-text">Obrigado pelo contato. Responderemos em breve.</p>
+                <br>
+                <button class="submit-btn" onclick="closeModal('successModal')" data-translate="success-btn">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTheme = 'dark';
+        let currentLang = 'pt';
+
+        const translations = {
+            pt: {
+                'title': 'Mini Jogos',
+                'nav-play': 'Jogar',
+                'nav-about': 'Sobre',
+                'nav-contact': 'Contato',
+                'theme-dark': 'Dark',
+                'theme-light': 'Light',
+                'header-title': 'Escolha seu jogo',
+                'header-subtitle': 'Clássicos que nunca saem de moda',
+                'game-chess': 'Xadrez',
+                'game-chess-desc': 'Estratégia clássica em 64 casas',
+                'game-minesweeper': 'Campo Minado',
+                'game-minesweeper-desc': 'Desvende o campo sem explodir',
+                'game-sudoku': 'Sudoku',
+                'game-sudoku-desc': 'Preencha a grade com lógica',
+                'game-checkers': 'Damas',
+                'game-checkers-desc': 'Capture todas as peças adversárias',
+                'btn-play': 'Jogar',
+                'about-title': 'Sobre',
+                'about-text': 'Mini Jogos é uma plataforma que reúne os melhores jogos clássicos em um só lugar. Nosso objetivo é proporcionar diversão e entretenimento para todas as idades, com jogos que testam sua estratégia, lógica e raciocínio.',
+                'about-text2': 'Desenvolvido com carinho para trazer nostalgia e desafios atemporais.',
+                'contact-title': 'Contato',
+                'form-name': 'Nome',
+                'form-email': 'E-mail',
+                'form-message': 'Mensagem',
+                'form-submit': 'Enviar Mensagem',
+                'success-title': 'Mensagem enviada!',
+                'success-text': 'Obrigado pelo contato. Responderemos em breve.',
+                'success-btn': 'Fechar',
+                'alert-chess': 'Xadrez em desenvolvimento',
+                'alert-minesweeper': 'Campo Minado em desenvolvimento',
+                'alert-sudoku': 'Sudoku em desenvolvimento',
+                'alert-checkers': 'Damas em desenvolvimento',
+                'alert-piano': 'Simulador de Piano em desenvolvimento',
+                'alert-sheet': 'Editor de Partituras em desenvolvimento',
+                'game-piano': 'Simulador de Piano',
+                'game-piano-desc': 'Toque suas músicas favoritas',
+                'game-sheet': 'Editor de Partituras',
+                'game-sheet-desc': 'Crie e edite suas composições'
+            },
+            en: {
+                'title': 'Mini Games',
+                'nav-play': 'Play',
+                'nav-about': 'About',
+                'nav-contact': 'Contact',
+                'theme-dark': 'Dark',
+                'theme-light': 'Light',
+                'header-title': 'Choose your game',
+                'header-subtitle': 'Timeless classics',
+                'game-chess': 'Chess',
+                'game-chess-desc': 'Classic strategy in 64 squares',
+                'game-minesweeper': 'Minesweeper',
+                'game-minesweeper-desc': 'Clear the field without exploding',
+                'game-sudoku': 'Sudoku',
+                'game-sudoku-desc': 'Fill the grid with logic',
+                'game-checkers': 'Checkers',
+                'game-checkers-desc': 'Capture all opponent pieces',
+                'btn-play': 'Play',
+                'about-title': 'About',
+                'about-text': 'Mini Games is a platform that brings together the best classic games in one place. Our goal is to provide fun and entertainment for all ages, with games that test your strategy, logic and reasoning.',
+                'about-text2': 'Developed with love to bring nostalgia and timeless challenges.',
+                'contact-title': 'Contact',
+                'form-name': 'Name',
+                'form-email': 'Email',
+                'form-message': 'Message',
+                'form-submit': 'Send Message',
+                'success-title': 'Message sent!',
+                'success-text': 'Thank you for contacting us. We will respond shortly.',
+                'success-btn': 'Close',
+                'alert-chess': 'Chess in development',
+                'alert-minesweeper': 'Minesweeper in development',
+                'alert-sudoku': 'Sudoku in development',
+                'alert-checkers': 'Checkers in development',
+                'alert-piano': 'Piano Simulator in development',
+                'alert-sheet': 'Sheet Music Editor in development',
+                'game-piano': 'Piano Simulator',
+                'game-piano-desc': 'Play your favorite songs',
+                'game-sheet': 'Sheet Music Editor',
+                'game-sheet-desc': 'Create and edit your compositions'
+            }
+        };
+
+        function toggleTheme() {
+            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.body.className = currentTheme;
+            
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            
+            if (currentTheme === 'light') {
+                icon.textContent = '☀️';
+                text.textContent = translations[currentLang]['theme-light'];
+            } else {
+                icon.textContent = '🌙';
+                text.textContent = translations[currentLang]['theme-dark'];
+            }
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'pt' ? 'en' : 'pt';
+            
+            const flag = document.getElementById('lang-flag');
+            const text = document.getElementById('lang-text');
+            
+            if (currentLang === 'en') {
+                flag.textContent = '🇺🇸';
+                text.textContent = 'EN';
+            } else {
+                flag.textContent = '🇧🇷';
+                text.textContent = 'BR';
+            }
+            
+            updateTranslations();
+        }
+
+        function updateTranslations() {
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[currentLang][key]) {
+                    element.textContent = translations[currentLang][key];
+                }
+            });
+        }
+
+        function openAbout() {
+            document.getElementById('aboutModal').classList.add('active');
+        }
+
+        function openContact() {
+            document.getElementById('contactModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function submitContact(event) {
+            event.preventDefault();
+            closeModal('contactModal');
+            document.getElementById('successModal').classList.add('active');
+            document.getElementById('contactForm').reset();
+        }
+
+        // Fechar modal clicando fora
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body
