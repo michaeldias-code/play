@@ -62,7 +62,6 @@ export class View {
     /* ---------------- Destaque de Movimentos Válidos (NOVO) ---------------- */
     highlightValidMoves(moves) {
         // Limpa destaques anteriores primeiro
-		console.log("Linha 65 - HIGHLIGHT");
         this.clearHighlights();
         this.validMoves = moves;
         // Adiciona a classe 'valid-move' às células de destino
@@ -72,7 +71,6 @@ export class View {
                 cell.classList.add("valid-move");
                 // Adiciona um ponto visual
                 if (!this.board.board[index]) {
-					console.log("Linha 75 - HIGHLIGHT");
                     const dot = document.createElement("div");
                     dot.className = "valid-dot";
                     cell.appendChild(dot);
@@ -123,14 +121,12 @@ export class View {
         }
         // Re-aplica os destaques de movimentos válidos após o re-render
         if (this.selected !== null && this.validMoves.length > 0) {
-			console.log("Linha 126 - HIGHLIGHT");
             this.highlightValidMoves(this.validMoves);
         }
     }
     /* ---------------- Destaque de movimento AI/último movimento ---------------- */
     highlightCell(index) {
         // ... código mantido ...
-		console.log("Linha 133 - HIGHLIGHT");
         const prev = this.boardDiv.querySelector(".ai-move");
         if (prev) prev.classList.remove("ai-move");
         const cell = this.boardDiv.querySelector(`.cell[data-index="${index}"]`);
@@ -153,7 +149,6 @@ export class View {
                     this.selected = index;
                     // <<<< NOVO CHECK: Aplica o auxílio visual APENAS no modo 'easy' >>>>
                     if (this.controller.difficulty === "easy") {
-						console.log("Linha 156 - HIGHLIGHT");
                         this.validMoves = this.controller.getValidMoves(index);
                         this.highlightValidMoves(this.validMoves);
                     }
