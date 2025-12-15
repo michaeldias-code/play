@@ -231,7 +231,6 @@ export class GameController {
 					this.view.lastMove = { from: m.from, to: m.to };
 					this.view.render();
 					this.view.highlightCell(m.to);
-					console.log(`HIGHLIGHT LINHA 234: ${m.to}`);
 					let logMsg = `▶️ IA: ${this.indexToNotation(m.from)} -> ${this.indexToNotation(m.to)}`;
 					console.log(logMsg);
 					// promoção
@@ -310,7 +309,6 @@ export class GameController {
 					this.view.lastMove = { from: m.from, to: m.to };
 					this.view.render();
 					this.view.highlightCell(m.to);
-					console.log(`HIGHLIGHT LINHA 234: ${m.to}`);
 					console.log(`?? IA: ${this.indexToNotation(m.from)} ? ${this.indexToNotation(m.to)}`);
 				}
 				this.currentTurn = "brancas";
@@ -367,4 +365,3 @@ export class GameController {
 	}
 
 }
-
