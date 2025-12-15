@@ -176,8 +176,6 @@ export class GameController {
 		//    que o *próximo* MoveValidator use o estado correto.
 		this.view.lastMove = { from, to };
 		this.view.render();
-		//novo - apagar se necessário
-		this.view.highlightCell(m.to);
 		// ... (Lógica de Promoção de Peão mantida, com os símbolos corrigidos ♙/♟) ...
 		if (piece.tipo === "♙" || piece.tipo === "♟") {
 			if ((piece.cor === "brancas" && this.board.row(to) === 0) || (piece.cor === "pretas" && this.board.row(to) === 7)) {
