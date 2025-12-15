@@ -35,7 +35,7 @@
     background: var(--bg-grad);
     color: var(--text);
     height: 100vh;
-    overflow: hidden;
+    /*overflow: hidden;*/
     display: flex;
     justify-content: center;
     align-items: stretch;
@@ -224,6 +224,10 @@
       0 12px 28px rgba(15,23,42,0.9),
       0 0 0 1px rgba(15,23,42,0.8);
     transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.18s ease, background 0.18s ease;
+	flex: 1;
+	overflow-y: auto;
+	padding-right: 2px;
+	flex-direction: column;
   }
 
   .game-card::before {
