@@ -277,29 +277,28 @@ export class GameController {
 		const piece = this.board.board[pos];
 		if (!piece) return;
 		const cor = piece.cor;
-	    let nomePeca = "";
-		// Mapeamento de SÍMBOLO para NOME (se for o caso)
-		if (escolha === "♕" || escolha === "♛") nomePeca = "rainha";
-		else if (escolha === "♖" || escolha === "♜") nomePeca = "torre";
-		else if (escolha === "♗" || escolha === "♝") nomePeca = "bispo";
-		else if (escolha === "♘" || escolha === "♞") nomePeca = "cavalo";
-		else nomePeca = escolha; // Se o modal enviar "rainha" (improvável, mas seguro)
+		const simboloParaNome = {
+			"?": "rainha", "?": "rainha",
+			"?": "torre",  "?": "torre",
+			"?": "bispo",  "?": "bispo",
+			"?": "cavalo", "?": "cavalo"
+		};
+		if (simboloParaNome[escolha]) {
+			escolha = simboloParaNome[escolha];
+		}
 		// Mapa final que coloca o símbolo correto no tabuleiro de acordo com a cor
 		const mapa = {
-			rainha: cor === "brancas" ? "♕" : "♛",
-			torre:  cor === "brancas" ? "♖" : "♜",
-			bispo:  cor === "brancas" ? "♗" : "♝",
-			cavalo: cor === "brancas" ? "♘" : "♞"
+			rainha: cor === "brancas" ? "?" : "?",
+			torre:  cor === "brancas" ? "?" : "?",
+			bispo:  cor === "brancas" ? "?" : "?",
+			cavalo: cor === "brancas" ? "?" : "?"
 		};
-	    const simboloFinal = mapa[nomePeca] || escolha; 
-		piece.tipo = simboloFinal;
-	
+		piece.tipo = mapa[escolha];
 		console.log(
 			`?? Promoção concluída em ${this.indexToNotation(pos)} para: ${escolha}`
 		);
 		this.view.hidePromotionModal();
 		this.view.render();
-		
 		this.currentTurn = cor === "brancas" ? "pretas" : "brancas";
 		// ?? Após a promoção, inicia turno da IA (se for vez das pretas)
 		if (this.currentTurn === "pretas" && !this.gameOver) {
@@ -363,5 +362,4 @@ export class GameController {
 		this.view.hidePromotionModal();
 		console.log("Jogo reiniciado!");
 	}
-
 }
