@@ -140,6 +140,10 @@ export class GameController {
 		}
 		// --- Executa o movimento ---
 		this.board.movePiece(from, to, epCapturedPos);
+		//NOVO
+							this.view.render();
+					this.view.highlightCell(m.to);
+//fim novo
 		// --- Salva no histórico de movimentos ---
 		this.moveHistory.push({
 			from,
