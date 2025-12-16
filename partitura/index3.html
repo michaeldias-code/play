@@ -2,23 +2,17 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editor Profissional de Partituras</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 10px;
         }
-
         .container {
             background: white;
             border-radius: 15px;
@@ -27,18 +21,15 @@
             max-width: 100%;
             margin: 0 auto;
         }
-
         .header {
             text-align: center;
             margin-bottom: 15px;
         }
-
         .header h1 {
             color: #333;
             font-size: 20px;
             margin-bottom: 5px;
         }
-
         .metadata {
             display: flex;
             flex-direction: column;
@@ -48,32 +39,27 @@
             background: #f8f9fa;
             border-radius: 8px;
         }
-
-        .metadata input, .metadata select {
+        .metadata input {
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 6px;
             font-size: 14px;
             width: 100%;
         }
-
         .meta-row {
             display: flex;
             gap: 8px;
             align-items: center;
         }
-
         .meta-row label {
             font-size: 12px;
             font-weight: 600;
             min-width: 60px;
         }
-
         .meta-row input[type="number"] {
             width: 60px;
             text-align: center;
         }
-
         .controls {
             background: #f5f5f5;
             padding: 10px;
@@ -82,11 +68,9 @@
             max-height: 40vh;
             overflow-y: auto;
         }
-
         .control-section {
             margin-bottom: 12px;
         }
-
         .control-section h3 {
             font-size: 12px;
             color: #666;
@@ -94,13 +78,11 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-
         .button-group {
             display: flex;
             gap: 6px;
             flex-wrap: wrap;
         }
-
         button {
             padding: 8px 12px;
             border: 2px solid #ddd;
@@ -112,23 +94,19 @@
             font-weight: 600;
             flex-shrink: 0;
         }
-
         button:active {
             transform: scale(0.95);
         }
-
         button.selected {
             background: #667eea;
             color: white;
             border-color: #667eea;
         }
-
         button.active {
             background: #4CAF50;
             color: white;
             border-color: #4CAF50;
         }
-
         .fig-button {
             width: 45px;
             height: 45px;
@@ -138,31 +116,26 @@
             justify-content: center;
             padding: 4px;
         }
-
         .fig-button canvas {
             pointer-events: none;
             max-width: 100%;
             max-height: 100%;
         }
-
         .accidental-btn {
             font-size: 20px;
             min-width: 45px;
         }
-
         .action-btn {
             padding: 10px 16px;
             font-size: 14px;
             flex: 1;
             min-width: 120px;
         }
-
         #play-btn { background: #4CAF50; color: white; border-color: #4CAF50; }
         #clear-btn { background: #f44336; color: white; border-color: #f44336; }
         #undo-btn { background: #ff9800; color: white; border-color: #ff9800; }
         #download-btn { background: #2196F3; color: white; border-color: #2196F3; }
         #add-staff-btn { background: #9C27B0; color: white; border-color: #9C27B0; }
-
         .score-container {
             background: white;
             border: 2px solid #e0e0e0;
@@ -170,29 +143,24 @@
             overflow: auto;
             -webkit-overflow-scrolling: touch;
             margin-bottom: 15px;
-            position: relative;
+            max-height: 60vh;
         }
-
         .score-wrapper {
             min-width: 900px;
-            min-height: 250px;
+            min-height: 400px;
             padding: 20px;
-            position: relative;
         }
-
         #score {
             cursor: crosshair;
             display: block;
             background: white;
         }
-
         .info {
             text-align: center;
             color: #666;
             font-size: 12px;
             padding: 10px;
         }
-
         .modal {
             display: none;
             position: fixed;
@@ -206,11 +174,9 @@
             justify-content: center;
             padding: 20px;
         }
-
         .modal.active {
             display: flex;
         }
-
         .modal-content {
             background: white;
             padding: 20px;
@@ -218,121 +184,41 @@
             max-width: 400px;
             width: 100%;
         }
-
         .modal h2 {
             margin-bottom: 15px;
             color: #333;
             font-size: 18px;
         }
-
         .modal-buttons {
             display: flex;
             flex-direction: column;
             gap: 8px;
             margin-top: 15px;
         }
-
         .modal-buttons button {
             width: 100%;
             padding: 12px;
             font-size: 14px;
         }
-
-        .scroll-hint {
-            text-align: center;
-            color: #999;
-            font-size: 11px;
-            margin-top: -10px;
-            margin-bottom: 10px;
-        }
-
-        /* Scrollbar customizado */
-        .score-container::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        .score-container::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        .score-container::-webkit-scrollbar-thumb {
-            background: #667eea;
-            border-radius: 4px;
-        }
-
-        .controls::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .controls::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        .controls::-webkit-scrollbar-thumb {
-            background: #999;
-            border-radius: 3px;
-        }
-
         @media (min-width: 768px) {
-            .container {
-                padding: 30px;
-                max-width: 1400px;
-            }
-
-            .header h1 {
-                font-size: 28px;
-                margin-bottom: 10px;
-            }
-
+            .container { padding: 30px; max-width: 1400px; }
+            .header h1 { font-size: 28px; }
             .metadata {
                 display: grid;
                 grid-template-columns: repeat(2, 1fr);
                 gap: 12px;
-                padding: 15px;
             }
-
-            .controls {
-                max-height: none;
-            }
-
-            .control-section h3 {
-                font-size: 13px;
-            }
-
-            button {
-                font-size: 13px;
-            }
-
-            .fig-button {
-                width: 55px;
-                height: 55px;
-                font-size: 28px;
-            }
-
-            .action-btn {
-                font-size: 15px;
-                flex: 0 1 auto;
-            }
-
-            .button-group {
-                gap: 8px;
-            }
-
-            .info {
-                font-size: 14px;
-            }
+            .controls { max-height: none; }
+            .fig-button { width: 55px; height: 55px; font-size: 28px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎵 Editor de Partituras</h1>
+            <h1>🎵 Editor de Partituras Profissional</h1>
         </div>
 
-        <!-- Metadados -->
         <div class="metadata">
             <input type="text" id="title-input" placeholder="Título da Música" value="Minha Composição">
             <input type="text" id="composer-input" placeholder="Compositor">
@@ -348,54 +234,40 @@
             </div>
         </div>
 
-        <!-- Controles -->
         <div class="controls">
-            <!-- Figuras Normais -->
             <div class="control-section">
                 <h3>Figuras Normais</h3>
                 <div class="button-group">
-                    <button class="fig-button selected" data-type="semibreve" data-dot="false" title="Semibreve">
-                        <canvas width="40" height="40"></canvas>
-                    </button>
-                    <button class="fig-button" data-type="minima" data-dot="false" title="Mínima">
-                        <canvas width="40" height="40"></canvas>
-                    </button>
-                    <button class="fig-button" data-type="seminima" data-dot="false" title="Semínima">♩</button>
-                    <button class="fig-button" data-type="colcheia" data-dot="false" title="Colcheia">♪</button>
+                    <button class="fig-button selected" data-type="semibreve" data-dot="false">○</button>
+                    <button class="fig-button" data-type="minima" data-dot="false">𝅗𝅥</button>
+                    <button class="fig-button" data-type="seminima" data-dot="false">♩</button>
+                    <button class="fig-button" data-type="colcheia" data-dot="false">♪</button>
+                    <button class="fig-button" data-type="semicolcheia" data-dot="false">♬</button>
                 </div>
             </div>
 
-            <!-- Figuras Pontuadas -->
             <div class="control-section">
                 <h3>Figuras Pontuadas</h3>
                 <div class="button-group">
-                    <button class="fig-button" data-type="semibreve" data-dot="true" title="Semibreve Pontuada">
-                        <canvas width="40" height="40"></canvas>
-                    </button>
-                    <button class="fig-button" data-type="minima" data-dot="true" title="Mínima Pontuada">
-                        <canvas width="40" height="40"></canvas>
-                    </button>
-                    <button class="fig-button" data-type="seminima" data-dot="true" title="Semínima Pontuada">
-                        <canvas width="40" height="40"></canvas>
-                    </button>
-                    <button class="fig-button" data-type="colcheia" data-dot="true" title="Colcheia Pontuada">
-                        <canvas width="40" height="40"></canvas>
-                    </button>
+                    <button class="fig-button" data-type="semibreve" data-dot="true">○.</button>
+                    <button class="fig-button" data-type="minima" data-dot="true">𝅗𝅥.</button>
+                    <button class="fig-button" data-type="seminima" data-dot="true">♩.</button>
+                    <button class="fig-button" data-type="colcheia" data-dot="true">♪.</button>
+                    <button class="fig-button" data-type="semicolcheia" data-dot="true">♬.</button>
                 </div>
             </div>
 
-            <!-- Pausas -->
             <div class="control-section">
                 <h3>Pausas</h3>
                 <div class="button-group">
-                    <button class="fig-button" data-type="pausa-semibreve" data-dot="false" title="Pausa Semibreve">𝄻</button>
-                    <button class="fig-button" data-type="pausa-minima" data-dot="false" title="Pausa Mínima">𝄼</button>
-                    <button class="fig-button" data-type="pausa-seminima" data-dot="false" title="Pausa Semínima">𝄽</button>
-                    <button class="fig-button" data-type="pausa-colcheia" data-dot="false" title="Pausa Colcheia">𝄾</button>
+                    <button class="fig-button" data-type="pausa-semibreve" data-dot="false">𝄻</button>
+                    <button class="fig-button" data-type="pausa-minima" data-dot="false">𝄼</button>
+                    <button class="fig-button" data-type="pausa-seminima" data-dot="false">𝄽</button>
+                    <button class="fig-button" data-type="pausa-colcheia" data-dot="false">𝄾</button>
+                    <button class="fig-button" data-type="pausa-semicolcheia" data-dot="false">𝄿</button>
                 </div>
             </div>
 
-            <!-- Acidentes -->
             <div class="control-section">
                 <h3>Acidentes</h3>
                 <div class="button-group">
@@ -405,7 +277,6 @@
                 </div>
             </div>
 
-            <!-- Armadura -->
             <div class="control-section">
                 <h3>Armadura de Clave</h3>
                 <div class="button-group">
@@ -417,12 +288,11 @@
                 </div>
             </div>
 
-            <!-- Ações -->
             <div class="control-section">
                 <h3>Clave Ativa</h3>
                 <div class="button-group">
-                    <button class="action-btn active" id="clef-treble-btn">🎼 Sol (Direita)</button>
-                    <button class="action-btn" id="clef-bass-btn">🎹 Fá (Esquerda)</button>
+                    <button class="action-btn active" id="clef-treble-btn">🎼 Sol</button>
+                    <button class="action-btn" id="clef-bass-btn">🎹 Fá</button>
                 </div>
             </div>
 
@@ -439,9 +309,6 @@
             </div>
         </div>
 
-        <div class="scroll-hint">👆 Role os controles acima | 👇 Role a partitura abaixo</div>
-
-        <!-- Partitura -->
         <div class="score-container">
             <div class="score-wrapper">
                 <canvas id="score"></canvas>
@@ -449,11 +316,10 @@
         </div>
 
         <div class="info">
-            👆 Clique na pauta para adicionar notas
+            👆 Clique na pauta • Barras de compasso automáticas • Pautas conectadas
         </div>
     </div>
 
-    <!-- Modal -->
     <div id="export-modal" class="modal">
         <div class="modal-content">
             <h2>Exportar Partitura</h2>
@@ -461,17 +327,17 @@
             <div class="modal-buttons">
                 <button id="export-json">📄 JSON</button>
                 <button id="export-musicxml">🎼 MusicXML</button>
-                <button id="export-pdf">🖼️ Imagem PNG</button>
+                <button id="export-pdf">🖼️ PNG</button>
                 <button id="export-cancel" style="background: #ccc;">Cancelar</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Estado
-        let staffs = [[{ clef: 'treble', notes: [] }, { clef: 'bass', notes: [] }]]; // Grande Pauta
+        // Estado Global
+        let staffs = [[{ clef: 'treble', notes: [] }, { clef: 'bass', notes: [] }]];
         let currentStaffIndex = 0;
-        let currentClef = 'treble'; // 'treble' (Sol) ou 'bass' (Fá)
+        let currentClef = 'treble';
         let selectedType = "semibreve";
         let useDot = false;
         let selectedAccidental = null;
@@ -483,139 +349,63 @@
 
         const canvas = document.getElementById("score");
         const ctx = canvas.getContext("2d");
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         // Constantes
         const SPACING = 50;
         const MIN_SCORE_WIDTH = 900;
         const CLEF_MARGIN = 160;
-        const STAFF_OFFSET = 400; // Aumentado para acomodar duas pautas
-        const SINGLE_STAFF_HEIGHT = 160; // Altura de uma pauta individual
+        const STAFF_OFFSET = 400;
 
-        // Notas para Clave de Sol
         const noteYTreble = {
-    "C6": 20, "B5": 30, "A5": 40, "G5": 50, "F5": 60, "E5": 70,
-    "D5": 80, "C5": 90, "B4": 100, "A4": 110, "G4": 120,
-    "F4": 130, "E4": 140, "D4": 150, "C4": 160, "B3": 170,
-    "A3": 180, "G3": 190
-};
-        // Notas para Clave de Fá
+            "C6": 20, "B5": 30, "A5": 40, "G5": 50, "F5": 60, "E5": 70,
+            "D5": 80, "C5": 90, "B4": 100, "A4": 110, "G4": 120,
+            "F4": 130, "E4": 140, "D4": 150, "C4": 160, "B3": 170,
+            "A3": 180, "G3": 190
+        };
+
         const noteYBass = {
-            "A3": 220, "G3": 230, "F3": 240, "E3": 250, "D3": 260,
-            "C3": 270, "B2": 280, "A2": 290, "G2": 300, "F2": 310,
-            "E2": 320, "D2": 330, "C2": 340, "B1": 350, "A1": 360,
-            "G1": 370, "F1": 380, "E1": 390
+            "A3": 240, "G3": 250, "F3": 260, "E3": 270, "D3": 280,
+            "C3": 290, "B2": 300, "A2": 310, "G2": 320, "F2": 330,
+            "E2": 340, "D2": 350, "C2": 360, "B1": 370, "A1": 380
         };
 
         const freqs = {
-            "E1": 41.20, "F1": 43.65, "G1": 49.00, "A1": 55.00, "B1": 61.74,
-            "C2": 65.41, "D2": 73.42, "E2": 82.41, "F2": 87.31, "G2": 98.00,
-            "A2": 110.00, "B2": 123.47, "C3": 130.81, "D3": 146.83, "E3": 164.81,
-            "F3": 174.61, "G3": 196.00, "A3": 220.00, "B3": 246.94,
-            "C4": 261.63, "D4": 293.66, "E4": 329.63, "F4": 349.23, "G4": 392.00,
+            "A1": 55.00, "B1": 61.74, "C2": 65.41, "D2": 73.42, "E2": 82.41, "F2": 87.31, "G2": 98.00,
+            "A2": 110.00, "B2": 123.47, "C3": 130.81, "D3": 146.83, "E3": 164.81, "F3": 174.61, "G3": 196.00,
+            "A3": 220.00, "B3": 246.94, "C4": 261.63, "D4": 293.66, "E4": 329.63, "F4": 349.23, "G4": 392.00,
             "A4": 440.00, "B4": 493.88, "C5": 523.25, "D5": 587.33, "E5": 659.25,
             "F5": 698.46, "G5": 783.99, "A5": 880.00, "B5": 987.77, "C6": 1046.50
         };
 
         const noteDurations = {
-            "semibreve": 2.0, "minima": 1.0, "seminima": 0.5, "colcheia": 0.25,
-            "pausa-semibreve": 2.0, "pausa-minima": 1.0, "pausa-seminima": 0.5, "pausa-colcheia": 0.25
+            "semibreve": 2.0, "minima": 1.0, "seminima": 0.5, "colcheia": 0.25, "semicolcheia": 0.125,
+            "pausa-semibreve": 2.0, "pausa-minima": 1.0, "pausa-seminima": 0.5, 
+            "pausa-colcheia": 0.25, "pausa-semicolcheia": 0.125
         };
 
         const SHARP_FACTOR = 1.059463;
         const FLAT_FACTOR = 1 / SHARP_FACTOR;
-        const sharpOrder = ['F5', 'C5', 'G5', 'D5', 'A4', 'E5', 'B4'];
-        const flatOrder = ['B4', 'E5', 'A4', 'D5', 'G4', 'C5', 'F4'];
 
-        // Desenhar ícones dos botões
-        function drawButtonIcons() {
-            const drawHead = (ctx, x, y, fill = false, scale = 1) => {
-                ctx.beginPath();
-                ctx.ellipse(x, y, 8 * scale, 6 * scale, -0.3, 0, Math.PI * 2);
-                ctx.lineWidth = 2 * scale;
-                if (fill) {
-                    ctx.fillStyle = '#333';
-                    ctx.fill();
-                } else {
-                    ctx.stroke();
-                }
+        // Calcular duração em tempos (baseado no denominador do compasso)
+        function getDurationInBeats(noteType, dot, bottomNumber) {
+            const baseDurations = {
+                "semibreve": 4, "minima": 2, "seminima": 1, "colcheia": 0.5, "semicolcheia": 0.25,
+                "pausa-semibreve": 4, "pausa-minima": 2, "pausa-seminima": 1, 
+                "pausa-colcheia": 0.5, "pausa-semicolcheia": 0.25
             };
             
-            const drawStem = (ctx, x, y, scale = 1) => {
-                ctx.beginPath();
-                ctx.moveTo(x + 8 * scale, y);
-                ctx.lineTo(x + 8 * scale, y - 20 * scale);
-                ctx.lineWidth = 2 * scale;
-                ctx.stroke();
-            };
-
-            const drawDot = (ctx, x, y, scale = 1) => {
-                ctx.beginPath();
-                ctx.arc(x + 14 * scale, y, 2 * scale, 0, Math.PI * 2);
-                ctx.fill();
-            };
+            let duration = baseDurations[noteType] || 1;
             
-            const drawFlag = (ctx, x, y, scale = 1) => {
-                ctx.lineWidth = 2 * scale;
-                ctx.beginPath();
-                ctx.moveTo(x + 8 * scale, y - 20 * scale);
-                ctx.quadraticCurveTo(x + 16 * scale, y - 16 * scale, x + 8 * scale, y - 10 * scale);
-                ctx.stroke();
-            };
-
-            const semibreve = document.querySelector('[data-type="semibreve"][data-dot="false"] canvas');
-            if (semibreve) {
-                const c = semibreve.getContext('2d');
-                c.translate(20, 20);
-                drawHead(c, 0, 0, false, 1);
-            }
-
-            const minima = document.querySelector('[data-type="minima"][data-dot="false"] canvas');
-            if (minima) {
-                const c = minima.getContext('2d');
-                c.translate(20, 24);
-                drawHead(c, 0, 0, false, 1);
-                drawStem(c, 0, 0, 1);
-            }
-
-            const semibreveDot = document.querySelector('[data-type="semibreve"][data-dot="true"] canvas');
-            if (semibreveDot) {
-                const c = semibreveDot.getContext('2d');
-                c.translate(16, 20);
-                drawHead(c, 0, 0, false, 0.9);
-                drawDot(c, 0, 0, 1);
-            }
-
-            const minimaDot = document.querySelector('[data-type="minima"][data-dot="true"] canvas');
-            if (minimaDot) {
-                const c = minimaDot.getContext('2d');
-                c.translate(16, 24);
-                drawHead(c, 0, 0, false, 0.9);
-                drawStem(c, 0, 0, 1);
-                drawDot(c, 0, 0, 1);
-            }
-
-            const seminimaDot = document.querySelector('[data-type="seminima"][data-dot="true"] canvas');
-            if (seminimaDot) {
-                const c = seminimaDot.getContext('2d');
-                c.translate(16, 24);
-                drawHead(c, 0, 0, true, 0.9);
-                drawStem(c, 0, 0, 1);
-                drawDot(c, 0, 0, 1);
-            }
-
-            const colcheiaDot = document.querySelector('[data-type="colcheia"][data-dot="true"] canvas');
-            if (colcheiaDot) {
-                const c = colcheiaDot.getContext('2d');
-                c.translate(16, 26);
-                drawHead(c, 0, 0, true, 0.9);
-                drawStem(c, 0, 0, 1);
-                drawFlag(c, 0, 0, 1);
-                drawDot(c, 0, 0, 1);
-            }
+            // Ajuste baseado no denominador (4/4, 3/4, 6/8, etc)
+            if (bottomNumber === 8) duration *= 0.5;
+            else if (bottomNumber === 2) duration *= 2;
+            
+            if (dot) duration *= 1.5;
+            
+            return duration;
         }
 
-        // Funções de desenho da partitura
+        // Funções de desenho
         function drawAccidental(acc, x, y) {
             ctx.font = "24px Arial";
             ctx.fillStyle = "#333";
@@ -685,6 +475,29 @@
             if (dot) drawDot(x, y);
         }
 
+        function drawSemicolcheia(x, y, dot = false) {
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "#333";
+            ctx.fillStyle = "#333";
+            ctx.beginPath();
+            ctx.ellipse(x, y, 10, 7, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(x + 10, y);
+            ctx.lineTo(x + 10, y - 40);
+            ctx.stroke();
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(x + 10, y - 40);
+            ctx.quadraticCurveTo(x + 26, y - 33, x + 10, y - 20);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x + 10, y - 35);
+            ctx.quadraticCurveTo(x + 26, y - 28, x + 10, y - 15);
+            ctx.stroke();
+            if (dot) drawDot(x, y);
+        }
+
         function drawRest(type, x, y) {
             ctx.font = "32px Arial";
             ctx.fillStyle = "#333";
@@ -693,44 +506,12 @@
                 'pausa-semibreve': ['𝄻', 110],
                 'pausa-minima': ['𝄼', 130],
                 'pausa-seminima': ['𝄽', 120],
-                'pausa-colcheia': ['𝄾', 120]
+                'pausa-colcheia': ['𝄾', 120],
+                'pausa-semicolcheia': ['𝄿', 120]
             };
             const [symbol, yOffset] = symbols[type] || ['', 120];
-            ctx.fillText(symbol, x, y - (noteY['G4'] - yOffset));
+            ctx.fillText(symbol, x, y - (noteYTreble['G4'] - yOffset));
             ctx.textAlign = "left";
-        }
-
-        function drawLedgerLines(x, y, yOffset, clef) {
-            // Linhas suplementares superiores (acima da pauta)
-            if (clef === 'treble') {
-            const topStaffLine = 80 + yOffset; // Primeira linha da pauta
-            if (y < topStaffLine) {
-                ctx.strokeStyle = "#333";
-                ctx.lineWidth = 1.5;
-                // Desenha linhas suplementares de 20 em 20 pixels
-                for (let lineY = topStaffLine - 20; lineY >= y - 5; lineY -= 20) {
-                    ctx.beginPath();
-                    ctx.moveTo(x - 15, lineY);
-                    ctx.lineTo(x + 15, lineY);
-                    ctx.stroke();
-                }
-            }
-            }else{
-            // Linhas suplementares inferiores (abaixo da pauta)
-            const bottomStaffLine = 260 + yOffset; // Quinta linha da pauta
-            if (y > bottomStaffLine) {
-                ctx.strokeStyle = "#333";
-                ctx.lineWidth = 1.5;
-                // Desenha linhas suplementares de 20 em 20 pixels
-                for (let lineY = bottomStaffLine 
-                    + 20; lineY <= y + 5; lineY += 20) {
-                    ctx.beginPath();
-                    ctx.moveTo(x - 15, lineY);
-                    ctx.lineTo(x + 15, lineY);
-                    ctx.stroke();
-                }
-            }
-        }
         }
 
         function drawNote(note, x, y) {
@@ -743,114 +524,68 @@
             else if (note.type === "minima") drawMinima(x, y, dot);
             else if (note.type === "seminima") drawSeminima(x, y, dot);
             else if (note.type === "colcheia") drawColcheia(x, y, dot);
+            else if (note.type === "semicolcheia") drawSemicolcheia(x, y, dot);
         }
 
-        function drawKeySharps(yOffset) {
-            for (let i = 0; i < keySharps; i++) {
-                const pitch = sharpOrder[i];
-                const x = 80 + (i * 12);
-                const y = noteY[pitch] + yOffset;
-                ctx.font = "24px Arial";
-                ctx.fillStyle = "#333";
-                ctx.fillText("♯", x, y + 8);
-            }
-        }
-
-        function drawKeyFlats(yOffset) {
-            for (let i = 0; i < keyFlats; i++) {
-                const pitch = flatOrder[i];
-                const x = 80 + (i * 12);
-                const y = noteY[pitch] + yOffset;
-                ctx.font = "24px Arial";
-                ctx.fillStyle = "#333";
-                ctx.fillText("♭", x, y + 8);
-            }
-        }
-
-        function drawStaff(staffIndex) {
-            const yOffset = staffIndex * STAFF_OFFSET;
-            
-            // Desenhar CLAVE DE SOL (treble)
-            drawSingleStaff(yOffset, 'treble');
-            
-            // Desenhar CLAVE DE FÁ (bass)
-            drawSingleStaff(yOffset + 180, 'bass');
-            
-            // Desenhar COLCHETE conectando as duas pautas
-            ctx.strokeStyle = "#333";
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.moveTo(15, 80 + yOffset);
-            ctx.lineTo(15, 340 + yOffset);
-            ctx.stroke();
-            
-            // Linha vertical mais grossa no início
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(20, 80 + yOffset);
-            ctx.lineTo(20, 160 + yOffset);
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.moveTo(20, 260 + yOffset);
-            ctx.lineTo(20, 340 + yOffset);
-            ctx.stroke();
-        }
-
-        function drawSingleStaff(yBase, clef) {
+        function drawLedgerLines(x, y, yOffset, clef) {
             ctx.strokeStyle = "#333";
             ctx.lineWidth = 1.5;
             
-            // Linhas da pauta
-            for (let i = 0; i < 5; i++) {
-                const y = yBase + 80 + i * 20;
-                ctx.beginPath();
-                ctx.moveTo(20, y);
-                ctx.lineTo(canvas.width - 20, y);
-                ctx.stroke();
-            }
-
-            // Desenhar a clave apropriada
             if (clef === 'treble') {
-                // Clave de Sol
-                ctx.font = "70px Arial, sans-serif";
-                ctx.fillStyle = "#333";
-                ctx.textBaseline = "top";
-                ctx.fillText("𝄞", 35, yBase + 78);
+                const topStaffLine = 80 + yOffset;
+                if (y < topStaffLine) {
+                    for (let lineY = topStaffLine - 20; lineY >= y - 5; lineY -= 20) {
+                        ctx.beginPath();
+                        ctx.moveTo(x - 15, lineY);
+                        ctx.lineTo(x + 15, lineY);
+                        ctx.stroke();
+                    }
+                }
+                const bottomStaffLine = 160 + yOffset;
+                if (y > bottomStaffLine) {
+                    for (let lineY = bottomStaffLine + 20; lineY <= y + 5; lineY += 20) {
+                        ctx.beginPath();
+                        ctx.moveTo(x - 15, lineY);
+                        ctx.lineTo(x + 15, lineY);
+                        ctx.stroke();
+                    }
+                }
             } else {
-                // Clave de Fá
-                ctx.font = "50px Arial, sans-serif";
-                ctx.fillStyle = "#333";
-                ctx.textBaseline = "top";
-                ctx.fillText("𝄢", 35, yBase + 78);
-                
-                // Dois pontos da clave de Fá
-                ctx.beginPath();
-                ctx.arc(75, yBase + 100, 3, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(75, yBase + 120, 3, 0, Math.PI * 2);
-                ctx.fill();
+                const topStaffLine = 260 + yOffset;
+                if (y < topStaffLine) {
+                    for (let lineY = topStaffLine - 20; lineY >= y - 5; lineY -= 20) {
+                        ctx.beginPath();
+                        ctx.moveTo(x - 15, lineY);
+                        ctx.lineTo(x + 15, lineY);
+                        ctx.stroke();
+                    }
+                }
+                const bottomStaffLine = 340 + yOffset;
+                if (y > bottomStaffLine) {
+                    for (let lineY = bottomStaffLine + 20; lineY <= y + 5; lineY += 20) {
+                        ctx.beginPath();
+                        ctx.moveTo(x - 15, lineY);
+                        ctx.lineTo(x + 15, lineY);
+                        ctx.stroke();
+                    }
+                }
             }
+        }
 
-            // Armadura de clave
-            if (keySharps > 0) {
-                drawKeySharps(yBase, clef);
-            } else if (keyFlats > 0) {
-                drawKeyFlats(yBase, clef);
-            }
-
-            // Fórmula de compasso
-            drawTimeSignature(110, yBase);
-            
-            // Linha vertical final
+        function drawBarline(x, yOffset) {
+            ctx.strokeStyle = "#333";
+            ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(canvas.width - 20, yBase + 80);
-            ctx.lineTo(canvas.width - 20, yBase + 160);
+            ctx.moveTo(x, 80 + yOffset);
+            ctx.lineTo(x, 160 + yOffset);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, 260 + yOffset);
+            ctx.lineTo(x, 340 + yOffset);
             ctx.stroke();
         }
 
-        function drawKeySharps(yOffset, clef) {
+        function drawKeySharps(yBase, clef) {
             const positions = clef === 'treble' ? 
                 ['F5', 'C5', 'G5', 'D5', 'A4', 'E5', 'B4'] :
                 ['A3', 'E3', 'B2', 'F3', 'C3', 'G3', 'D3'];
@@ -866,7 +601,7 @@
             }
         }
 
-        function drawKeyFlats(yOffset, clef) {
+        function drawKeyFlats(yBase, clef) {
             const positions = clef === 'treble' ?
                 ['B4', 'E5', 'A4', 'D5', 'G4', 'C5', 'F4'] :
                 ['D3', 'G3', 'C3', 'F3', 'B2', 'E3', 'A2'];
@@ -892,6 +627,75 @@
             ctx.textAlign = "left";
         }
 
+function drawSingleStaff(yBase, clef) {
+            ctx.strokeStyle = "#333";
+            ctx.lineWidth = 1.5;
+            
+            for (let i = 0; i < 5; i++) {
+                const y = yBase + 80 + i * 20;
+                ctx.beginPath();
+                ctx.moveTo(20, y);
+                ctx.lineTo(canvas.width - 20, y);
+                ctx.stroke();
+            }
+
+            if (clef === 'treble') {
+                ctx.font = "70px Arial, sans-serif";
+                ctx.fillStyle = "#333";
+                ctx.textBaseline = "top";
+                ctx.fillText("𝄞", 35, yBase + 78);
+            } else {
+                ctx.font = "50px Arial, sans-serif";
+                ctx.fillStyle = "#333";
+                ctx.textBaseline = "top";
+                ctx.fillText("𝄢", 35, yBase + 78);
+                ctx.beginPath();
+                ctx.arc(75, yBase + 100, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(75, yBase + 120, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            if (keySharps > 0) {
+                drawKeySharps(yBase, clef);
+            } else if (keyFlats > 0) {
+                drawKeyFlats(yBase, clef);
+            }
+
+            drawTimeSignature(110, yBase);
+            
+            ctx.beginPath();
+            ctx.moveTo(canvas.width - 20, yBase + 80);
+            ctx.lineTo(canvas.width - 20, yBase + 160);
+            ctx.stroke();
+        }
+
+        function drawStaff(staffIndex) {
+            const yOffset = staffIndex * STAFF_OFFSET;
+            
+            drawSingleStaff(yOffset, 'treble');
+            drawSingleStaff(yOffset + 180, 'bass');
+            
+            ctx.strokeStyle = "#333";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(15, 80 + yOffset);
+            ctx.lineTo(15, 340 + yOffset);
+            ctx.stroke();
+            
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(20, 80 + yOffset);
+            ctx.lineTo(20, 160 + yOffset);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(20, 260 + yOffset);
+            ctx.lineTo(20, 340 + yOffset);
+            ctx.stroke();
+        }
+
         function redraw() {
             let maxNotesCount = 0;
             for (const grandStaff of staffs) {
@@ -914,105 +718,122 @@
                 
                 const yOffsetBase = staffIndex * STAFF_OFFSET;
                 
-                // Desenhar notas da clave de Sol
+                // Desenhar clave de Sol com barras de compasso
                 let xTreble = CLEF_MARGIN;
+                let currentBeat = 0;
+                
                 for (const chord of grandStaff[0].notes) {
                     for (const note of chord) {
                         if (note.type.startsWith('pausa-')) {
                             drawRest(note.type, xTreble, yOffsetBase);
                         } else {
                             const noteYPos = noteYTreble[note.pitch];
-                            
                             drawLedgerLines(xTreble, noteYPos, yOffsetBase, 'treble');
-drawLedgerLines(xBass, noteYPos, yOffsetBase, 'bass');
                             if (note.accidental) drawAccidental(note.accidental, xTreble, noteYPos);
                             drawNote(note, xTreble, noteYPos);
                         }
                     }
+                    
+                    // Calcular batidas e adicionar barra de compasso
+                    const noteDuration = getDurationInBeats(chord[0].type, chord[0].dot, timeSignature.bottom);
+                    currentBeat += noteDuration;
+                    
+                    if (currentBeat >= timeSignature.top) {
+                        drawBarline(xTreble + SPACING/2, yOffsetBase);
+                        currentBeat = 0;
+                    }
+                    
                     xTreble += SPACING;
                 }
                 
-                // Desenhar notas da clave de Fá
+                // Desenhar clave de Fá com barras de compasso
                 let xBass = CLEF_MARGIN;
+                currentBeat = 0;
+                
                 for (const chord of grandStaff[1].notes) {
                     for (const note of chord) {
                         if (note.type.startsWith('pausa-')) {
                             drawRest(note.type, xBass, yOffsetBase + 180);
                         } else {
                             const noteYPos = noteYBass[note.pitch];
-                            drawLedgerLines(xBass, noteYPos, yOffsetBase);
+                            drawLedgerLines(xBass, noteYPos, yOffsetBase, 'bass');
                             if (note.accidental) drawAccidental(note.accidental, xBass, noteYPos);
                             drawNote(note, xBass, noteYPos);
                         }
                     }
+                    
+                    const noteDuration = getDurationInBeats(chord[0].type, chord[0].dot, timeSignature.bottom);
+                    currentBeat += noteDuration;
+                    
+                    if (currentBeat >= timeSignature.top) {
+                        currentBeat = 0;
+                    }
+                    
                     xBass += SPACING;
                 }
             });
         }
 
-        // Áudio com Tone.js para som de piano real
-        const piano = new Tone.Sampler({
-            let piano = null;
+        // Piano com Tone.js
+        let piano = null;
+        
+        async function initPiano() {
+            if (piano) return;
+            piano = new Tone.Sampler({
+                urls: {
+                    "C4": "C4.mp3",
+                    "D#4": "Ds4.mp3",
+                    "F#4": "Fs4.mp3",
+                    "A4": "A4.mp3",
+                },
+                release: 1,
+                baseUrl: "https://tonejs.github.io/audio/salamander/"
+            }).toDestination();
+            await Tone.loaded();
+        }
 
-async function initPiano() {
-    if (piano) return;
-    
-    piano = new Tone.Sampler({
-        urls: {
-            "C4": "C4.mp3",
-            "D#4": "Ds4.mp3",
-            "F#4": "Fs4.mp3",
-            "A4": "A4.mp3",
-        },
-        release: 1,
-        baseUrl: "https://tonejs.github.io/audio/salamander/"
-    }).toDestination();
-    
-    await Tone.loaded();
-}}).toDestination();
-
-        // Converter frequência para nota musical
-        function freqToNoteName(freq, accidental = null) {
+        function freqToNoteName(freq) {
             const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
             const A4 = 440;
             const C0 = A4 * Math.pow(2, -4.75);
-            
             let halfSteps = Math.round(12 * Math.log2(freq / C0));
             const octave = Math.floor(halfSteps / 12);
-            let noteIndex = halfSteps % 12;
-            
-            // Ajuste para acidentes
-            if (accidental === 'sharp') {
-                // Nota já está correta
-            } else if (accidental === 'flat') {
-                // Converte bemol para sustenido equivalente
-                noteIndex = (noteIndex - 1 + 12) % 12;
-        }
-           const note = notes[noteIndex];
-            return note + octave;
+            return notes[halfSteps % 12] + octave;
         }
 
         async function playFreq(freq, duration, startTime = 0) {
-    await initPiano();
-    const note = freqToNoteName(freq);
-    const now = Tone.now();
-    piano.triggerAttackRelease(note, duration, now + startTime, 0.6);
-}
+            await initPiano();
+            const note = freqToNoteName(freq);
+            piano.triggerAttackRelease(note, duration, Tone.now() + startTime, 0.6);
+        }
+
         async function playScore() {
             await initPiano();
-    await Tone.start();
-    
-            const allChords = staffs.flat();
-            if (allChords.length === 0) {
+            await Tone.start();
+            
+            let allNotes = [];
+            for (const grandStaff of staffs) {
+                const trebleNotes = grandStaff[0].notes;
+                const bassNotes = grandStaff[1].notes;
+                const maxLength = Math.max(trebleNotes.length, bassNotes.length);
+                
+                for (let i = 0; i < maxLength; i++) {
+                    const combined = [];
+                    if (i < trebleNotes.length) combined.push(...trebleNotes[i]);
+                    if (i < bassNotes.length) combined.push(...bassNotes[i]);
+                    allNotes.push(combined);
+                }
+            }
+            
+            if (allNotes.length === 0) {
                 alert("Adicione notas primeiro!");
                 return;
             }
-            if (audioCtx.state === 'suspended') await audioCtx.resume();
 
             let t = 0;
             const beatDuration = 60 / tempo;
             
-            for (const chord of allChords) {
+            for (const chord of allNotes) {
                 if (chord.length === 0) continue;
                 const baseNote = chord[0];
                 
@@ -1031,7 +852,7 @@ async function initPiano() {
                     let freq = freqs[note.pitch];
                     if (note.accidental === 'sharp') freq *= SHARP_FACTOR;
                     else if (note.accidental === 'flat') freq *= FLAT_FACTOR;
-                    playFreq(freq, duration, t);
+                    await playFreq(freq, duration, t);
                 }
                 t += duration;
             }
@@ -1061,105 +882,23 @@ async function initPiano() {
         function exportToMusicXML() {
             const title = document.getElementById('title-input').value;
             const composer = document.getElementById('composer-input').value;
-            
             let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 3.1 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
 <score-partwise version="3.1">
   <work><work-title>${title}</work-title></work>
-  <identification>
-    <creator type="composer">${composer}</creator>
-    <encoding>
-      <software>Editor de Partituras</software>
-      <encoding-date>${new Date().toISOString().split('T')[0]}</encoding-date>
-    </encoding>
-  </identification>
-  <part-list>
-    <score-part id="P1"><part-name>Piano</part-name></score-part>
-  </part-list>
-  <part id="P1">`;
-
-            const noteTypeMap = {
-                'semibreve': 'whole', 'minima': 'half',
-                'seminima': 'quarter', 'colcheia': 'eighth'
-            };
-
-            staffs.forEach((staff, staffIndex) => {
-                xml += `
-    <measure number="${staffIndex + 1}">
+  <identification><creator type="composer">${composer}</creator></identification>
+  <part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list>
+  <part id="P1">
+    <measure number="1">
       <attributes>
         <divisions>4</divisions>
         <key><fifths>${keySharps - keyFlats}</fifths></key>
-        <time>
-          <beats>${timeSignature.top}</beats>
-          <beat-type>${timeSignature.bottom}</beat-type>
-        </time>
+        <time><beats>${timeSignature.top}</beats><beat-type>${timeSignature.bottom}</beat-type></time>
         <clef><sign>G</sign><line>2</line></clef>
       </attributes>
-      <sound tempo="${tempo}"/>`;
-
-                staff.forEach(chord => {
-                    if (chord.length === 1) {
-                        const note = chord[0];
-                        if (note.type.startsWith('pausa-')) {
-                            const restType = note.type.replace('pausa-', '');
-                            xml += `
-      <note>
-        <rest/>
-        <duration>4</duration>
-        <type>${noteTypeMap[restType]}</type>`;
-                            if (note.dot) xml += `\n        <dot/>`;
-                            xml += `\n      </note>`;
-                        } else {
-                            const pitch = note.pitch.charAt(0);
-                            const octave = note.pitch.charAt(1);
-                            xml += `
-      <note>
-        <pitch>
-          <step>${pitch}</step>`;
-                            if (note.accidental === 'sharp') xml += `\n          <alter>1</alter>`;
-                            else if (note.accidental === 'flat') xml += `\n          <alter>-1</alter>`;
-                            xml += `
-          <octave>${octave}</octave>
-        </pitch>
-        <duration>4</duration>
-        <type>${noteTypeMap[note.type]}</type>`;
-                            if (note.dot) xml += `\n        <dot/>`;
-                            if (note.accidental) {
-                                const accMap = { 'sharp': 'sharp', 'flat': 'flat', 'natural': 'natural' };
-                                xml += `\n        <accidental>${accMap[note.accidental]}</accidental>`;
-                            }
-                            xml += `\n      </note>`;
-                        }
-                    } else {
-                        chord.forEach((note, idx) => {
-                            if (note.type.startsWith('pausa-')) return;
-                            const pitch = note.pitch.charAt(0);
-                            const octave = note.pitch.charAt(1);
-                            xml += `\n      <note>`;
-                            if (idx > 0) xml += `\n        <chord/>`;
-                            xml += `
-        <pitch>
-          <step>${pitch}</step>`;
-                            if (note.accidental === 'sharp') xml += `\n          <alter>1</alter>`;
-                            else if (note.accidental === 'flat') xml += `\n          <alter>-1</alter>`;
-                            xml += `
-          <octave>${octave}</octave>
-        </pitch>
-        <duration>4</duration>
-        <type>${noteTypeMap[note.type]}</type>`;
-                            if (note.dot) xml += `\n        <dot/>`;
-                            if (note.accidental) {
-                                const accMap = { 'sharp': 'sharp', 'flat': 'flat', 'natural': 'natural' };
-                                xml += `\n        <accidental>${accMap[note.accidental]}</accidental>`;
-                            }
-                            xml += `\n      </note>`;
-                        });
-                    }
-                });
-                xml += `\n    </measure>`;
-            });
-
-            xml += `\n  </part>\n</score-partwise>`;
+    </measure>
+  </part>
+</score-partwise>`;
             const blob = new Blob([xml], { type: 'application/xml' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1176,21 +915,17 @@ async function initPiano() {
             pdfCanvas.width = canvas.width;
             pdfCanvas.height = canvas.height + 100;
             const pdfCtx = pdfCanvas.getContext('2d');
-            
             pdfCtx.fillStyle = 'white';
             pdfCtx.fillRect(0, 0, pdfCanvas.width, pdfCanvas.height);
             pdfCtx.fillStyle = 'black';
             pdfCtx.font = 'bold 24px Arial';
             pdfCtx.textAlign = 'center';
             pdfCtx.fillText(title, pdfCanvas.width / 2, 40);
-            
             if (composer) {
                 pdfCtx.font = '16px Arial';
                 pdfCtx.fillText(composer, pdfCanvas.width / 2, 70);
             }
-            
             pdfCtx.drawImage(canvas, 0, 100);
-            
             pdfCanvas.toBlob(blob => {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -1202,7 +937,6 @@ async function initPiano() {
         }
 
         // Event Listeners
-        drawButtonIcons();
         redraw();
 
         document.getElementById('time-top').addEventListener('change', (e) => {
@@ -1291,7 +1025,6 @@ async function initPiano() {
             document.getElementById('harmony-btn').classList.toggle('active');
         });
 
-        // Alternar entre claves
         document.getElementById('clef-treble-btn').addEventListener('click', () => {
             currentClef = 'treble';
             document.getElementById('clef-treble-btn').classList.add('active');
@@ -1316,7 +1049,6 @@ async function initPiano() {
             const grandStaff = staffs[currentStaffIndex];
             const clefIndex = currentClef === 'treble' ? 0 : 1;
             const targetStaff = grandStaff[clefIndex].notes;
-            
             if (targetStaff.length > 0) {
                 const lastChord = targetStaff[targetStaff.length - 1];
                 if (lastChord.length > 1) lastChord.pop();
@@ -1372,15 +1104,13 @@ async function initPiano() {
 
             let targetStaffIndex = Math.floor(clickY / STAFF_OFFSET);
             if (targetStaffIndex >= staffs.length) targetStaffIndex = staffs.length - 1;
+            if (targetStaffIndex < 0) targetStaffIndex = 0;
             currentStaffIndex = targetStaffIndex;
 
             const staffYOffset = targetStaffIndex * STAFF_OFFSET;
             const relativeY = clickY - staffYOffset;
             
-            // Determinar qual clave foi clicada
-            let clickedClef = 'treble';
             if (relativeY > 180) {
-                clickedClef = 'bass';
                 currentClef = 'bass';
                 document.getElementById('clef-bass-btn').classList.add('active');
                 document.getElementById('clef-treble-btn').classList.remove('active');
@@ -1454,4 +1184,4 @@ async function initPiano() {
         });
     </script>
 </body>
-</html> 
+</html>
