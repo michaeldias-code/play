@@ -419,6 +419,14 @@
 
             <!-- Ações -->
             <div class="control-section">
+                <h3>Clave Ativa</h3>
+                <div class="button-group">
+                    <button class="action-btn active" id="clef-treble-btn">🎼 Sol (Direita)</button>
+                    <button class="action-btn" id="clef-bass-btn">🎹 Fá (Esquerda)</button>
+                </div>
+            </div>
+
+            <div class="control-section">
                 <h3>Ações</h3>
                 <div class="button-group">
                     <button class="action-btn" id="play-btn">▶ Tocar</button>
@@ -460,8 +468,10 @@
     </div>
 
     <script>
-let staffs = [[]];
+        // Estado
+        let staffs = [[{ clef: 'treble', notes: [] }, { clef: 'bass', notes: [] }]]; // Grande Pauta
         let currentStaffIndex = 0;
+        let currentClef = 'treble'; // 'treble' (Sol) ou 'bass' (Fá)
         let selectedType = "semibreve";
         let useDot = false;
         let selectedAccidental = null;
@@ -474,35 +484,38 @@ let staffs = [[]];
         const canvas = document.getElementById("score");
         const ctx = canvas.getContext("2d");
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-const piano = new Tone.Sampler({
-    urls: {
-        "C4": "C4.mp3",
-        "D#4": "Ds4.mp3",
-        "F#4": "Fs4.mp3",
-        "A4": "A4.mp3",
-    },
-    release: 1,
-    baseUrl: "https://tonejs.github.io/audio/salamander/"
-}).toDestination();
+
         // Constantes
         const SPACING = 50;
         const MIN_SCORE_WIDTH = 900;
         const CLEF_MARGIN = 160;
-        const STAFF_OFFSET = 250;
+        const STAFF_OFFSET = 400; // Aumentado para acomodar duas pautas
+        const SINGLE_STAFF_HEIGHT = 160; // Altura de uma pauta individual
 
-        const noteY = {
-    "C6": 20, "B5": 30, "A5": 40, "G5": 50, "F5": 60, "E5": 70,
-    "D5": 80, "C5": 90, "B4": 100, "A4": 110, "G4": 120,
-    "F4": 130, "E4": 140, "D4": 150, "C4": 160, "B3": 170,
-    "A3": 180, "G3": 190, "F3": 200, "E3": 210
-};
+        // Notas para Clave de Sol
+        const noteYTreble = {
+            "C6": 20, "B5": 30, "A5": 40, "G5": 50, "F5": 60, "E5": 70,
+            "D5": 80, "C5": 90, "B4": 100, "A4": 110, "G4": 120,
+            "F4": 130, "E4": 140, "D4": 150, "C4": 160, "B3": 170,
+            "A3": 180, "G3": 190, "F3": 200, "E3": 210
+        };
+        // Notas para Clave de Fá
+        const noteYBass = {
+            "A3": 220, "G3": 230, "F3": 240, "E3": 250, "D3": 260,
+            "C3": 270, "B2": 280, "A2": 290, "G2": 300, "F2": 310,
+            "E2": 320, "D2": 330, "C2": 340, "B1": 350, "A1": 360,
+            "G1": 370, "F1": 380, "E1": 390
+        };
 
-const freqs = {
-    "E3": 164.81, "F3": 174.61, "G3": 196.00, "A3": 220.00, "B3": 246.94,
-    "C4": 261.63, "D4": 293.66, "E4": 329.63, "F4": 349.23, "G4": 392.00,
-    "A4": 440.00, "B4": 493.88, "C5": 523.25, "D5": 587.33, "E5": 659.25,
-    "F5": 698.46, "G5": 783.99, "A5": 880.00, "B5": 987.77, "C6": 1046.50
-};
+        const freqs = {
+            "E1": 41.20, "F1": 43.65, "G1": 49.00, "A1": 55.00, "B1": 61.74,
+            "C2": 65.41, "D2": 73.42, "E2": 82.41, "F2": 87.31, "G2": 98.00,
+            "A2": 110.00, "B2": 123.47, "C3": 130.81, "D3": 146.83, "E3": 164.81,
+            "F3": 174.61, "G3": 196.00, "A3": 220.00, "B3": 246.94,
+            "C4": 261.63, "D4": 293.66, "E4": 329.63, "F4": 349.23, "G4": 392.00,
+            "A4": 440.00, "B4": 493.88, "C5": 523.25, "D5": 587.33, "E5": 659.25,
+            "F5": 698.46, "G5": 783.99, "A5": 880.00, "B5": 987.77, "C6": 1046.50
+        };
 
         const noteDurations = {
             "semibreve": 2.0, "minima": 1.0, "seminima": 0.5, "colcheia": 0.25,
@@ -590,7 +603,6 @@ const freqs = {
                 drawStem(c, 0, 0, 1);
                 drawDot(c, 0, 0, 1);
             }
-            
 
             const colcheiaDot = document.querySelector('[data-type="colcheia"][data-dot="true"] canvas');
             if (colcheiaDot) {
@@ -687,32 +699,37 @@ const freqs = {
             ctx.fillText(symbol, x, y - (noteY['G4'] - yOffset));
             ctx.textAlign = "left";
         }
-        
-function drawLedgerLines(x, y, yOffset) {
-    const topStaffLine = 80 + yOffset;
-    if (y < topStaffLine) {
-        ctx.strokeStyle = "#333";
-        ctx.lineWidth = 1.5;
-        for (let lineY = topStaffLine - 20; lineY >= y - 5; lineY -= 20) {
-            ctx.beginPath();
-            ctx.moveTo(x - 15, lineY);
-            ctx.lineTo(x + 15, lineY);
-            ctx.stroke();
+
+        function drawLedgerLines(x, y, yOffset) {
+            // Linhas suplementares superiores (acima da pauta)
+            const topStaffLine = 80 + yOffset; // Primeira linha da pauta
+            if (y < topStaffLine) {
+                ctx.strokeStyle = "#333";
+                ctx.lineWidth = 1.5;
+                // Desenha linhas suplementares de 20 em 20 pixels
+                for (let lineY = topStaffLine - 20; lineY >= y - 5; lineY -= 20) {
+                    ctx.beginPath();
+                    ctx.moveTo(x - 15, lineY);
+                    ctx.lineTo(x + 15, lineY);
+                    ctx.stroke();
+                }
+            }
+            
+            // Linhas suplementares inferiores (abaixo da pauta)
+            const bottomStaffLine = 160 + yOffset; // Quinta linha da pauta
+            if (y > bottomStaffLine) {
+                ctx.strokeStyle = "#333";
+                ctx.lineWidth = 1.5;
+                // Desenha linhas suplementares de 20 em 20 pixels
+                for (let lineY = bottomStaffLine + 20; lineY <= y + 5; lineY += 20) {
+                    ctx.beginPath();
+                    ctx.moveTo(x - 15, lineY);
+                    ctx.lineTo(x + 15, lineY);
+                    ctx.stroke();
+                }
+            }
         }
-    }
-    
-    const bottomStaffLine = 160 + yOffset;
-    if (y > bottomStaffLine) {
-        ctx.strokeStyle = "#333";
-        ctx.lineWidth = 1.5;
-        for (let lineY = bottomStaffLine + 20; lineY <= y + 5; lineY += 20) {
-            ctx.beginPath();
-            ctx.moveTo(x - 15, lineY);
-            ctx.lineTo(x + 15, lineY);
-            ctx.stroke();
-        }
-    }
-}
+
         function drawNote(note, x, y) {
             if (note.type.startsWith('pausa-')) {
                 drawRest(note.type, x, y);
@@ -747,131 +764,268 @@ function drawLedgerLines(x, y, yOffset) {
             }
         }
 
-        function drawTimeSignature(x, yOffset) {
-            ctx.font = "bold 28px Georgia, serif";
-            ctx.fillStyle = "#333";
-            ctx.textAlign = "center";
-            const centerY = 120 + yOffset;
-            ctx.fillText(timeSignature.top.toString(), x, centerY - 12);
-            ctx.fillText(timeSignature.bottom.toString(), x, centerY + 22);
-            ctx.textAlign = "left";
-                }
-
         function drawStaff(staffIndex) {
             const yOffset = staffIndex * STAFF_OFFSET;
+            
+            // Desenhar CLAVE DE SOL (treble)
+            drawSingleStaff(yOffset, 'treble');
+            
+            // Desenhar CLAVE DE FÁ (bass)
+            drawSingleStaff(yOffset + 180, 'bass');
+            
+            // Desenhar COLCHETE conectando as duas pautas
+            ctx.strokeStyle = "#333";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(15, 80 + yOffset);
+            ctx.lineTo(15, 340 + yOffset);
+            ctx.stroke();
+            
+            // Linha vertical mais grossa no início
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(20, 80 + yOffset);
+            ctx.lineTo(20, 160 + yOffset);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(20, 260 + yOffset);
+            ctx.lineTo(20, 340 + yOffset);
+            ctx.stroke();
+        }
+
+        function drawSingleStaff(yBase, clef) {
             ctx.strokeStyle = "#333";
             ctx.lineWidth = 1.5;
             
+            // Linhas da pauta
             for (let i = 0; i < 5; i++) {
-                const y = 80 + i * 20 + yOffset;
+                const y = yBase + 80 + i * 20;
                 ctx.beginPath();
                 ctx.moveTo(20, y);
                 ctx.lineTo(canvas.width - 20, y);
                 ctx.stroke();
             }
 
-            ctx.font = "70px Arial, sans-serif";
-            ctx.fillStyle = "#333";
-            ctx.textBaseline = "top";
-            ctx.fillText("𝄞", 35, 78 + yOffset);
+            // Desenhar a clave apropriada
+            if (clef === 'treble') {
+                // Clave de Sol
+                ctx.font = "70px Arial, sans-serif";
+                ctx.fillStyle = "#333";
+                ctx.textBaseline = "top";
+                ctx.fillText("𝄞", 35, yBase + 78);
+            } else {
+                // Clave de Fá
+                ctx.font = "50px Arial, sans-serif";
+                ctx.fillStyle = "#333";
+                ctx.textBaseline = "top";
+                ctx.fillText("𝄢", 35, yBase + 78);
+                
+                // Dois pontos da clave de Fá
+                ctx.beginPath();
+                ctx.arc(75, yBase + 100, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(75, yBase + 120, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
 
-            if (keySharps > 0) drawKeySharps(yOffset);
-            else if (keyFlats > 0) drawKeyFlats(yOffset);
+            // Armadura de clave
+            if (keySharps > 0) {
+                drawKeySharps(yBase, clef);
+            } else if (keyFlats > 0) {
+                drawKeyFlats(yBase, clef);
+            }
 
-            drawTimeSignature(110, yOffset);
+            // Fórmula de compasso
+            drawTimeSignature(110, yBase);
             
+            // Linha vertical final
             ctx.beginPath();
-            ctx.moveTo(20, 80 + yOffset);
-            ctx.lineTo(20, 160 + yOffset);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(canvas.width - 20, 80 + yOffset);
-            ctx.lineTo(canvas.width - 20, 160 + yOffset);
+            ctx.moveTo(canvas.width - 20, yBase + 80);
+            ctx.lineTo(canvas.width - 20, yBase + 160);
             ctx.stroke();
         }
 
-        function redraw() {
-            let maxChordCount = 0;
-            for (const staff of staffs) {
-                if (staff.length > maxChordCount) maxChordCount = staff.length;
+        function drawKeySharps(yOffset, clef) {
+            const positions = clef === 'treble' ? 
+                ['F5', 'C5', 'G5', 'D5', 'A4', 'E5', 'B4'] :
+                ['A3', 'E3', 'B2', 'F3', 'C3', 'G3', 'D3'];
+            const noteYMap = clef === 'treble' ? noteYTreble : noteYBass;
+            
+            for (let i = 0; i < keySharps; i++) {
+                const pitch = positions[i];
+                const x = 80 + (i * 12);
+                const y = noteYMap[pitch];
+                ctx.font = "24px Arial";
+                ctx.fillStyle = "#333";
+                ctx.fillText("♯", x, y + 8);
             }
-            let requiredWidth = CLEF_MARGIN + (maxChordCount * SPACING) + SPACING + 20;
+        }
+
+        function drawKeyFlats(yOffset, clef) {
+            const positions = clef === 'treble' ?
+                ['B4', 'E5', 'A4', 'D5', 'G4', 'C5', 'F4'] :
+                ['D3', 'G3', 'C3', 'F3', 'B2', 'E3', 'A2'];
+            const noteYMap = clef === 'treble' ? noteYTreble : noteYBass;
+            
+            for (let i = 0; i < keyFlats; i++) {
+                const pitch = positions[i];
+                const x = 80 + (i * 12);
+                const y = noteYMap[pitch];
+                ctx.font = "24px Arial";
+                ctx.fillStyle = "#333";
+                ctx.fillText("♭", x, y + 8);
+            }
+        }
+
+        function drawTimeSignature(x, yBase) {
+            ctx.font = "bold 28px Georgia, serif";
+            ctx.fillStyle = "#333";
+            ctx.textAlign = "center";
+            const centerY = yBase + 120;
+            ctx.fillText(timeSignature.top.toString(), x, centerY - 12);
+            ctx.fillText(timeSignature.bottom.toString(), x, centerY + 22);
+            ctx.textAlign = "left";
+        }
+
+        function redraw() {
+            let maxNotesCount = 0;
+            for (const grandStaff of staffs) {
+                const trebleCount = grandStaff[0].notes.length;
+                const bassCount = grandStaff[1].notes.length;
+                const maxCount = Math.max(trebleCount, bassCount);
+                if (maxCount > maxNotesCount) maxNotesCount = maxCount;
+            }
+            
+            let requiredWidth = CLEF_MARGIN + (maxNotesCount * SPACING) + SPACING + 20;
             canvas.width = Math.max(MIN_SCORE_WIDTH, requiredWidth);
 
-            const requiredHeight = staffs.length * STAFF_OFFSET;
+            const requiredHeight = staffs.length * STAFF_OFFSET + 100;
             canvas.height = requiredHeight;
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            staffs.forEach((staff, staffIndex) => {
+            staffs.forEach((grandStaff, staffIndex) => {
                 drawStaff(staffIndex);
-                const yOffset = staffIndex * STAFF_OFFSET;
-                let x = CLEF_MARGIN;
                 
-                for (const chord of staff) {
+                const yOffsetBase = staffIndex * STAFF_OFFSET;
+                
+                // Desenhar notas da clave de Sol
+                let xTreble = CLEF_MARGIN;
+                for (const chord of grandStaff[0].notes) {
                     for (const note of chord) {
                         if (note.type.startsWith('pausa-')) {
-                            drawRest(note.type, x, yOffset);
+                            drawRest(note.type, xTreble, yOffsetBase);
                         } else {
-                            const noteYPos = noteY[note.pitch] + yOffset;
-                            if (note.accidental) drawAccidental(note.accidental, x, noteYPos);
-                            drawLedgerLines(x, noteYPos, yOffset); // adicione ANTES de drawNote
-                            drawNote(note, x, noteYPos);
+                            const noteYPos = noteYTreble[note.pitch];
+                            drawLedgerLines(xTreble, noteYPos, yOffsetBase);
+                            if (note.accidental) drawAccidental(note.accidental, xTreble, noteYPos);
+                            drawNote(note, xTreble, noteYPos);
                         }
                     }
-                    x += SPACING;
+                    xTreble += SPACING;
+                }
+                
+                // Desenhar notas da clave de Fá
+                let xBass = CLEF_MARGIN;
+                for (const chord of grandStaff[1].notes) {
+                    for (const note of chord) {
+                        if (note.type.startsWith('pausa-')) {
+                            drawRest(note.type, xBass, yOffsetBase + 180);
+                        } else {
+                            const noteYPos = noteYBass[note.pitch];
+                            drawLedgerLines(xBass, noteYPos, yOffsetBase);
+                            if (note.accidental) drawAccidental(note.accidental, xBass, noteYPos);
+                            drawNote(note, xBass, noteYPos);
+                        }
+                    }
+                    xBass += SPACING;
                 }
             });
         }
 
-        // Áudio
-        function freqToNoteName(freq) {
-    const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-    const A4 = 440;
-    const C0 = A4 * Math.pow(2, -4.75);
-    const halfSteps = Math.round(12 * Math.log2(freq / C0));
-    const octave = Math.floor(halfSteps / 12);
-    const note = notes[halfSteps % 12];
-    return note + octave;
-                }
+        // Áudio com Tone.js para som de piano real
+        const piano = new Tone.Sampler({
+            urls: {
+                "A0": "A0.mp3",
+                "C1": "C1.mp3",
+                "D#1": "Ds1.mp3",
+                "F#1": "Fs1.mp3",
+                "A1": "A1.mp3",
+                "C2": "C2.mp3",
+                "D#2": "Ds2.mp3",
+                "F#2": "Fs2.mp3",
+                "A2": "A2.mp3",
+                "C3": "C3.mp3",
+                "D#3": "Ds3.mp3",
+                "F#3": "Fs3.mp3",
+                "A3": "A3.mp3",
+                "C4": "C4.mp3",
+                "D#4": "Ds4.mp3",
+                "F#4": "Fs4.mp3",
+                "A4": "A4.mp3",
+                "C5": "C5.mp3",
+                "D#5": "Ds5.mp3",
+                "F#5": "Fs5.mp3",
+                "A5": "A5.mp3",
+                "C6": "C6.mp3",
+                "D#6": "Ds6.mp3",
+                "F#6": "Fs6.mp3",
+                "A6": "A6.mp3",
+                "C7": "C7.mp3",
+                "D#7": "Ds7.mp3",
+                "F#7": "Fs7.mp3",
+                "A7": "A7.mp3",
+                "C8": "C8.mp3"
+            },
+            release: 1,
+            baseUrl: "https://tonejs.github.io/audio/salamander/"
+        }).toDestination();
+
+        // Converter frequência para nota musical
+        function freqToNoteName(freq, accidental = null) {
+            const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+            const A4 = 440;
+            const C0 = A4 * Math.pow(2, -4.75);
+            
+            let halfSteps = Math.round(12 * Math.log2(freq / C0));
+            const octave = Math.floor(halfSteps / 12);
+            let noteIndex = halfSteps % 12;
+            
+            // Ajuste para acidentes
+            if (accidental === 'sharp') {
+                // Nota já está correta
+            } else if (accidental === 'flat') {
+                // Converte bemol para sustenido equivalente
+                noteIndex = (noteIndex - 1 + 12) % 12;
+        }
+           const note = notes[noteIndex];
+            return note + octave;
+        }
+
         function playFreq(freq, duration, startTime = audioCtx.currentTime) {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-
-            osc.frequency.value = freq;
-            osc.type = "triangle";
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-
-            gain.gain.setValueAtTime(0.15, startTime);
-            gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
-
-            osc.start(startTime);
-            osc.stop(startTime + duration);
+            const note = freqToNoteName(freq);
+            const now = Tone.now();
+            const delay = Math.max(0, startTime - audioCtx.currentTime);
+            piano.triggerAttackRelease(note, duration, now + delay, 0.6);
         }
 
         async function playScore() {
             const allChords = staffs.flat();
-            
             if (allChords.length === 0) {
-                alert("Adicione notas na partitura primeiro!");
+                alert("Adicione notas primeiro!");
                 return;
             }
-
-            if (audioCtx.state === 'suspended') {
-                await audioCtx.resume();
-            }
+            if (audioCtx.state === 'suspended') await audioCtx.resume();
 
             let t = audioCtx.currentTime;
-            const beatDuration = 60 / tempo; // duração de uma semínima em segundos
+            const beatDuration = 60 / tempo;
             
             for (const chord of allChords) {
                 if (chord.length === 0) continue;
-                
                 const baseNote = chord[0];
                 
-                // Pula pausas no áudio
                 if (baseNote.type.startsWith('pausa-')) {
                     let duration = noteDurations[baseNote.type] * beatDuration;
                     if (baseNote.dot) duration *= 1.5;
@@ -884,25 +1038,16 @@ function drawLedgerLines(x, y, yOffset) {
                 
                 for (const note of chord) {
                     if (note.type.startsWith('pausa-')) continue;
-                    
                     let freq = freqs[note.pitch];
-                    
-                    if (note.accidental === 'sharp') {
-                        freq *= SHARP_FACTOR;
-                    } else if (note.accidental === 'flat') {
-                        freq *= FLAT_FACTOR;
-                    }
-                    
+                    if (note.accidental === 'sharp') freq *= SHARP_FACTOR;
+                    else if (note.accidental === 'flat') freq *= FLAT_FACTOR;
                     playFreq(freq, duration, t);
                 }
-
                 t += duration;
             }
         }
 
-        // ============================================================
-        // EXPORTAÇÃO
-        // ============================================================
+        // Exportação
         function exportToJSON() {
             const data = {
                 version: "1.0",
@@ -910,13 +1055,9 @@ function drawLedgerLines(x, y, yOffset) {
                 composer: document.getElementById('composer-input').value,
                 tempo: tempo,
                 timeSignature: timeSignature,
-                keySignature: {
-                    sharps: keySharps,
-                    flats: keyFlats
-                },
+                keySignature: { sharps: keySharps, flats: keyFlats },
                 staffs: staffs
             };
-
             const json = JSON.stringify(data, null, 2);
             const blob = new Blob([json], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -934,29 +1075,22 @@ function drawLedgerLines(x, y, yOffset) {
             let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 3.1 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
 <score-partwise version="3.1">
-  <work>
-    <work-title>${title}</work-title>
-  </work>
+  <work><work-title>${title}</work-title></work>
   <identification>
     <creator type="composer">${composer}</creator>
     <encoding>
-      <software>Editor Profissional de Partituras</software>
+      <software>Editor de Partituras</software>
       <encoding-date>${new Date().toISOString().split('T')[0]}</encoding-date>
     </encoding>
   </identification>
   <part-list>
-    <score-part id="P1">
-      <part-name>Piano</part-name>
-    </score-part>
+    <score-part id="P1"><part-name>Piano</part-name></score-part>
   </part-list>
   <part id="P1">`;
 
-            // Mapear tipos de nota para MusicXML
             const noteTypeMap = {
-                'semibreve': 'whole',
-                'minima': 'half',
-                'seminima': 'quarter',
-                'colcheia': 'eighth'
+                'semibreve': 'whole', 'minima': 'half',
+                'seminima': 'quarter', 'colcheia': 'eighth'
             };
 
             staffs.forEach((staff, staffIndex) => {
@@ -964,24 +1098,18 @@ function drawLedgerLines(x, y, yOffset) {
     <measure number="${staffIndex + 1}">
       <attributes>
         <divisions>4</divisions>
-        <key>
-          <fifths>${keySharps - keyFlats}</fifths>
-        </key>
+        <key><fifths>${keySharps - keyFlats}</fifths></key>
         <time>
           <beats>${timeSignature.top}</beats>
           <beat-type>${timeSignature.bottom}</beat-type>
         </time>
-        <clef>
-          <sign>G</sign>
-          <line>2</line>
-        </clef>
+        <clef><sign>G</sign><line>2</line></clef>
       </attributes>
       <sound tempo="${tempo}"/>`;
 
                 staff.forEach(chord => {
                     if (chord.length === 1) {
                         const note = chord[0];
-                        
                         if (note.type.startsWith('pausa-')) {
                             const restType = note.type.replace('pausa-', '');
                             xml += `
@@ -994,15 +1122,12 @@ function drawLedgerLines(x, y, yOffset) {
                         } else {
                             const pitch = note.pitch.charAt(0);
                             const octave = note.pitch.charAt(1);
-                            
                             xml += `
       <note>
         <pitch>
           <step>${pitch}</step>`;
-                            
                             if (note.accidental === 'sharp') xml += `\n          <alter>1</alter>`;
                             else if (note.accidental === 'flat') xml += `\n          <alter>-1</alter>`;
-                            
                             xml += `
           <octave>${octave}</octave>
         </pitch>
@@ -1016,23 +1141,17 @@ function drawLedgerLines(x, y, yOffset) {
                             xml += `\n      </note>`;
                         }
                     } else {
-                        // Acorde
                         chord.forEach((note, idx) => {
                             if (note.type.startsWith('pausa-')) return;
-                            
                             const pitch = note.pitch.charAt(0);
                             const octave = note.pitch.charAt(1);
-                            
-                            xml += `
-      <note>`;
+                            xml += `\n      <note>`;
                             if (idx > 0) xml += `\n        <chord/>`;
                             xml += `
         <pitch>
           <step>${pitch}</step>`;
-                            
                             if (note.accidental === 'sharp') xml += `\n          <alter>1</alter>`;
                             else if (note.accidental === 'flat') xml += `\n          <alter>-1</alter>`;
-                            
                             xml += `
           <octave>${octave}</octave>
         </pitch>
@@ -1047,14 +1166,10 @@ function drawLedgerLines(x, y, yOffset) {
                         });
                     }
                 });
-
                 xml += `\n    </measure>`;
             });
 
-            xml += `
-  </part>
-</score-partwise>`;
-
+            xml += `\n  </part>\n</score-partwise>`;
             const blob = new Blob([xml], { type: 'application/xml' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1065,21 +1180,15 @@ function drawLedgerLines(x, y, yOffset) {
         }
 
         function exportToPDF() {
-            // Captura o canvas como imagem
             const title = document.getElementById('title-input').value;
             const composer = document.getElementById('composer-input').value;
-            
-            // Cria um novo canvas para o PDF com metadados
             const pdfCanvas = document.createElement('canvas');
             pdfCanvas.width = canvas.width;
-            pdfCanvas.height = canvas.height + 100; // espaço para título
+            pdfCanvas.height = canvas.height + 100;
             const pdfCtx = pdfCanvas.getContext('2d');
             
-            // Fundo branco
             pdfCtx.fillStyle = 'white';
             pdfCtx.fillRect(0, 0, pdfCanvas.width, pdfCanvas.height);
-            
-            // Título e compositor
             pdfCtx.fillStyle = 'black';
             pdfCtx.font = 'bold 24px Arial';
             pdfCtx.textAlign = 'center';
@@ -1090,10 +1199,8 @@ function drawLedgerLines(x, y, yOffset) {
                 pdfCtx.fillText(composer, pdfCanvas.width / 2, 70);
             }
             
-            // Desenha a partitura
             pdfCtx.drawImage(canvas, 0, 100);
             
-            // Converte para imagem e baixa
             pdfCanvas.toBlob(blob => {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -1101,23 +1208,12 @@ function drawLedgerLines(x, y, yOffset) {
                 a.download = `${title.replace(/\s+/g, '_')}.png`;
                 a.click();
                 URL.revokeObjectURL(url);
-                
-                alert('Imagem exportada! Para PDF real, use um conversor online ou software de edição.');
             });
         }
 
-        // ============================================================
-        // EVENT LISTENERS
-        // ============================================================
-        
-        // Inicialização
+        // Event Listeners
         drawButtonIcons();
         redraw();
-
-        // Metadados
-        document.getElementById('title-input').addEventListener('input', (e) => {
-            redraw();
-        });
 
         document.getElementById('time-top').addEventListener('change', (e) => {
             timeSignature.top = parseInt(e.target.value);
@@ -1133,25 +1229,20 @@ function drawLedgerLines(x, y, yOffset) {
             tempo = parseInt(e.target.value);
         });
 
-        // Seleção de figuras
         document.querySelectorAll('.fig-button').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.fig-button').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
                 selectedType = btn.dataset.type;
                 useDot = btn.dataset.dot === 'true';
-                
-                // Desativa harmonia ao trocar de figura
                 isHarmonyMode = false;
                 document.getElementById('harmony-btn').classList.remove('active');
             });
         });
 
-        // Acidentes
         document.querySelectorAll('.accidental-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const accType = btn.dataset.accidental;
-                
                 if (selectedAccidental === accType) {
                     selectedAccidental = null;
                     btn.classList.remove('selected');
@@ -1163,10 +1254,9 @@ function drawLedgerLines(x, y, yOffset) {
             });
         });
 
-        // Armadura de clave
         document.getElementById('key-sharp-up').addEventListener('click', () => {
             if (keyFlats > 0) {
-                alert('Remova os bemóis antes de adicionar sustenidos');
+                alert('Remova os bemóis antes');
                 return;
             }
             if (keySharps < 7) {
@@ -1184,7 +1274,7 @@ function drawLedgerLines(x, y, yOffset) {
 
         document.getElementById('key-flat-up').addEventListener('click', () => {
             if (keySharps > 0) {
-                alert('Remova os sustenidos antes de adicionar bemóis');
+                alert('Remova os sustenidos antes');
                 return;
             }
             if (keyFlats < 7) {
@@ -1206,54 +1296,60 @@ function drawLedgerLines(x, y, yOffset) {
             redraw();
         });
 
-        // Botão Harmonia
         document.getElementById('harmony-btn').addEventListener('click', () => {
             isHarmonyMode = !isHarmonyMode;
-            const btn = document.getElementById('harmony-btn');
-            if (isHarmonyMode) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
+            document.getElementById('harmony-btn').classList.toggle('active');
         });
 
-        // Adicionar pauta
+        // Alternar entre claves
+        document.getElementById('clef-treble-btn').addEventListener('click', () => {
+            currentClef = 'treble';
+            document.getElementById('clef-treble-btn').classList.add('active');
+            document.getElementById('clef-bass-btn').classList.remove('active');
+        });
+
+        document.getElementById('clef-bass-btn').addEventListener('click', () => {
+            currentClef = 'bass';
+            document.getElementById('clef-bass-btn').classList.add('active');
+            document.getElementById('clef-treble-btn').classList.remove('active');
+        });
+
         document.getElementById('add-staff-btn').addEventListener('click', () => {
             staffs.push([{ clef: 'treble', notes: [] }, { clef: 'bass', notes: [] }]);
             currentStaffIndex = staffs.length - 1;
             redraw();
         });
 
-        // Tocar
         document.getElementById('play-btn').addEventListener('click', playScore);
 
-        // Desfazer
         document.getElementById('undo-btn').addEventListener('click', () => {
-            const targetStaff = staffs[currentStaffIndex];
-
+            const grandStaff = staffs[currentStaffIndex];
+            const clefIndex = currentClef === 'treble' ? 0 : 1;
+            const targetStaff = grandStaff[clefIndex].notes;
+            
             if (targetStaff.length > 0) {
                 const lastChord = targetStaff[targetStaff.length - 1];
-                
-                if (lastChord.length > 1) {
-                    lastChord.pop();
-                } else {
-                    targetStaff.pop();
-                }
+                if (lastChord.length > 1) lastChord.pop();
+                else targetStaff.pop();
                 redraw();
             }
         });
 
-        // Limpar
         document.getElementById('clear-btn').addEventListener('click', () => {
-            const allChords = staffs.flat();
-            if (allChords.length > 0 && confirm("Deseja limpar toda a partitura?")) {
-                staffs = [[]];
+            let hasNotes = false;
+            for (const grandStaff of staffs) {
+                if (grandStaff[0].notes.length > 0 || grandStaff[1].notes.length > 0) {
+                    hasNotes = true;
+                    break;
+                }
+            }
+            if (hasNotes && confirm("Limpar tudo?")) {
+                staffs = [[{ clef: 'treble', notes: [] }, { clef: 'bass', notes: [] }]];
                 currentStaffIndex = 0;
                 redraw();
             }
         });
 
-        // Exportar
         document.getElementById('download-btn').addEventListener('click', () => {
             document.getElementById('export-modal').classList.add('active');
         });
@@ -1277,22 +1373,33 @@ function drawLedgerLines(x, y, yOffset) {
             document.getElementById('export-modal').classList.remove('active');
         });
 
-        // Clique no canvas
         canvas.addEventListener('click', (e) => {
             const rect = canvas.getBoundingClientRect();
-            const clickY = e.clientY - rect.top;
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const clickX = (e.clientX - rect.left) * scaleX;
+            const clickY = (e.clientY - rect.top) * scaleY;
 
-            // Determina a pauta
             let targetStaffIndex = Math.floor(clickY / STAFF_OFFSET);
-            if (targetStaffIndex >= staffs.length) {
-                targetStaffIndex = staffs.length - 1;
-            }
+            if (targetStaffIndex >= staffs.length) targetStaffIndex = staffs.length - 1;
             currentStaffIndex = targetStaffIndex;
 
             const staffYOffset = targetStaffIndex * STAFF_OFFSET;
             const relativeY = clickY - staffYOffset;
+            
+            // Determinar qual clave foi clicada
+            let clickedClef = 'treble';
+            if (relativeY > 180) {
+                clickedClef = 'bass';
+                currentClef = 'bass';
+                document.getElementById('clef-bass-btn').classList.add('active');
+                document.getElementById('clef-treble-btn').classList.remove('active');
+            } else {
+                currentClef = 'treble';
+                document.getElementById('clef-treble-btn').classList.add('active');
+                document.getElementById('clef-bass-btn').classList.remove('active');
+            }
 
-            // Se for pausa, não precisa de pitch
             if (selectedType.startsWith('pausa-')) {
                 const newNote = {
                     type: selectedType,
@@ -1300,27 +1407,23 @@ function drawLedgerLines(x, y, yOffset) {
                     pitch: null,
                     accidental: null
                 };
-
-                const targetStaff = staffs[currentStaffIndex];
-
+                const clefIndex = currentClef === 'treble' ? 0 : 1;
+                const targetStaff = staffs[currentStaffIndex][clefIndex].notes;
                 if (isHarmonyMode && targetStaff.length > 0) {
-                    // No modo harmonia, não faz sentido adicionar pausa em acorde
-                    alert('Não é possível adicionar pausas em modo harmonia');
+                    alert('Pausas não podem ser adicionadas em harmonia');
                     return;
-                } else {
-                    targetStaff.push([newNote]);
                 }
-
+                targetStaff.push([newNote]);
                 redraw();
                 return;
             }
 
-            // Para notas normais, encontra o pitch
+            const noteYMap = currentClef === 'treble' ? noteYTreble : noteYBass;
             let bestPitch = null;
             let bestDist = Infinity;
-
-            for (const p in noteY) {
-                const d = Math.abs(noteY[p] - relativeY);
+            
+            for (const p in noteYMap) {
+                const d = Math.abs(noteYMap[p] - relativeY);
                 if (d < bestDist) {
                     bestDist = d;
                     bestPitch = p;
@@ -1336,31 +1439,24 @@ function drawLedgerLines(x, y, yOffset) {
                 accidental: selectedAccidental
             };
             
-            const targetStaff = staffs[currentStaffIndex];
+            const clefIndex = currentClef === 'treble' ? 0 : 1;
+            const targetStaff = staffs[currentStaffIndex][clefIndex].notes;
 
             if (isHarmonyMode && targetStaff.length > 0) {
                 const lastChord = targetStaff[targetStaff.length - 1];
-                
-                // Verifica se a nota já existe
                 const isPitchPresent = lastChord.some(note =>
                     note.pitch === bestPitch && note.accidental === selectedAccidental
                 );
-                
-                if (!isPitchPresent) {
-                    lastChord.push(newNote);
-                }
+                if (!isPitchPresent) lastChord.push(newNote);
             } else {
                 targetStaff.push([newNote]);
             }
 
-            // Limpa seleção de acidente
             selectedAccidental = null;
             document.querySelectorAll('.accidental-btn').forEach(b => b.classList.remove('selected'));
-
             redraw();
         });
 
-        // Fechar modal ao clicar fora
         document.getElementById('export-modal').addEventListener('click', (e) => {
             if (e.target.id === 'export-modal') {
                 e.target.classList.remove('active');
@@ -1368,4 +1464,4 @@ function drawLedgerLines(x, y, yOffset) {
         });
     </script>
 </body>
-</html>
+</html> 
