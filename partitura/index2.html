@@ -482,16 +482,18 @@
         const STAFF_OFFSET = 250;
 
         const noteY = {
-            "B5": 40, "A5": 50, "G5": 60, "F5": 70, "E5": 80,
-            "D5": 90, "C5": 100, "B4": 110, "A4": 120, "G4": 130,
-            "F4": 140, "E4": 150, "D4": 160, "C4": 170
-        };
+    "C6": 20, "B5": 30, "A5": 40, "G5": 50, "F5": 60, "E5": 70,
+    "D5": 80, "C5": 90, "B4": 100, "A4": 110, "G4": 120,
+    "F4": 130, "E4": 140, "D4": 150, "C4": 160, "B3": 170,
+    "A3": 180, "G3": 190, "F3": 200, "E3": 210
+};
 
-        const freqs = {
-            "C4": 261.63, "D4": 293.66, "E4": 329.63, "F4": 349.23, "G4": 392.00,
-            "A4": 440.00, "B4": 493.88, "C5": 523.25, "D5": 587.33, "E5": 659.25,
-            "F5": 698.46, "G5": 783.99, "A5": 880.00, "B5": 987.77
-        };
+const freqs = {
+    "E3": 164.81, "F3": 174.61, "G3": 196.00, "A3": 220.00, "B3": 246.94,
+    "C4": 261.63, "D4": 293.66, "E4": 329.63, "F4": 349.23, "G4": 392.00,
+    "A4": 440.00, "B4": 493.88, "C5": 523.25, "D5": 587.33, "E5": 659.25,
+    "F5": 698.46, "G5": 783.99, "A5": 880.00, "B5": 987.77, "C6": 1046.50
+};
 
         const noteDurations = {
             "semibreve": 2.0, "minima": 1.0, "seminima": 0.5, "colcheia": 0.25,
@@ -579,6 +581,7 @@
                 drawStem(c, 0, 0, 1);
                 drawDot(c, 0, 0, 1);
             }
+            
 
             const colcheiaDot = document.querySelector('[data-type="colcheia"][data-dot="true"] canvas');
             if (colcheiaDot) {
@@ -675,7 +678,32 @@
             ctx.fillText(symbol, x, y - (noteY['G4'] - yOffset));
             ctx.textAlign = "left";
         }
-
+        
+function drawLedgerLines(x, y, yOffset) {
+    const topStaffLine = 80 + yOffset;
+    if (y < topStaffLine) {
+        ctx.strokeStyle = "#333";
+        ctx.lineWidth = 1.5;
+        for (let lineY = topStaffLine - 20; lineY >= y - 5; lineY -= 20) {
+            ctx.beginPath();
+            ctx.moveTo(x - 15, lineY);
+            ctx.lineTo(x + 15, lineY);
+            ctx.stroke();
+        }
+    }
+    
+    const bottomStaffLine = 160 + yOffset;
+    if (y > bottomStaffLine) {
+        ctx.strokeStyle = "#333";
+        ctx.lineWidth = 1.5;
+        for (let lineY = bottomStaffLine + 20; lineY <= y + 5; lineY += 20) {
+            ctx.beginPath();
+            ctx.moveTo(x - 15, lineY);
+            ctx.lineTo(x + 15, lineY);
+            ctx.stroke();
+        }
+    }
+}
         function drawNote(note, x, y) {
             if (note.type.startsWith('pausa-')) {
                 drawRest(note.type, x, y);
@@ -779,6 +807,7 @@
                         } else {
                             const noteYPos = noteY[note.pitch] + yOffset;
                             if (note.accidental) drawAccidental(note.accidental, x, noteYPos);
+                            drawLedgerLines(x, noteYPos, yOffset); // adicione ANTES de drawNote
                             drawNote(note, x, noteYPos);
                         }
                     }
