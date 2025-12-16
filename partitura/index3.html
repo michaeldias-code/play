@@ -494,11 +494,11 @@
 
         // Notas para Clave de Sol
         const noteYTreble = {
-            "C6": 20, "B5": 30, "A5": 40, "G5": 50, "F5": 60, "E5": 70,
-            "D5": 80, "C5": 90, "B4": 100, "A4": 110, "G4": 120,
-            "F4": 130, "E4": 140, "D4": 150, "C4": 160, "B3": 170,
-            "A3": 180, "G3": 190, "F3": 200, "E3": 210
-        };
+    "C6": 20, "B5": 30, "A5": 40, "G5": 50, "F5": 60, "E5": 70,
+    "D5": 80, "C5": 90, "B4": 100, "A4": 110, "G4": 120,
+    "F4": 130, "E4": 140, "D4": 150, "C4": 160, "B3": 170,
+    "A3": 180, "G3": 190
+};
         // Notas para Clave de Fá
         const noteYBass = {
             "A3": 220, "G3": 230, "F3": 240, "E3": 250, "D3": 260,
@@ -700,8 +700,9 @@
             ctx.textAlign = "left";
         }
 
-        function drawLedgerLines(x, y, yOffset) {
+        function drawLedgerLines(x, y, yOffset, clef) {
             // Linhas suplementares superiores (acima da pauta)
+            if (clef === 'treble') {
             const topStaffLine = 80 + yOffset; // Primeira linha da pauta
             if (y < topStaffLine) {
                 ctx.strokeStyle = "#333";
@@ -714,20 +715,22 @@
                     ctx.stroke();
                 }
             }
-            
+            }else{
             // Linhas suplementares inferiores (abaixo da pauta)
-            const bottomStaffLine = 160 + yOffset; // Quinta linha da pauta
+            const bottomStaffLine = 260 + yOffset; // Quinta linha da pauta
             if (y > bottomStaffLine) {
                 ctx.strokeStyle = "#333";
                 ctx.lineWidth = 1.5;
                 // Desenha linhas suplementares de 20 em 20 pixels
-                for (let lineY = bottomStaffLine + 20; lineY <= y + 5; lineY += 20) {
+                for (let lineY = bottomStaffLine 
+                    + 20; lineY <= y + 5; lineY += 20) {
                     ctx.beginPath();
                     ctx.moveTo(x - 15, lineY);
                     ctx.lineTo(x + 15, lineY);
                     ctx.stroke();
                 }
             }
+        }
         }
 
         function drawNote(note, x, y) {
@@ -919,7 +922,9 @@
                             drawRest(note.type, xTreble, yOffsetBase);
                         } else {
                             const noteYPos = noteYTreble[note.pitch];
-                            drawLedgerLines(xTreble, noteYPos, yOffsetBase);
+                            
+                            drawLedgerLines(xTreble, noteYPos, yOffsetBase, 'treble');
+drawLedgerLines(xBass, noteYPos, yOffsetBase, 'bass');
                             if (note.accidental) drawAccidental(note.accidental, xTreble, noteYPos);
                             drawNote(note, xTreble, noteYPos);
                         }
@@ -947,41 +952,24 @@
 
         // Áudio com Tone.js para som de piano real
         const piano = new Tone.Sampler({
-            urls: {
-                "A0": "A0.mp3",
-                "C1": "C1.mp3",
-                "D#1": "Ds1.mp3",
-                "F#1": "Fs1.mp3",
-                "A1": "A1.mp3",
-                "C2": "C2.mp3",
-                "D#2": "Ds2.mp3",
-                "F#2": "Fs2.mp3",
-                "A2": "A2.mp3",
-                "C3": "C3.mp3",
-                "D#3": "Ds3.mp3",
-                "F#3": "Fs3.mp3",
-                "A3": "A3.mp3",
-                "C4": "C4.mp3",
-                "D#4": "Ds4.mp3",
-                "F#4": "Fs4.mp3",
-                "A4": "A4.mp3",
-                "C5": "C5.mp3",
-                "D#5": "Ds5.mp3",
-                "F#5": "Fs5.mp3",
-                "A5": "A5.mp3",
-                "C6": "C6.mp3",
-                "D#6": "Ds6.mp3",
-                "F#6": "Fs6.mp3",
-                "A6": "A6.mp3",
-                "C7": "C7.mp3",
-                "D#7": "Ds7.mp3",
-                "F#7": "Fs7.mp3",
-                "A7": "A7.mp3",
-                "C8": "C8.mp3"
-            },
-            release: 1,
-            baseUrl: "https://tonejs.github.io/audio/salamander/"
-        }).toDestination();
+            let piano = null;
+
+async function initPiano() {
+    if (piano) return;
+    
+    piano = new Tone.Sampler({
+        urls: {
+            "C4": "C4.mp3",
+            "D#4": "Ds4.mp3",
+            "F#4": "Fs4.mp3",
+            "A4": "A4.mp3",
+        },
+        release: 1,
+        baseUrl: "https://tonejs.github.io/audio/salamander/"
+    }).toDestination();
+    
+    await Tone.loaded();
+}}).toDestination();
 
         // Converter frequência para nota musical
         function freqToNoteName(freq, accidental = null) {
@@ -1004,14 +992,16 @@
             return note + octave;
         }
 
-        function playFreq(freq, duration, startTime = audioCtx.currentTime) {
-            const note = freqToNoteName(freq);
-            const now = Tone.now();
-            const delay = Math.max(0, startTime - audioCtx.currentTime);
-            piano.triggerAttackRelease(note, duration, now + delay, 0.6);
-        }
-
+        async function playFreq(freq, duration, startTime = 0) {
+    await initPiano();
+    const note = freqToNoteName(freq);
+    const now = Tone.now();
+    piano.triggerAttackRelease(note, duration, now + startTime, 0.6);
+}
         async function playScore() {
+            await initPiano();
+    await Tone.start();
+    
             const allChords = staffs.flat();
             if (allChords.length === 0) {
                 alert("Adicione notas primeiro!");
@@ -1019,7 +1009,7 @@
             }
             if (audioCtx.state === 'suspended') await audioCtx.resume();
 
-            let t = audioCtx.currentTime;
+            let t = 0;
             const beatDuration = 60 / tempo;
             
             for (const chord of allChords) {
