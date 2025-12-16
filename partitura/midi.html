@@ -134,8 +134,11 @@
              * Define o conteúdo musical, gera o arquivo e cria o link de download manual.
              */
             generateAndDownload(filename = 'composicao_profissional.mid') {
+                        /**
+             * Define o conteúdo musical, gera o arquivo e cria o link de download manual.
+             */
+            generateAndDownload(filename = 'composicao_profissional.mid') {
                 
-                // 1. INICIALIZAÇÃO ROBUSTA NO MOMENTO DA EXECUÇÃO
                 if (typeof MidiWriter === 'undefined') {
                     document.getElementById('status-message').textContent = "ERRO CRÍTICO: O motor MIDI não está disponível.";
                     document.getElementById('midi-button').disabled = true;
@@ -144,48 +147,75 @@
                 
                 this.Writer = new MidiWriter.Writer(); 
                 
-                // Feedback de processamento
                 document.getElementById('status-message').textContent = 'Gerando dados MIDI...';
-                document.getElementById('status-message').style.color = '#3498db';
+                document.getElementById('status-message').style.color = '#3498db'; // Azul
 
+                try {
+                    // --- 1. Definição da Composição (Mantida) ---
+                    const pianoEvents = [
+                        { pitch: 'C4', duration: '8', velocity: 110 },
+                        { pitch: 'E4', duration: '8', velocity: 110 },
+                        { pitch: 'G4', duration: '8', velocity: 110 },
+                        { pitch: 'C5', duration: '8', velocity: 110 },
+                        { pitch: ['C4', 'E4', 'G4'], duration: '2', velocity: 100 },
+                        { pitch: 'F4', duration: '4', velocity: 95 },
+                        { pitch: ['F4', 'A4', 'C5'], duration: '2', velocity: 120 }
+                    ];
+                    this.addTrack(1, pianoEvents); 
 
-                // --- 2. Definição da Composição ---
-                const pianoEvents = [
-                    { pitch: 'C4', duration: '8', velocity: 110 },
-                    { pitch: 'E4', duration: '8', velocity: 110 },
-                    { pitch: 'G4', duration: '8', velocity: 110 },
-                    { pitch: 'C5', duration: '8', velocity: 110 },
-                    { pitch: ['C4', 'E4', 'G4'], duration: '2', velocity: 100 },
-                    { pitch: 'F4', duration: '4', velocity: 95 },
-                    { pitch: ['F4', 'A4', 'C5'], duration: '2', velocity: 120 }
-                ];
-                this.addTrack(1, pianoEvents); 
+                    const bassEvents = [
+                        { pitch: 'C2', duration: '2', velocity: 80 }, 
+                        { pitch: 'G2', duration: '2', velocity: 80 }, 
+                        { pitch: 'F2', duration: '2', velocity: 80 }, 
+                        { pitch: 'C2', duration: '1', velocity: 90 }
+                    ];
+                    this.addTrack(33, bassEvents); 
 
-                const bassEvents = [
-                    { pitch: 'C2', duration: '2', velocity: 80 }, 
-                    { pitch: 'G2', duration: '2', velocity: 80 }, 
-                    { pitch: 'F2', duration: '2', velocity: 80 }, 
-                    { pitch: 'C2', duration: '1', velocity: 90 }
-                ];
-                this.addTrack(33, bassEvents); 
+                    // --- 2. Geração da URI e Criação do Link ---
 
-                // --- 3. Criação do Link de Download (Método Manual Forçado) ---
+                    const dataUri = this.Writer.dataUri();
+                    
+                    const link = document.createElement('a');
+                    link.href = dataUri; 
+                    link.download = filename; 
+                    link.textContent = `DOWNLOAD: Toque e Segure aqui para salvar o arquivo ${filename}`;
+                    link.classList.add('download-link-manual'); // Anexa a classe CSS
+                    
+                    const container = document.querySelector('.container');
+                    
+                    // Garante que o container existe
+                    if (!container) throw new Error("Container principal não encontrado.");
+                    
+                    // Remove o link anterior, se existir
+                    const existingLink = container.querySelector('.download-link-manual');
+                    if (existingLink) {
+                        container.removeChild(existingLink);
+                    }
+                    
+                    // Anexa o novo link
+                    container.appendChild(link);
+                    
+                    // --- 3. Atualização de Status de SUCESSO ---
+                    
+                    const button = document.getElementById('midi-button');
+                    button.textContent = 'Arquivo Gerado com Sucesso!';
+                    button.disabled = true;
+                    
+                    document.getElementById('status-message').textContent = 'Link de Download criado abaixo.';
+                    document.getElementById('status-message').style.color = '#27ae60'; // Verde (Sucesso)
 
-                const dataUri = this.Writer.dataUri();
-                
-                const link = document.createElement('a');
-                link.href = dataUri; 
-                link.download = filename; 
-                link.textContent = `DOWNLOAD: Toque e Segure aqui para salvar o arquivo ${filename}`;
-                link.classList.add('download-link-manual');
-                
-                const container = document.querySelector('.container');
-                
-                // Remove o link anterior, se existir
-                const existingLink = container.querySelector('.download-link-manual');
-                if (existingLink) {
-                    container.removeChild(existingLink);
+                } catch (e) {
+                    // Se a geração ou a manipulação do DOM falhar
+                    const button = document.getElementById('midi-button');
+                    button.textContent = 'Erro ao Gerar (Tente Novamente)';
+                    button.disabled = false;
+
+                    document.getElementById('status-message').textContent = 
+                        `ERRO INTERNO: Falha na Geração ou Download. Mensagem: ${e.message}`;
+                    document.getElementById('status-message').style.color = '#e74c3c'; // Vermelho (Erro)
                 }
+            }
+
                 
                 // Anexa o novo link
                 container.appendChild(link);
