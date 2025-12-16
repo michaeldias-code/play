@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Editor Profissional de Partituras</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         * {
             margin: 0;
@@ -474,7 +475,16 @@
         const canvas = document.getElementById("score");
         const ctx = canvas.getContext("2d");
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
+const piano = new Tone.Sampler({
+    urls: {
+        "C4": "C4.mp3",
+        "D#4": "Ds4.mp3",
+        "F#4": "Fs4.mp3",
+        "A4": "A4.mp3",
+    },
+    release: 1,
+    baseUrl: "https://tonejs.github.io/audio/salamander/"
+}).toDestination();
         // Constantes
         const SPACING = 50;
         const MIN_SCORE_WIDTH = 900;
@@ -817,18 +827,22 @@ function drawLedgerLines(x, y, yOffset) {
         }
 
         // Áudio
-        function playFreq(freq, duration, startTime = audioCtx.currentTime) {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.frequency.value = freq;
-            osc.type = "triangle";
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            gain.gain.setValueAtTime(0.15, startTime);
-            gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
-            osc.start(startTime);
-            osc.stop(startTime + duration);
-        }
+        function freqToNoteName(freq) {
+    const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    const A4 = 440;
+    const C0 = A4 * Math.pow(2, -4.75);
+    const halfSteps = Math.round(12 * Math.log2(freq / C0));
+    const octave = Math.floor(halfSteps / 12);
+    const note = notes[halfSteps % 12];
+    return note + octave;
+}
+
+function playFreq(freq, duration, startTime = audioCtx.currentTime) {
+    const note = freqToNoteName(freq);
+    const now = Tone.now();
+    const delay = Math.max(0, startTime - audioCtx.currentTime);
+    piano.triggerAttackRelease(note, duration, now + delay, 0.6);
+}
 
         async function playScore() {
             const allChords = staffs.flat();
