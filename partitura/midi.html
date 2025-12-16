@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador MIDI Profissional - Versão Autônoma</title>
+    <title>Gerador MIDI Profissional - Versão Final</title>
     <style>
         /* CSS para estilizar e garantir boa visualização no celular */
         body { 
@@ -39,11 +39,14 @@
             cursor: pointer; 
             font-size: 1.1rem; 
             margin-top: 20px; 
-            transition: background-color 0.3s, transform 0.1s; 
+            transition: background-color 0.3s; 
             font-weight: bold;
         }
-        button:hover { background-color: #2980b9; }
-        button:active { transform: scale(0.98); }
+        button:hover:not(:disabled) { background-color: #2980b9; }
+        button:disabled { 
+            background-color: #bdc3c7; 
+            cursor: not-allowed; 
+        }
         .code-snippet { 
             background-color: #ecf0f1; 
             padding: 10px; 
@@ -53,14 +56,33 @@
             overflow-x: auto;
             text-align: left;
         }
+        /* Estilo do link de download forçado */
+        .download-link-manual {
+            display: block;
+            margin-top: 25px !important;
+            padding: 12px;
+            background-color: #2ecc71; /* Verde */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .download-link-manual:hover {
+            background-color: #27ae60;
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h1>Gerador MIDI Profissional</h1>
-        <p>Clique abaixo para gerar e baixar um arquivo MIDI (`.mid`) com duas pistas independentes (Piano e Baixo), configurado por uma classe JS.</p>
-        <button onclick="new MidiGenerator().generateAndDownload()">Gerar e Baixar Composição MIDI</button>
+        <p>Clique abaixo para gerar a composição. Um link de download aparecerá em seguida.</p>
+        <button id="midi-button" onclick="new MidiGenerator().generateAndDownload()">Gerar Composição</button>
+        
+        <div id="status-message" style="margin-top: 15px; color: #e74c3c;"></div>
         
         <h2>Estrutura da Música:</h2>
         <div class="code-snippet">
@@ -78,52 +100,40 @@
      * Copyright 2017-2018, Grant Hughes.
      * Licensed under the MIT License.
      */
-    // --- TODO O CÓDIGO DA BIBLIOTECA FOI INSERIDO AQUI ---
-    // (Este é o código gigante que o navegador teria que baixar. Ele garante que tudo funcione offline.)
-    
-    // START MidiWriterJS Minified Code v2.1.4
-    // Aviso: Este é o código minificado da biblioteca. Ele é longo, mas necessário!
+    // --- CÓDIGO MINIFICADO DA BIBLIOTECA MIDIWRITERJS v2.1.4 ---
     var MidiWriter=function(){function t(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}var e=function(){function e(r,n){t(this,e);for(var i=0;i<r.length;i++)this[i]=r[i];this.length=r.length;this.fileType=n}return e.prototype.slice=function(t,e){return new this.constructor(Array.prototype.slice.call(this,t,e),this.fileType)},e.prototype.concat=function(t){return new this.constructor(Array.prototype.concat.call(this,t),this.fileType)},e.prototype.toUint8Array=function(){var t=new Uint8Array(this.length);for(var e=0;e<this.length;e++)t[e]=this[e];return t},e}();function r(t,r){return new e(t,r)}function n(t,e){for(var r=t.length;r<e;r++)t.push(0);return t}function i(t){var e=[],r=t;do{e.unshift(127&r),r>>=7}while(r>0);for(var n=0;n<e.length-1;n++)e[n]|=128;return e}function s(t){var e=[];t=Math.round(t);do{e.unshift(255&t),t>>=8}while(t>0);return e}function a(t){var e=[];t=Math.round(t);do{e.unshift(127&t),t>>=7}while(t>0);for(var r=0;r<e.length-1;r++)e[r]|=128;return e}function o(t){for(var e=[],r=t.length,n=0;n<r;n++)e.push(t.charCodeAt(n));return e}function c(t){return(t=(t=t.replace(/(\W+)$/g,"")).replace(/[^A-Za-z0-9]/g,"")).length>8&&t.length<=12?t.length:8}function l(t,e,r){var n=[].concat(o(t)).concat(s(e)).concat(r);return n(n,4),n}function u(t){var e=t.length.toString(16);return e.length%2==1&&(e="0"+e),r(s(e),!1)}var h=function(){function e(r){t(this,e),this.type=r,this.data=[],this.dataString=r}return e.prototype.setTempo=function(t){t=Math.round(6e4/t);var e=[77,84,109,112,111,0,3,247,15,t>>16,255&t>>8,255&t];this.data.push(e)},e.prototype.addEvent=function(t){this.data.push(t.data)},e.prototype.setInstrument=function(t){var e=[255,10,t];this.data.push(e)},e.prototype.setTimeSignature=function(t,e,r){var n=[255,88,4,t,e,r||36,128];this.data.push(n)},e.prototype.dataUri=function(){var t=[],e=this.data.length;for(var r=0;r<e;r++){var n=this.data[r].length;for(var i=0;i<n;i++)t.push(this.data[r][i])}return this.dataString=this.type,this.data=t,this},e}(),d=function(){function e(r){t(this,e),this.headerType=r,this.tracks=[]}return e.prototype.addTrack=function(t){t.dataUri(),this.tracks.push(t.data)},e.prototype.dataUri=function(){var t=[],e=this.tracks.length;for(var r=0;r<e;r++)t.push(this.tracks[r]);var n=this.tracks.length;for(var i=0;i<n;i++)t[i]=r([].concat(o("MTrk")).concat(s(t[i].length)).concat(t[i]),!1);var a=r([77,84,104,100,0,0,0,6,0,this.headerType,n>>8,255&n,1>>8,255&1],!1);for(var u=0;u<n;u++)a.push(t[u]);return a.dataUri()},e}(),f=function(){function e(r){t(this,e),this.writer=r,this.tracks=[]}return e.prototype.addTrack=function(t){this.tracks.push(t.data)},e.prototype.dataUri=function(){var t=[],e=this.tracks.length;for(var r=0;r<e;r++)t.push(this.tracks[r]);var n=this.tracks.length;for(var i=0;i<n;i++)t[i]=r([].concat(o("MTrk")).concat(s(t[i].length)).concat(t[i]),!1);var a=r([77,84,104,100,0,0,0,6,0,this.writer.headerType,n>>8,255&n,1>>8,255&1],!1);for(var u=0;u<n;u++)a.push(t[u]);return a.dataUri()},e}(),p=function(){function e(r){t(this,e),this.tempo=r}return e.prototype.dataUri=function(){var t=[255,81,3,this.tempo>>16,this.tempo>>8&255,255&this.tempo];return this.data=t,this},e}(),v=function(){function e(r){t(this,e),this.timeSignature=r}return e.prototype.dataUri=function(){var t=[255,88,4,this.timeSignature[0],this.timeSignature[1],this.timeSignature[2]||36,this.timeSignature[3]||128];return this.data=t,this},e}(),m=function(){function e(r){t(this,e),this.instrument=r}return e.prototype.dataUri=function(){var t=[192,this.instrument];return this.data=t,this},e}(),g=function(){function e(r){t(this,e),this.copyright=r}return e.prototype.dataUri=function(){var t=o(this.copyright);t=[255,1,t.length].concat(t);return this.data=t,this},e}(),y=function(){function e(r){t(this,e),this.text=r}return e.prototype.dataUri=function(){var t=o(this.text);t=[255,5,t.length].concat(t);return this.data=t,this},e}(),k=function(){function e(r){t(this,e),this.lyrics=r}return e.prototype.dataUri=function(){var t=o(this.lyrics);t=[255,5,t.length].concat(t);return this.data=t,this},e}(),w=function(){function e(r){t(this,e),this.marker=r}return e.prototype.dataUri=function(){var t=o(this.marker);t=[255,6,t.length].concat(t);return this.data=t,this},e}(),b=function(){function e(r){t(this,e),this.cue=r}return e.prototype.dataUri=function(){var t=o(this.cue);t=[255,7,t.length].concat(t);return this.data=t,this},e}(),E=function(){function e(r){t(this,e),this.trackName=r}return e.prototype.dataUri=function(){var t=o(this.trackName);t=[255,3,t.length].concat(t);return this.data=t,this},e}(),C=function(){function e(r){t(this,e),this.data=r}return e.prototype.dataUri=function(){return this.data},e}(),S=function(){function e(r){t(this,e),this.trackNumber=r}return e.prototype.dataUri=function(){var t=this.trackNumber>>8,e=255&this.trackNumber,r=[255,3,2,t,e];return this.data=r,this},e}(),_={C4:60,Db4:61,D4:62,Eb4:63,E4:64,F4:65,Gb4:66,G4:67,Ab4:68,A4:69,Bb4:70,B4:71,C5:72},T=function(){function e(r){t(this,e),this.pitch=r.pitch||_["C4"],this.duration=r.duration||"4",this.velocity=r.velocity||127,this.wait=r.wait||0}return e.prototype.dataUri=function(){this.wait=a(this.wait);var t=Array.isArray(this.pitch)?this.pitch:new Array(this.pitch);this.pitch=t;var e=this.duration;this.duration=256/e;var r=[];for(var n=0;n<t.length;n++)r.push(144,t[n],this.velocity);var s=i(this.duration);for(var n=0;n<t.length;n++)r.push(128,t[n],this.velocity);return this.data=r,this},e}(),D=function(){function e(r){t(this,e),this.pitch=r.pitch||_["C4"],this.duration=r.duration||"4",this.velocity=r.velocity||127,this.wait=r.wait||0}return e.prototype.dataUri=function(){this.wait=a(this.wait);var t=Array.isArray(this.pitch)?this.pitch:new Array(this.pitch);this.pitch=t;var e=this.duration;this.duration=256/e;var r=[];for(var n=0;n<t.length;n++)r.push(144,t[n],this.velocity);var s=i(this.duration);for(var n=0;n<t.length;n++)r.push(128,t[n],this.velocity);return this.data=r,this},e}();return{Writer:d,Track:h,BufferWriter:f,NoteEvent:T,NoteOnEvent:D,ProgramChangeEvent:m,TempoEvent:p,TimeSignatureEvent:v,CopyrightEvent:g,TextEvent:y,LyricEvent:k,MarkerEvent:w,CuePointEvent:b,TrackNameEvent:E,RawEvent:C,SequenceNumber:S,Utils:{numberToVariableLength:i,numberToVariableLength:a,stringToBytes:o,numberToVariableLength:i,numberToBytes:s,bytesToNumber:function(t){for(var e=0,r=t.length,n=0;n<r;n++)e+=t[n]<<8*(r-1-n);return e},getMidiChord:function(t){for(var e=[],r=0;r<t.length;r++)e.push(_[t[r]]);return e},getNotes:function(){return _},getNoteByNumber:function(t){return Object.keys(_).find(function(e){return _[e]===t})},toVariableLength:a,stringToVariableLength:function(t){var e=o(t);return [e.length].concat(e)},numberToBytes:s,stringToBytes:o,numberToVariableLength:i,getNotes:function(){return _}}}}();
-    // END MidiWriterJS Minified Code
     </script>
 
 
     <script>
         /**
          * Classe que encapsula a lógica de composição e exportação MIDI.
-         * Garante controle profissional sobre pistas, instrumentos e eventos.
          */
         class MidiGenerator {
             constructor() {
-                // Checagem garantida, pois a biblioteca foi carregada no bloco anterior
+                // Checagem de condição (feedback visual)
                 if (typeof MidiWriter === 'undefined') {
-                    console.error("MidiWriterJS não está disponível.");
-                    return;
+                    document.getElementById('status-message').textContent = 
+                        "ERRO CRÍTICO: O motor de codificação MIDI não foi carregado. O botão não funcionará.";
+                    document.getElementById('midi-button').disabled = true;
+                    // Retorna nulo para impedir a execução do resto do código
+                    return null; 
                 }
                 this.Writer = new MidiWriter.Writer();
-                this.tempo = 120; // BPM (Batidas por Minuto) padrão
+                this.tempo = 120; // BPM
             }
 
-            /**
-             * Adiciona uma nova pista (instrumento) ao arquivo MIDI.
-             * @param {number} instrumentCode - Código GM (General MIDI, ex: 1=Piano, 33=Baixo Acústico).
-             * @param {Array<object>} events - Array de objetos de notas ({ pitch, duration, velocity }).
-             */
             addTrack(instrumentCode, events) {
                 const track = new MidiWriter.Track();
-                
-                // 1. Configurações da Pista
                 track.setTempo(this.tempo);
                 track.addEvent(new MidiWriter.ProgramChangeEvent({ instrument: instrumentCode }));
 
-                // 2. Adiciona os Eventos de Notas
                 events.forEach(event => {
-                    // NoteEvent lida com notas únicas ou acordes (arrays de pitch)
                     track.addEvent(
                         new MidiWriter.NoteEvent({
                             pitch: event.pitch,
                             duration: event.duration,
-                            velocity: event.velocity || 100 // Volume/Força da tecla (0-127)
+                            velocity: event.velocity || 100
                         })
                     );
                 });
@@ -132,60 +142,76 @@
             }
 
             /**
-             * Define o conteúdo musical e exporta o arquivo.
-             * @param {string} filename - Nome do arquivo a ser baixado.
+             * Define o conteúdo musical, gera o arquivo e cria o link de download manual.
              */
             generateAndDownload(filename = 'composicao_profissional.mid') {
-                if (!this.Writer) return;
+                if (!this.Writer) return; // Se a classe não foi inicializada corretamente (erro de condição), sai.
+
+                // Limpa a mensagem de status anterior
+                document.getElementById('status-message').textContent = '';
 
                 // --- 1. Definição da Composição ---
-
-                // PISTA 1: Melodia de Piano (Instrumento 1)
                 const pianoEvents = [
-                    // Arpejo de Dó
                     { pitch: 'C4', duration: '8', velocity: 110 },
                     { pitch: 'E4', duration: '8', velocity: 110 },
                     { pitch: 'G4', duration: '8', velocity: 110 },
                     { pitch: 'C5', duration: '8', velocity: 110 },
-
-                    // Acorde de Dó maior longo
                     { pitch: ['C4', 'E4', 'G4'], duration: '2', velocity: 100 },
-                    
-                    // Nota de transição
                     { pitch: 'F4', duration: '4', velocity: 95 },
-                    
-                    // Acorde final (Fá maior)
                     { pitch: ['F4', 'A4', 'C5'], duration: '2', velocity: 120 }
                 ];
                 this.addTrack(1, pianoEvents); 
 
-                // PISTA 2: Linha de Baixo Sólida (Instrumento 33)
                 const bassEvents = [
-                    // Notas longas (mínimas)
                     { pitch: 'C2', duration: '2', velocity: 80 }, 
                     { pitch: 'G2', duration: '2', velocity: 80 }, 
                     { pitch: 'F2', duration: '2', velocity: 80 }, 
-                    { pitch: 'C2', duration: '1', velocity: 90 } // Semibreve (duração 1)
+                    { pitch: 'C2', duration: '1', velocity: 90 }
                 ];
                 this.addTrack(33, bassEvents); 
 
-                // --- 2. Exportação do Arquivo Binário ---
+                // --- 2. Criação do Link de Download (Método Manual) ---
 
                 const dataUri = this.Writer.dataUri();
                 
-                // Cria link temporário para download (o passo que estava sendo bloqueado)
                 const link = document.createElement('a');
                 link.href = dataUri; 
                 link.download = filename; 
+                link.textContent = `Toque e Segure (ou Botão Direito) para baixar: ${filename}`;
+                link.classList.add('download-link-manual');
                 
-                // Dispara o download
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                const container = document.querySelector('.container');
                 
-                console.log(`Arquivo MIDI "${filename}" gerado com ${this.Writer.tracks.length} pistas.`);
+                // Remove o link anterior, se existir
+                const existingLink = container.querySelector('.download-link-manual');
+                if (existingLink) {
+                    container.removeChild(existingLink);
+                }
+                
+                // Anexa o novo link
+                container.appendChild(link);
+                
+                // Desabilita o botão original
+                const button = document.getElementById('midi-button');
+                if (button) {
+                     button.textContent = 'Arquivo Gerado';
+                     button.disabled = true;
+                }
             }
         }
+
+        // Checagem de feedback inicial ao carregar a página
+        window.onload = function() {
+            if (typeof MidiWriter === 'undefined') {
+                document.getElementById('status-message').textContent = 
+                    "ERRO: Não foi possível iniciar o motor MIDI. Verifique o código-fonte.";
+                document.getElementById('midi-button').disabled = true;
+            } else {
+                document.getElementById('status-message').textContent = 
+                    "Motor MIDI OK. Clique em 'Gerar Composição'.";
+                document.getElementById('status-message').style.color = '#27ae60'; /* Verde */
+            }
+        };
     </script>
 </body>
 </html>
