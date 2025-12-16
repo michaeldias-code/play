@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador MIDI com JavaScript</title>
+</head>
+<body>
+
+    <h1>Gerador MIDI Simples</h1>
+    <p>Clique no botão para gerar e baixar um arquivo MIDI com uma escala simples de C maior.</p>
+    
+    <script src="https://cdn.jsdelivr.net/npm/midi-writer-js@2.1.4/build/midi-writer-js.min.js"></script>
+    
+    <button onclick="generateAndDownloadMidi()">Gerar e Baixar MIDI</button>
+
+    <script>
+        // --- FUNÇÃO PRINCIPAL ---
+
+        function generateAndDownloadMidi() {
+            // 1. Definição da Sequência e Pista (Track)
+            const Writer = new MidiWriter.Writer();
+            
+            // Cria uma nova pista (Track)
+            const track = new MidiWriter.Track();
+
+            // Configura o instrumento (General MIDI Instrument Map)
+            // Exemplo: 1 é Piano Acústico
+            track.addEvent(new MidiWriter.ProgramChangeEvent({ instrument: 1 }));
+            
+            // Configura o andamento (Tempo)
+            track.setTempo(120); // 120 batidas por minuto (BPM)
+
+            // --- 2. Criação dos Eventos de Notas ---
+
+            // Array de notas MIDI (C4, D4, E4, F4, G4, A4, B4, C5)
+            // Notação do MidiWriter: 
+            // 'C4' = Dó na quarta oitava.
+            // '4' = Duração da nota (semínima)
+            
+            const cMajorScale = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'];
+
+            // Adiciona as notas com duração de semínima (4)
+            track.addEvent(
+                new MidiWriter.NoteEvent({ 
+                    pitch: cMajorScale, 
+                    duration: '4', 
+                    velocity: 100 // Volume/Força da tecla (0-127)
+                })
+            );
+
+            // Adiciona um acorde simples (C maior) no final para demonstrar acordes
+            track.addEvent(
+                new MidiWriter.NoteEvent({
+                    pitch: ['C4', 'E4', 'G4'], // Notas do acorde
+                    duration: '2', // Duração de mínima
+                    velocity: 120
+                })
+            );
+
+            // 3. Adiciona a Pista ao Writer e Exporta
+            Writer.addTrack(track);
+
+            // Gera o Data URI do arquivo MIDI
+            const dataUri = Writer.dataUri();
+
+            // 4. Cria um link de download e simula o clique
+            const link = document.createElement('a');
+            
+            // O Data URI contém o arquivo binário codificado em base64
+            link.href = dataUri; 
+            link.download = 'minha_musica.mid'; 
+            
+            // Simula o clique para iniciar o download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            console.log("Arquivo MIDI gerado e download iniciado.");
+        }
+    </script>
+</body>
+</html>
