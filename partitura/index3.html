@@ -766,6 +766,7 @@ function drawSingleStaff(yBase, clef) {
                     currentBeat += noteDuration;
                     
                     if (currentBeat >= timeSignature.top) {
+                        drawBarline(xBass + SPACING/2, yOffsetBase + 180);
                         currentBeat = 0;
                     }
                     
