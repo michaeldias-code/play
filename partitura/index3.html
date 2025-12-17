@@ -1111,7 +1111,7 @@ function drawSingleStaff(yBase, clef) {
             const staffYOffset = targetStaffIndex * STAFF_OFFSET;
             const relativeY = clickY - staffYOffset;
             
-            if (relativeY > 115) {
+            if (relativeY > 245) {
                 currentClef = 'bass';
                 document.getElementById('clef-bass-btn').classList.add('active');
                 document.getElementById('clef-treble-btn').classList.remove('active');
