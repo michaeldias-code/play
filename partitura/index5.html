@@ -224,7 +224,6 @@
         <div class="header">
             <h1>🎵 Editor de Partituras Profissional</h1>
         </div>
-
         <div class="metadata">
             <input type="text" id="title-input" placeholder="Título da Música" value="Minha Composição">
             <input type="text" id="composer-input" placeholder="Compositor">
@@ -239,7 +238,6 @@
                 <input type="number" id="tempo-input" min="40" max="240" value="120">
             </div>
         </div>
-
         <div class="controls">
             <div class="control-section">
                 <h3>Figuras Normais</h3>
@@ -251,7 +249,6 @@
                     <button class="fig-button" data-type="semicolcheia" data-dot="false">♬</button>
                 </div>
             </div>
-
             <div class="control-section">
                 <h3>Figuras Pontuadas</h3>
                 <div class="button-group">
@@ -262,7 +259,6 @@
                     <button class="fig-button" data-type="semicolcheia" data-dot="true">♬.</button>
                 </div>
             </div>
-
             <div class="control-section">
                 <h3>Pausas</h3>
                 <div class="button-group">
@@ -273,7 +269,6 @@
                     <button class="fig-button" data-type="pausa-semicolcheia" data-dot="false">𝄿</button>
                 </div>
             </div>
-
             <div class="control-section">
                 <h3>Acidentes</h3>
                 <div class="button-group">
@@ -282,7 +277,6 @@
                     <button class="accidental-btn" data-accidental="natural">♮</button>
                 </div>
             </div>
-
             <div class="control-section">
                 <h3>Armadura de Clave</h3>
                 <div class="button-group">
@@ -293,7 +287,6 @@
                     <button id="key-reset">⟲</button>
                 </div>
             </div>
-
             <div class="control-section">
                 <h3>Clave Ativa</h3>
                 <div class="button-group">
@@ -301,7 +294,6 @@
                     <button class="action-btn" id="clef-bass-btn">🎹 Fá</button>
                 </div>
             </div>
-
             <div class="control-section">
                 <h3>Ações</h3>
                 <div class="button-group">
@@ -316,18 +308,15 @@
                 </div>
             </div>
         </div>
-
         <div class="score-container">
             <div class="score-wrapper">
                 <canvas id="score"></canvas>
             </div>
         </div>
-
         <div class="info">
             👆 Clique na pauta • Barras de compasso automáticas • Pautas conectadas
         </div>
     </div>
-
     <div id="export-modal" class="modal">
         <div class="modal-content">
             <h2>Exportar Partitura</h2>
@@ -340,7 +329,6 @@
             </div>
         </div>
     </div>
-    
     <script>
         // Estado Global
         let staffs = [[{ clef: 'treble', notes: [] }, { clef: 'bass', notes: [] }]];
@@ -354,29 +342,24 @@
         let keyFlats = 0;
         let timeSignature = { top: 4, bottom: 4 };
         let tempo = 120;
-
         const canvas = document.getElementById("score");
         const ctx = canvas.getContext("2d");
-
         // Constantes
         const SPACING = 50;
         const MIN_SCORE_WIDTH = 900;
         const CLEF_MARGIN = 160;
         const STAFF_OFFSET = 400;
-
         const noteYTreble = {
             "C6": 20, "B5": 30, "A5": 40, "G5": 50, "F5": 60, "E5": 70,
             "D5": 80, "C5": 90, "B4": 100, "A4": 110, "G4": 120,
             "F4": 130, "E4": 140, "D4": 150, "C4": 160, "B3": 170,
             "A3": 180, "G3": 190
         };
-
         const noteYBass = {
             "A3": 240, "G3": 250, "F3": 260, "E3": 270, "D3": 280,
             "C3": 290, "B2": 300, "A2": 310, "G2": 320, "F2": 330,
             "E2": 340, "D2": 350, "C2": 360, "B1": 370, "A1": 380
         };
-
         const freqs = {
             "A1": 55.00, "B1": 61.74, "C2": 65.41, "D2": 73.42, "E2": 82.41, "F2": 87.31, "G2": 98.00,
             "A2": 110.00, "B2": 123.47, "C3": 130.81, "D3": 146.83, "E3": 164.81, "F3": 174.61, "G3": 196.00,
@@ -384,16 +367,13 @@
             "A4": 440.00, "B4": 493.88, "C5": 523.25, "D5": 587.33, "E5": 659.25,
             "F5": 698.46, "G5": 783.99, "A5": 880.00, "B5": 987.77, "C6": 1046.50
         };
-
         const noteDurations = {
             "semibreve": 2.0, "minima": 1.0, "seminima": 0.5, "colcheia": 0.25, "semicolcheia": 0.125,
             "pausa-semibreve": 2.0, "pausa-minima": 1.0, "pausa-seminima": 0.5, 
             "pausa-colcheia": 0.25, "pausa-semicolcheia": 0.125
         };
-
         const SHARP_FACTOR = 1.059463;
         const FLAT_FACTOR = 1 / SHARP_FACTOR;
-
         // Calcular duração em tempos (baseado no denominador do compasso)
         function getDurationInBeats(noteType, dot, bottomNumber) {
             const baseDurations = {
@@ -401,18 +381,13 @@
                 "pausa-semibreve": 4, "pausa-minima": 2, "pausa-seminima": 1, 
                 "pausa-colcheia": 0.5, "pausa-semicolcheia": 0.25
             };
-            
             let duration = baseDurations[noteType] || 1;
-            
             // Ajuste baseado no denominador (4/4, 3/4, 6/8, etc)
             if (bottomNumber === 8) duration *= 0.5;
             else if (bottomNumber === 2) duration *= 2;
-            
             if (dot) duration *= 1.5;
-            
             return duration;
         }
-
         // Funções de desenho
         function drawAccidental(acc, x, y) {
             ctx.font = "24px Arial";
@@ -420,14 +395,12 @@
             const symbol = acc === 'sharp' ? '♯' : acc === 'flat' ? '♭' : '♮';
             ctx.fillText(symbol, x - 20, y + 8);
         }
-
         function drawDot(x, y) {
             ctx.beginPath();
             ctx.arc(x + 18, y, 3, 0, Math.PI * 2);
             ctx.fillStyle = "#333";
             ctx.fill();
         }
-
         function drawSemibreve(x, y, dot = false) {
             ctx.lineWidth = 2;
             ctx.strokeStyle = "#333";
@@ -436,7 +409,6 @@
             ctx.stroke();
             if (dot) drawDot(x, y);
         }
-
         function drawMinima(x, y, dot = false) {
             ctx.lineWidth = 2;
             ctx.strokeStyle = "#333";
@@ -449,7 +421,6 @@
             ctx.stroke();
             if (dot) drawDot(x, y);
         }
-
         function drawSeminima(x, y, dot = false) {
             ctx.lineWidth = 2;
             ctx.strokeStyle = "#333";
@@ -463,7 +434,6 @@
             ctx.stroke();
             if (dot) drawDot(x, y);
         }
-
         function drawColcheia(x, y, dot = false) {
             ctx.lineWidth = 2;
             ctx.strokeStyle = "#333";
@@ -482,7 +452,6 @@
             ctx.stroke();
             if (dot) drawDot(x, y);
         }
-
         function drawSemicolcheia(x, y, dot = false) {
             ctx.lineWidth = 2;
             ctx.strokeStyle = "#333";
@@ -505,23 +474,44 @@
             ctx.stroke();
             if (dot) drawDot(x, y);
         }
-
-        function drawRest(type, x, y) {
-            ctx.font = "32px Arial";
-            ctx.fillStyle = "#333";
-            ctx.textAlign = "center";
-            const symbols = {
-                'pausa-semibreve': ['𝄻', 110],
-                'pausa-minima': ['𝄼', 130],
-                'pausa-seminima': ['𝄽', 120],
-                'pausa-colcheia': ['𝄾', 120],
-                'pausa-semicolcheia': ['𝄿', 120]
-            };
-            const [symbol, yOffset] = symbols[type] || ['', 120];
-            ctx.fillText(symbol, x, y - (noteYTreble['G4'] - yOffset));
-            ctx.textAlign = "left";
-        }
-
+		function drawRest(type, x, y) {
+			ctx.fillStyle = "#333";
+			ctx.strokeStyle = "#333";
+			const baseY = y + 40; // Posição central    
+			if (type === 'pausa-semibreve') {
+				ctx.fillRect(x - 8, baseY - 20, 16, 6);
+			} else if (type === 'pausa-minima') {
+				ctx.fillRect(x - 8, baseY - 14, 16, 6);
+			} else if (type === 'pausa-seminima') {
+				ctx.lineWidth = 2;
+				ctx.beginPath();
+				ctx.moveTo(x, baseY - 10);
+				ctx.lineTo(x - 8, baseY + 10);
+				ctx.stroke();
+				ctx.fillRect(x - 5, baseY - 15, 8, 8);
+			} else if (type === 'pausa-colcheia') {
+				ctx.lineWidth = 2;
+				ctx.beginPath();
+				ctx.moveTo(x, baseY - 10);
+				ctx.lineTo(x, baseY + 10);
+				ctx.stroke();
+				ctx.beginPath();
+				ctx.arc(x + 5, baseY - 5, 4, 0, Math.PI * 2);
+				ctx.fill();
+			} else if (type === 'pausa-semicolcheia') {
+				ctx.lineWidth = 2;
+				ctx.beginPath();
+				ctx.moveTo(x, baseY - 10);
+				ctx.lineTo(x, baseY + 10);
+				ctx.stroke();
+				ctx.beginPath();
+				ctx.arc(x + 5, baseY - 8, 3, 0, Math.PI * 2);
+				ctx.fill();
+				ctx.beginPath();
+				ctx.arc(x + 5, baseY, 3, 0, Math.PI * 2);
+				ctx.fill();
+			}
+		}
         function drawNote(note, x, y) {
             if (note.type.startsWith('pausa-')) {
                 drawRest(note.type, x, y);
@@ -534,11 +524,9 @@
             else if (note.type === "colcheia") drawColcheia(x, y, dot);
             else if (note.type === "semicolcheia") drawSemicolcheia(x, y, dot);
         }
-
         function drawLedgerLines(x, y, yOffset, clef) {
             ctx.strokeStyle = "#333";
             ctx.lineWidth = 1.5;
-            
             if (clef === 'treble') {
                 const topStaffLine = 80 + yOffset;
                 if (y < topStaffLine) {
@@ -579,7 +567,6 @@
                 }
             }
         }
-
         function drawBarline(x, yOffset) {
             ctx.strokeStyle = "#333";
             ctx.lineWidth = 2;
@@ -592,13 +579,11 @@
             ctx.lineTo(x, 340 + yOffset);
             ctx.stroke();
         }
-
         function drawKeySharps(yBase, clef) {
             const positions = clef === 'treble' ? 
                 ['F5', 'C5', 'G5', 'D5', 'A4', 'E5', 'B4'] :
                 ['A3', 'E3', 'B2', 'F3', 'C3', 'G3', 'D3'];
             const noteYMap = clef === 'treble' ? noteYTreble : noteYBass;
-            
             for (let i = 0; i < keySharps; i++) {
                 const pitch = positions[i];
                 const x = 80 + (i * 12);
@@ -608,13 +593,11 @@
                 ctx.fillText("♯", x, y + 8);
             }
         }
-
         function drawKeyFlats(yBase, clef) {
             const positions = clef === 'treble' ?
                 ['B4', 'E5', 'A4', 'D5', 'G4', 'C5', 'F4'] :
                 ['D3', 'G3', 'C3', 'F3', 'B2', 'E3', 'A2'];
             const noteYMap = clef === 'treble' ? noteYTreble : noteYBass;
-            
             for (let i = 0; i < keyFlats; i++) {
                 const pitch = positions[i];
                 const x = 80 + (i * 12);
@@ -624,7 +607,6 @@
                 ctx.fillText("♭", x, y + 8);
             }
         }
-
         function drawTimeSignature(x, yBase) {
             ctx.font = "bold 28px Georgia, serif";
             ctx.fillStyle = "#333";
@@ -634,11 +616,9 @@
             ctx.fillText(timeSignature.bottom.toString(), x, centerY + 22);
             ctx.textAlign = "left";
         }
-
-function drawSingleStaff(yBase, clef) {
+		function drawSingleStaff(yBase, clef) {
             ctx.strokeStyle = "#333";
             ctx.lineWidth = 1.5;
-            
             for (let i = 0; i < 5; i++) {
                 const y = yBase + 80 + i * 20;
                 ctx.beginPath();
@@ -646,7 +626,6 @@ function drawSingleStaff(yBase, clef) {
                 ctx.lineTo(canvas.width - 20, y);
                 ctx.stroke();
             }
-
             if (clef === 'treble') {
                 //ctx.font = "70px Arial, sans-serif";
 				ctx.font = "70px 'Segoe UI Symbol', 'Noto Sans Symbols', Arial, sans-serif"; 
@@ -654,140 +633,117 @@ function drawSingleStaff(yBase, clef) {
                 ctx.textBaseline = "top";
                 ctx.fillText("𝄞", 35, yBase + 78);
             } else {
-                //ctx.font = "50px Arial, sans-serif";
-                ctx.font = "50px 'Segoe UI Symbol', 'Noto Sans Symbols', Arial, sans-serif";
-				ctx.fillStyle = "#333";
-                ctx.textBaseline = "top";
-                ctx.fillText("𝄢", 35, yBase + 78);
-                ctx.beginPath();
-                ctx.arc(75, yBase + 100, 3, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(75, yBase + 120, 3, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
+				// Desenhar clave de Fá manualmente
+				ctx.beginPath();
+				ctx.arc(50, yBase + 100, 8, 0, Math.PI * 2);
+				ctx.fill();
+				ctx.beginPath();
+				ctx.arc(50, yBase + 118, 3, 0, Math.PI * 2);
+				ctx.fill();
+				ctx.beginPath();
+				ctx.arc(50, yBase + 138, 3, 0, Math.PI * 2);
+				ctx.fill();
+				
+				ctx.lineWidth = 3;
+				ctx.beginPath();
+				ctx.arc(50, yBase + 118, 15, Math.PI * 0.3, Math.PI * 1.7);
+				ctx.stroke();            }
             if (keySharps > 0) {
                 drawKeySharps(yBase, clef);
             } else if (keyFlats > 0) {
                 drawKeyFlats(yBase, clef);
             }
-
             drawTimeSignature(110, yBase);
-            
             ctx.beginPath();
             ctx.moveTo(canvas.width - 20, yBase + 80);
             ctx.lineTo(canvas.width - 20, yBase + 160);
             ctx.stroke();
         }
-
         function drawStaff(staffIndex) {
             const yOffset = staffIndex * STAFF_OFFSET;
-            
             drawSingleStaff(yOffset, 'treble');
             drawSingleStaff(yOffset + 180, 'bass');
-            
             ctx.strokeStyle = "#333";
             ctx.lineWidth = 4;
             ctx.beginPath();
             ctx.moveTo(15, 80 + yOffset);
             ctx.lineTo(15, 340 + yOffset);
             ctx.stroke();
-            
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(20, 80 + yOffset);
             ctx.lineTo(20, 160 + yOffset);
             ctx.stroke();
-            
             ctx.beginPath();
             ctx.moveTo(20, 260 + yOffset);
             ctx.lineTo(20, 340 + yOffset);
             ctx.stroke();
         }
-
-        function redraw() {
-            let maxNotesCount = 0;
-            for (const grandStaff of staffs) {
-                const trebleCount = grandStaff[0].notes.length;
-                const bassCount = grandStaff[1].notes.length;
-                const maxCount = Math.max(trebleCount, bassCount);
-                if (maxCount > maxNotesCount) maxNotesCount = maxCount;
-            }
-            
-            let requiredWidth = CLEF_MARGIN + (maxNotesCount * SPACING) + SPACING + 20;
-            canvas.width = Math.max(MIN_SCORE_WIDTH, requiredWidth);
-
-            const requiredHeight = staffs.length * STAFF_OFFSET + 100;
-            canvas.height = requiredHeight;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            staffs.forEach((grandStaff, staffIndex) => {
-                drawStaff(staffIndex);
-                
-                const yOffsetBase = staffIndex * STAFF_OFFSET;
-                
-                // Desenhar clave de Sol com barras de compasso
-                let xTreble = CLEF_MARGIN;
-                let currentBeat = 0;
-                
-                for (const chord of grandStaff[0].notes) {
-                    for (const note of chord) {
-                        if (note.type.startsWith('pausa-')) {
-                            drawRest(note.type, xTreble, yOffsetBase);
-                        } else {
-                            const noteYPos = noteYTreble[note.pitch];
-                            drawLedgerLines(xTreble, noteYPos, yOffsetBase, 'treble');
-                            if (note.accidental) drawAccidental(note.accidental, xTreble, noteYPos);
-                            drawNote(note, xTreble, noteYPos);
-                        }
-                    }
-                    
-                    // Calcular batidas e adicionar barra de compasso
-                    const noteDuration = getDurationInBeats(chord[0].type, chord[0].dot, timeSignature.bottom);
-                    currentBeat += noteDuration;
-                    
-                    if (currentBeat >= timeSignature.top) {
-                        drawBarline(xTreble + SPACING/2, yOffsetBase);
-                        currentBeat = 0;
-                    }
-                    
-                    xTreble += SPACING;
-                }
-                
-                // Desenhar clave de Fá com barras de compasso
-                let xBass = CLEF_MARGIN;
-                currentBeat = 0;
-                
-                for (const chord of grandStaff[1].notes) {
-                    for (const note of chord) {
-                        if (note.type.startsWith('pausa-')) {
-                            drawRest(note.type, xBass, yOffsetBase + 180);
-                        } else {
-                            const noteYPos = noteYBass[note.pitch];
-                            drawLedgerLines(xBass, noteYPos, yOffsetBase, 'bass');
-                            if (note.accidental) drawAccidental(note.accidental, xBass, noteYPos);
-                            drawNote(note, xBass, noteYPos);
-                        }
-                    }
-                    
-                    const noteDuration = getDurationInBeats(chord[0].type, chord[0].dot, timeSignature.bottom);
-                    currentBeat += noteDuration;
-                    
-                    if (currentBeat >= timeSignature.top) {
-                        drawBarline(xBass + SPACING/2, yOffsetBase + 180);
-                        currentBeat = 0;
-                    }
-                    
-                    xBass += SPACING;
-                }
-            });
-        }
-
+		function redraw() {
+			let maxNotesCount = 0;
+			for (const grandStaff of staffs) {
+				const trebleCount = grandStaff[0].notes.length;
+				const bassCount = grandStaff[1].notes.length;
+				const maxCount = Math.max(trebleCount, bassCount);
+				if (maxCount > maxNotesCount) maxNotesCount = maxCount;
+			}
+			let requiredWidth = CLEF_MARGIN + (maxNotesCount * SPACING) + SPACING + 20;
+			canvas.width = Math.max(MIN_SCORE_WIDTH, requiredWidth);
+			const requiredHeight = staffs.length * STAFF_OFFSET + 100;
+			canvas.height = requiredHeight;
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			staffs.forEach((grandStaff, staffIndex) => {
+				drawStaff(staffIndex);
+				const yOffsetBase = staffIndex * STAFF_OFFSET;
+				// Clave de Sol
+				let xTreble = CLEF_MARGIN;
+				let currentBeat = 0;
+				for (let i = 0; i < grandStaff[0].notes.length; i++) {
+					const chord = grandStaff[0].notes[i];
+					for (const note of chord) {
+						if (note.type.startsWith('pausa-')) {
+							drawRest(note.type, xTreble, yOffsetBase);
+						} else {
+							const noteYPos = noteYTreble[note.pitch];
+							drawLedgerLines(xTreble, noteYPos, yOffsetBase, 'treble');
+							if (note.accidental) drawAccidental(note.accidental, xTreble, noteYPos);
+							drawNote(note, xTreble, noteYPos);
+						}
+					}
+					const noteDuration = getDurationInBeats(chord[0].type, chord[0].dot, timeSignature.bottom);
+					currentBeat += noteDuration;
+					xTreble += SPACING;
+					if (currentBeat >= timeSignature.top) {
+						drawBarline(xTreble - SPACING/2, yOffsetBase);
+						currentBeat = 0;
+					}
+				}
+				// Clave de Fá
+				let xBass = CLEF_MARGIN;
+				currentBeat = 0;
+				for (let i = 0; i < grandStaff[1].notes.length; i++) {
+					const chord = grandStaff[1].notes[i];
+					for (const note of chord) {
+						if (note.type.startsWith('pausa-')) {
+							drawRest(note.type, xBass, yOffsetBase + 180);
+						} else {
+							const noteYPos = noteYBass[note.pitch];
+							drawLedgerLines(xBass, noteYPos, yOffsetBase, 'bass');
+							if (note.accidental) drawAccidental(note.accidental, xBass, noteYPos);
+							drawNote(note, xBass, noteYPos);
+						}
+					}
+					const noteDuration = getDurationInBeats(chord[0].type, chord[0].dot, timeSignature.bottom);
+					currentBeat += noteDuration;
+					xBass += SPACING;
+					if (currentBeat >= timeSignature.top) {
+						currentBeat = 0;
+					}
+				}
+			});
+		}
         // Piano com Tone.js
         let piano = null;
-        
         async function initPiano() {
             if (piano) return;
             piano = new Tone.Sampler({
@@ -802,7 +758,6 @@ function drawSingleStaff(yBase, clef) {
             }).toDestination();
             await Tone.loaded();
         }
-
         function freqToNoteName(freq) {
             const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
             const A4 = 440;
@@ -811,131 +766,129 @@ function drawSingleStaff(yBase, clef) {
             const octave = Math.floor(halfSteps / 12);
             return notes[halfSteps % 12] + octave;
         }
-
         async function playFreq(freq, duration, startTime = 0) {
             await initPiano();
             const note = freqToNoteName(freq);
             piano.triggerAttackRelease(note, duration, Tone.now() + startTime, 0.6);
         }
-
-        async function playScore() {
-            await initPiano();
-            await Tone.start();
-            
-            let allNotes = [];
-            for (const grandStaff of staffs) {
-                const trebleNotes = grandStaff[0].notes;
-                const bassNotes = grandStaff[1].notes;
-                const maxLength = Math.max(trebleNotes.length, bassNotes.length);
-                
-                for (let i = 0; i < maxLength; i++) {
-                    const combined = [];
-                    if (i < trebleNotes.length) combined.push(...trebleNotes[i]);
-                    if (i < bassNotes.length) combined.push(...bassNotes[i]);
-                    allNotes.push(combined);
-                }
-            }
-            
-            if (allNotes.length === 0) {
-                alert("Adicione notas primeiro!");
-                return;
-            }
-
-            let t = 0;
-            const beatDuration = 60 / tempo;
-            
-            for (const chord of allNotes) {
-                if (chord.length === 0) continue;
-                const baseNote = chord[0];
-                
-                if (baseNote.type.startsWith('pausa-')) {
-                    let duration = noteDurations[baseNote.type] * beatDuration;
-                    if (baseNote.dot) duration *= 1.5;
-                    t += duration;
-                    continue;
-                }
-                
-                let duration = noteDurations[baseNote.type] * beatDuration;
-                if (baseNote.dot) duration *= 1.5;
-                
-                for (const note of chord) {
-                    if (note.type.startsWith('pausa-')) continue;
-                    let freq = freqs[note.pitch];
-                    if (note.accidental === 'sharp') freq *= SHARP_FACTOR;
-                    else if (note.accidental === 'flat') freq *= FLAT_FACTOR;
-                    await playFreq(freq, duration, t);
-                }
-                t += duration;
-            }
-        }
-function importFromJSON(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const data = JSON.parse(e.target.result);
-
-            // 1. Verificar a versão do arquivo (opcional, mas bom)
-            if (data.version !== "1.0") {
-                alert("Versão do arquivo incompatível.");
-                return;
-            }
-
-            // 2. Restaurar Variáveis Globais de Estado
-            tempo = data.tempo || 120; // Usa 120 como fallback
-            timeSignature.top = data.timeSignature.top || 4;
-            timeSignature.bottom = data.timeSignature.bottom || 4;
-            keySharps = data.keySignature.sharps || 0;
-            keyFlats = data.keySignature.flats || 0;
-            staffs = data.staffs || [[{ clef: 'treble', notes: [] }, { clef: 'bass', notes: [] }]];
-            currentStaffIndex = 0; // Começa na primeira pauta
-
-            // 3. Restaurar Campos de Título e Compositor no HTML
-            document.getElementById('title-input').value = data.title || '';
-            document.getElementById('composer-input').value = data.composer || '';
-            
-            // 4. Restaurar os valores dos controles de Tempo e Compasso no HTML
-            document.getElementById('tempo-input').value = tempo;
-            document.getElementById('time-top').value = timeSignature.top;
-            document.getElementById('time-bottom').value = timeSignature.bottom;
-
-
-            // 5. Redesenhar a partitura com os novos dados
-            redraw();
-
-            alert("Partitura importada com sucesso!");
-
-        } catch (error) {
-            console.error("Erro ao importar ou analisar JSON:", error);
-            alert("Erro ao carregar o arquivo. Certifique-se de que é um arquivo JSON válido.");
-        }
-    };
-
-    reader.readAsText(file);
-}
+		async function playScore() {
+			await initPiano();
+			await Tone.start();
+			let allNotes = [];
+			// Combinar TODAS as pautas sequencialmente
+			for (const grandStaff of staffs) {
+				const trebleNotes = grandStaff[0].notes;
+				const bassNotes = grandStaff[1].notes;
+				const maxLength = Math.max(trebleNotes.length, bassNotes.length);
+				for (let i = 0; i < maxLength; i++) {
+					const combined = [];
+					if (i < trebleNotes.length) combined.push(...trebleNotes[i]);
+					if (i < bassNotes.length) combined.push(...bassNotes[i]);
+					allNotes.push(combined);
+				}
+			}
+			if (allNotes.length === 0) {
+				alert("Adicione notas primeiro!");
+				return;
+			}
+			let t = 0;
+			const beatDuration = 60 / tempo;
+			for (const chord of allNotes) {
+				if (chord.length === 0) continue;
+				const baseNote = chord[0];
+				if (baseNote.type.startsWith('pausa-')) {
+					let duration = noteDurations[baseNote.type] * beatDuration;
+					if (baseNote.dot) duration *= 1.5;
+					t += duration;
+					continue;
+				}
+				let duration = noteDurations[baseNote.type] * beatDuration;
+				if (baseNote.dot) duration *= 1.5;
+				for (const note of chord) {
+					if (note.type.startsWith('pausa-')) continue;
+					let freq = freqs[note.pitch];
+					if (note.accidental === 'sharp') freq *= SHARP_FACTOR;
+					else if (note.accidental === 'flat') freq *= FLAT_FACTOR;
+					await playFreq(freq, duration, t);
+				}
+				t += duration;
+			}
+		}
+		function importFromJSON(event) {
+			const file = event.target.files[0];
+			if (!file) return;
+			const reader = new FileReader();
+			reader.onload = function(e) {
+				try {
+					const data = JSON.parse(e.target.result);
+					// 1. Verificar a versão do arquivo (opcional, mas bom)
+					if (data.version !== "1.0") {
+						alert("Versão do arquivo incompatível.");
+						return;
+					}
+					// 2. Restaurar Variáveis Globais de Estado
+					tempo = data.tempo || 120; // Usa 120 como fallback
+					timeSignature.top = data.timeSignature.top || 4;
+					timeSignature.bottom = data.timeSignature.bottom || 4;
+					keySharps = data.keySignature.sharps || 0;
+					keyFlats = data.keySignature.flats || 0;
+					staffs = data.staffs || [[{ clef: 'treble', notes: [] }, { clef: 'bass', notes: [] }]];
+					currentStaffIndex = 0; // Começa na primeira pauta
+					// 3. Restaurar Campos de Título e Compositor no HTML
+					document.getElementById('title-input').value = data.title || '';
+					document.getElementById('composer-input').value = data.composer || '';
+					// 4. Restaurar os valores dos controles de Tempo e Compasso no HTML
+					document.getElementById('tempo-input').value = tempo;
+					document.getElementById('time-top').value = timeSignature.top;
+					document.getElementById('time-bottom').value = timeSignature.bottom;
+					// 5. Redesenhar a partitura com os novos dados
+					redraw();
+					alert("Partitura importada com sucesso!");
+				} catch (error) {
+					console.error("Erro ao importar ou analisar JSON:", error);
+					alert("Erro ao carregar o arquivo. Certifique-se de que é um arquivo JSON válido.");
+				}
+			};
+			reader.readAsText(file);
+		}
+		function compactStringify(obj) {
+			return JSON.stringify(obj, (key, value) => {
+				if (key === 'treble' || key === 'bass') {
+					return value.map(chord => 
+						chord.map(note => 
+							`{"pitch":${JSON.stringify(note.pitch)},"type":"${note.type}","dot":${note.dot},"accidental":${JSON.stringify(note.accidental)}}`
+						).join(',')
+					);
+				}
+				return value;
+			}, 2).replace(/"(\{[^}]+\})"/g, '$1');
+		}
         // Exportação
-        function exportToJSON() {
-            const data = {
-                version: "1.0",
-                title: document.getElementById('title-input').value,
-                composer: document.getElementById('composer-input').value,
-                tempo: tempo,
-                timeSignature: timeSignature,
-                keySignature: { sharps: keySharps, flats: keyFlats },
-                staffs: staffs
-            };
-            const json = JSON.stringify(data, null, 2);
-            const blob = new Blob([json], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${data.title.replace(/\s+/g, '_')}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
+		function exportToJSON() {
+			const data = {
+				version: "1.0",
+				title: document.getElementById('title-input').value,
+				composer: document.getElementById('composer-input').value,
+				tempo: tempo,
+				timeSignature: timeSignature,
+				keySignature: { sharps: keySharps, flats: keyFlats },
+				staffs: staffs.map(grandStaff => ({
+					treble: grandStaff[0].notes,
+					bass: grandStaff[1].notes
+				}))
+			};
+			const json = JSON.stringify(data, null, 2)
+				.replace(/\[\s+\{/g, '[{')
+				.replace(/\},\s+\{/g, '},{')
+				.replace(/\}\s+\]/g, '}]');
+			const blob = new Blob([json], { type: 'application/json' });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = `${data.title.replace(/\s+/g, '_')}.json`;
+			a.click();
+			URL.revokeObjectURL(url);
+		}
         function exportToMusicXML() {
             const title = document.getElementById('title-input').value;
             const composer = document.getElementById('composer-input').value;
@@ -964,7 +917,6 @@ function importFromJSON(event) {
             a.click();
             URL.revokeObjectURL(url);
         }
-
         function exportToPDF() {
             const title = document.getElementById('title-input').value;
             const composer = document.getElementById('composer-input').value;
@@ -992,24 +944,19 @@ function importFromJSON(event) {
                 URL.revokeObjectURL(url);
             });
         }
-
         // Event Listeners
         redraw();
-
         document.getElementById('time-top').addEventListener('change', (e) => {
             timeSignature.top = parseInt(e.target.value);
             redraw();
         });
-
         document.getElementById('time-bottom').addEventListener('change', (e) => {
             timeSignature.bottom = parseInt(e.target.value);
             redraw();
         });
-
         document.getElementById('tempo-input').addEventListener('change', (e) => {
             tempo = parseInt(e.target.value);
         });
-
         document.querySelectorAll('.fig-button').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.fig-button').forEach(b => b.classList.remove('selected'));
@@ -1020,7 +967,6 @@ function importFromJSON(event) {
                 document.getElementById('harmony-btn').classList.remove('active');
             });
         });
-
         document.querySelectorAll('.accidental-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const accType = btn.dataset.accidental;
@@ -1034,7 +980,6 @@ function importFromJSON(event) {
                 }
             });
         });
-
         document.getElementById('key-sharp-up').addEventListener('click', () => {
             if (keyFlats > 0) {
                 alert('Remova os bemóis antes');
@@ -1045,14 +990,12 @@ function importFromJSON(event) {
                 redraw();
             }
         });
-
         document.getElementById('key-sharp-down').addEventListener('click', () => {
             if (keySharps > 0) {
                 keySharps--;
                 redraw();
             }
         });
-
         document.getElementById('key-flat-up').addEventListener('click', () => {
             if (keySharps > 0) {
                 alert('Remova os sustenidos antes');
@@ -1063,45 +1006,37 @@ function importFromJSON(event) {
                 redraw();
             }
         });
-
         document.getElementById('key-flat-down').addEventListener('click', () => {
             if (keyFlats > 0) {
                 keyFlats--;
                 redraw();
             }
         });
-
         document.getElementById('key-reset').addEventListener('click', () => {
             keySharps = 0;
             keyFlats = 0;
             redraw();
         });
-
         document.getElementById('harmony-btn').addEventListener('click', () => {
             isHarmonyMode = !isHarmonyMode;
             document.getElementById('harmony-btn').classList.toggle('active');
         });
-
         document.getElementById('clef-treble-btn').addEventListener('click', () => {
             currentClef = 'treble';
             document.getElementById('clef-treble-btn').classList.add('active');
             document.getElementById('clef-bass-btn').classList.remove('active');
         });
-
         document.getElementById('clef-bass-btn').addEventListener('click', () => {
             currentClef = 'bass';
             document.getElementById('clef-bass-btn').classList.add('active');
             document.getElementById('clef-treble-btn').classList.remove('active');
         });
-
         document.getElementById('add-staff-btn').addEventListener('click', () => {
             staffs.push([{ clef: 'treble', notes: [] }, { clef: 'bass', notes: [] }]);
             currentStaffIndex = staffs.length - 1;
             redraw();
         });
-
         document.getElementById('play-btn').addEventListener('click', playScore);
-
         document.getElementById('undo-btn').addEventListener('click', () => {
             const grandStaff = staffs[currentStaffIndex];
             const clefIndex = currentClef === 'treble' ? 0 : 1;
@@ -1113,7 +1048,6 @@ function importFromJSON(event) {
                 redraw();
             }
         });
-
         document.getElementById('clear-btn').addEventListener('click', () => {
             let hasNotes = false;
             for (const grandStaff of staffs) {
@@ -1128,48 +1062,37 @@ function importFromJSON(event) {
                 redraw();
             }
         });
-
         document.getElementById('download-btn').addEventListener('click', () => {
             document.getElementById('export-modal').classList.add('active');
         });
-
         document.getElementById('export-json').addEventListener('click', () => {
             exportToJSON();
             document.getElementById('export-modal').classList.remove('active');
         });
-
 		document.getElementById('import-file').addEventListener('change', importFromJSON);
-
-
         document.getElementById('export-musicxml').addEventListener('click', () => {
             exportToMusicXML();
             document.getElementById('export-modal').classList.remove('active');
         });
-
         document.getElementById('export-pdf').addEventListener('click', () => {
             exportToPDF();
             document.getElementById('export-modal').classList.remove('active');
         });
-
         document.getElementById('export-cancel').addEventListener('click', () => {
             document.getElementById('export-modal').classList.remove('active');
         });
-
         canvas.addEventListener('click', (e) => {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
             const clickX = (e.clientX - rect.left) * scaleX;
             const clickY = (e.clientY - rect.top) * scaleY;
-
             let targetStaffIndex = Math.floor(clickY / STAFF_OFFSET);
             if (targetStaffIndex >= staffs.length) targetStaffIndex = staffs.length - 1;
             if (targetStaffIndex < 0) targetStaffIndex = 0;
             currentStaffIndex = targetStaffIndex;
-
             const staffYOffset = targetStaffIndex * STAFF_OFFSET;
             const relativeY = clickY - staffYOffset;
-            
             if (relativeY > 200) {
                 currentClef = 'bass';
                 document.getElementById('clef-bass-btn').classList.add('active');
@@ -1179,7 +1102,6 @@ function importFromJSON(event) {
                 document.getElementById('clef-treble-btn').classList.add('active');
                 document.getElementById('clef-bass-btn').classList.remove('active');
             }
-
             if (selectedType.startsWith('pausa-')) {
                 const newNote = {
                     type: selectedType,
@@ -1197,11 +1119,9 @@ function importFromJSON(event) {
                 redraw();
                 return;
             }
-
             const noteYMap = currentClef === 'treble' ? noteYTreble : noteYBass;
             let bestPitch = null;
             let bestDist = Infinity;
-            
             for (const p in noteYMap) {
                 const d = Math.abs(noteYMap[p] - relativeY);
                 if (d < bestDist) {
@@ -1209,19 +1129,15 @@ function importFromJSON(event) {
                     bestPitch = p;
                 }
             }
-            
             if (bestDist > 15) return;
-
             const newNote = {
                 pitch: bestPitch,
                 type: selectedType,
                 dot: useDot,
                 accidental: selectedAccidental
             };
-            
             const clefIndex = currentClef === 'treble' ? 0 : 1;
             const targetStaff = staffs[currentStaffIndex][clefIndex].notes;
-
             if (isHarmonyMode && targetStaff.length > 0) {
                 const lastChord = targetStaff[targetStaff.length - 1];
                 const isPitchPresent = lastChord.some(note =>
@@ -1231,12 +1147,10 @@ function importFromJSON(event) {
             } else {
                 targetStaff.push([newNote]);
             }
-
             selectedAccidental = null;
             document.querySelectorAll('.accidental-btn').forEach(b => b.classList.remove('selected'));
             redraw();
         });
-
         document.getElementById('export-modal').addEventListener('click', (e) => {
             if (e.target.id === 'export-modal') {
                 e.target.classList.remove('active');
