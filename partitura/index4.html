@@ -648,13 +648,15 @@ function drawSingleStaff(yBase, clef) {
             }
 
             if (clef === 'treble') {
-                ctx.font = "70px Arial, sans-serif";
+                //ctx.font = "70px Arial, sans-serif";
+				ctx.font = "70px 'Segoe UI Symbol', 'Noto Sans Symbols', Arial, sans-serif"; 
                 ctx.fillStyle = "#333";
                 ctx.textBaseline = "top";
                 ctx.fillText("𝄞", 35, yBase + 78);
             } else {
-                ctx.font = "50px Arial, sans-serif";
-                ctx.fillStyle = "#333";
+                //ctx.font = "50px Arial, sans-serif";
+                ctx.font = "50px 'Segoe UI Symbol', 'Noto Sans Symbols', Arial, sans-serif";
+				ctx.fillStyle = "#333";
                 ctx.textBaseline = "top";
                 ctx.fillText("𝄢", 35, yBase + 78);
                 ctx.beginPath();
