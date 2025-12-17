@@ -1090,6 +1090,7 @@
             let targetStaffIndex = Math.floor(clickY / STAFF_OFFSET);
             if (targetStaffIndex >= staffs.length) targetStaffIndex = staffs.length - 1;
             if (targetStaffIndex < 0) targetStaffIndex = 0;
+			console.log("Clicou na pauta:", targetStaffIndex, "Total:", staffs.length);
             currentStaffIndex = targetStaffIndex;
             const staffYOffset = targetStaffIndex * STAFF_OFFSET;
             const relativeY = clickY - staffYOffset;
