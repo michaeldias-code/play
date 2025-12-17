@@ -1092,18 +1092,28 @@
             if (targetStaffIndex < 0) targetStaffIndex = 0;
 			console.log("Clicou na pauta:", targetStaffIndex, "Total:", staffs.length);
             currentStaffIndex = targetStaffIndex;
-            const staffYOffset = targetStaffIndex * STAFF_OFFSET;
-            const relativeY = clickY - staffYOffset;
-            if (relativeY > 200) {
-                currentClef = 'bass';
-                document.getElementById('clef-bass-btn').classList.add('active');
-                document.getElementById('clef-treble-btn').classList.remove('active');
-            } else {
-                currentClef = 'treble';
-                document.getElementById('clef-treble-btn').classList.add('active');
-                document.getElementById('clef-bass-btn').classList.remove('active');
-            }
-            if (selectedType.startsWith('pausa-')) {
+const staffYOffset = targetStaffIndex * STAFF_OFFSET;
+const relativeY = clickY - staffYOffset;
+
+// CORRIGIR DETECÇÃO DE CLAVE
+let clickedClef = 'treble';
+if (relativeY > 180 && relativeY < 360) {
+    clickedClef = 'bass';
+}
+
+currentClef = clickedClef;
+
+if (clickedClef === 'bass') {
+    document.getElementById('clef-bass-btn').classList.add('active');
+    document.getElementById('clef-treble-btn').classList.remove('active');
+} else {
+    document.getElementById('clef-treble-btn').classList.add('active');
+    document.getElementById('clef-bass-btn').classList.remove('active');
+}
+
+// ADICIONE ESTE LOG PARA TESTAR:
+console.log("RelativeY:", relativeY, "Clave:", currentClef, "Staff:", targetStaffIndex);
+			if (selectedType.startsWith('pausa-')) {
                 const newNote = {
                     type: selectedType,
                     dot: useDot,
