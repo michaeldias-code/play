@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor Profissional de Partituras</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            padding: 15px;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .header h1 {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+        .metadata {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .metadata input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 100%;
+        }
+        .meta-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .meta-row label {
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 60px;
+        }
+        .meta-row input[type="number"] {
+            width: 60px;
+            text-align: center;
+        }
+        .controls {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            max-height: 40vh;
+            overflow-y: auto;
+        }
+        .control-section {
+            margin-bottom: 12px;
+        }
+        .control-section h3 {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .button-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        button, .file-upload-label { /* Adicionado a classe para estilizar o label */
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+            display: flex; /* Para centralizar conteúdo */
+            align-items: center;
+            justify-content: center;
+            text-decoration: none; /* Para garantir que o label não tenha sublinhado */
+            color: #333;
+        }
+        button:active, .file-upload-label:active {
+            transform: scale(0.95);
+        }
+        button.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        button.active {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+        .fig-button {
+            width: 45px;
+            height: 45px;
+            font-size: 24px;
+            padding: 4px;
+        }
+        .fig-button canvas {
+            pointer-events: none;
+            max-width: 100%;
+            max-height: 100%;
+        }
+        .accidental-btn {
+            font-size: 20px;
+            min-width: 45px;
+        }
+        .action-btn, .file-upload-label { /* Aplicando estilo de botão de ação ao label */
+            padding: 10px 16px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 120px;
+            /* Estilo Padrão (Importar) */
+            background: #FF5722; /* Laranja/Importar */
+            color: white;
+            border-color: #FF5722;
+        }
+        #play-btn { background: #4CAF50; color: white; border-color: #4CAF50; }
+        #clear-btn { background: #f44336; color: white; border-color: #f44336; }
+        #undo-btn { background: #ff9800; color: white; border-color: #ff9800; }
+        #download-btn { background: #2196F3; color: white; border-color: #2196F3; }
+        #add-staff-btn { background: #9C27B0; color: white; border-color: #9C27B0; }
+        .score-container {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 15px;
+            max-height: 60vh;
+        }
+        .score-wrapper {
+            min-width: 900px;
+            min-height: 400px;
+            padding: 20px;
+        }
+        #score {
+            cursor: crosshair;
+            display: block;
+            background: white;
+        }
+        .info {
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            padding: 10px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 100%;
+        }
+        .modal h2 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 18px;
+        }
+        .modal-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        .modal-buttons button {
+            width: 100%;
+            padding: 12px;
+            font-size: 14px;
+        }
+        @media (min-width: 768px) {
+            .container { padding: 30px; max-width: 1400px; }
+            .header h1 { font-size: 28px; }
+            .metadata {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            .controls { max-height: none; }
+            .fig-button { width: 55px; height: 55px; font-size: 28px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 Editor de Partituras Profissional</h1>
+        </div>
+
+        <div class="metadata">
+            <input type="text" id="title-input" placeholder="Título da Música" value="Minha Composição">
+            <input type="text" id="composer-input" placeholder="Compositor">
+            <div class="meta-row">
+                <label>Compasso:</label>
+                <input type="number" id="time-top" min="1" max="16" value="4">
+                <span>/</span>
+                <input type="number" id="time-bottom" min="1" max="16" value="4">
+            </div>
+            <div class="meta-row">
+                <label>Tempo (BPM):</label>
+                <input type="number" id="tempo-input" min="40" max="240" value="120">
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-section">
+                <h3>Figuras Normais</h3>
+                <div class="button-group">
+                    <button class="fig-button selected" data-type="semibreve" data-dot="false">○</button>
+                    <button class="fig-button" data-type="minima" data-dot="false">𝅗𝅥</button>
+                    <button class="fig-button" data-type="seminima" data-dot="false">♩</button>
+                    <button class="fig-button" data-type="colcheia" data-dot="false">♪</button>
+                    <button class="fig-button" data-type="semicolcheia" data-dot="false">♬</button>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Figuras Pontuadas</h3>
+                <div class="button-group">
+                    <button class="fig-button" data-type="semibreve" data-dot="true">○.</button>
+                    <button class="fig-button" data-type="minima" data-dot="true">𝅗𝅥.</button>
+                    <button class="fig-button" data-type="seminima" data-dot="true">♩.</button>
+                    <button class="fig-button" data-type="colcheia" data-dot="true">♪.</button>
+                    <button class="fig-button" data-type="semicolcheia" data-dot="true">♬.</button>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Pausas</h3>
+                <div class="button-group">
+                    <button class="fig-button" data-type="pausa-semibreve" data-dot="false">𝄻</button>
+                    <button class="fig-button" data-type="pausa-minima" data-dot="false">𝄼</button>
+                    <button class="fig-button" data-type="pausa-seminima" data-dot="false">𝄽</button>
+                    <button class="fig-button" data-type="pausa-colcheia" data-dot="false">𝄾</button>
+                    <button class="fig-button" data-type="pausa-semicolcheia" data-dot="false">𝄿</button>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Acidentes</h3>
+                <div class="button-group">
+                    <button class="accidental-btn" data-accidental="sharp">♯</button>
+                    <button class="accidental-btn" data-accidental="flat">♭</button>
+                    <button class="accidental-btn" data-accidental="natural">♮</button>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Armadura de Clave</h3>
+                <div class="button-group">
+                    <button id="key-sharp-up">♯ +</button>
+                    <button id="key-sharp-down">♯ -</button>
+                    <button id="key-flat-up">♭ +</button>
+                    <button id="key-flat-down">♭ -</button>
+                    <button id="key-reset">⟲</button>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Clave Ativa</h3>
+                <div class="button-group">
+                    <button class="action-btn active" id="clef-treble-btn">🎼 Sol</button>
+                    <button class="action-btn" id="clef-bass-btn">🎹 Fá</button>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Ações</h3>
+                <div class="button-group">
+                    <button class="action-btn" id="play-btn">▶ Tocar</button>
+                    <label for="import-file" class="file-upload-label action-btn" id="import-btn">📥 Importar</label>
+                    <input type="file" id="import-file" accept=".json" style="display: none;">
+                    <button class="action-btn" id="harmony-btn">🎵 Harmonia</button>
+                    <button class="action-btn" id="add-staff-btn">➕ Pauta</button>
+                    <button class="action-btn" id="undo-btn">↶ Desfazer</button>
+                    <button class="action-btn" id="clear-btn">✕ Limpar</button>
+                    <button class="action-btn" id="download-btn">💾 Exportar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="score-container">
+            <div class="score-wrapper">
+                <canvas id="score"></canvas>
+            </div>
+        </div>
+
+        <div class="info">
+            👆 Clique na pauta • Barras de compasso automáticas • Pautas conectadas
+        </div>
+    </div>
+
+    <div id="export-modal" class="modal">
+        <div class="modal-content">
+            <h2>Exportar Partitura</h2>
+            <p style="margin-bottom: 15px; font-size: 14px;">Escolha o formato:</p>
+            <div class="modal-buttons">
+                <button id="export-json">📄 JSON</button>
+                <button id="export-musicxml">🎼 MusicXML</button>
+                <button id="export-pdf">🖼️ PNG</button>
+                <button id="export-cancel" style="background: #ccc;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
