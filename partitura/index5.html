@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor Profissional de Partituras</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            padding: 15px;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .header h1 {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+        .metadata {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .metadata input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 100%;
+        }
+        .meta-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .meta-row label {
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 60px;
+        }
+        .meta-row input[type="number"] {
+            width: 60px;
+            text-align: center;
+        }
+        .controls {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            max-height: 40vh;
+            overflow-y: auto;
+        }
+        .control-section {
+            margin-bottom: 12px;
+        }
+        .control-section h3 {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .button-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        button, .file-upload-label { /* Adicionado a classe para estilizar o label */
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+            display: flex; /* Para centralizar conteúdo */
+            align-items: center;
+            justify-content: center;
+            text-decoration: none; /* Para garantir que o label não tenha sublinhado */
+            color: #333;
+        }
+        button:active, .file-upload-label:active {
+            transform: scale(0.95);
+        }
+        button.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        button.active {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+        .fig-button {
+            width: 45px;
+            height: 45px;
+            font-size: 24px;
+            padding: 4px;
+        }
+        .fig-button canvas {
+            pointer-events: none;
+            max-width: 100%;
+            max-height: 100%;
+        }
+        .accidental-btn {
+            font-size: 20px;
+            min-width: 45px;
+        }
+        .action-btn, .file-upload-label { /* Aplicando estilo de botão de ação ao label */
+            padding: 10px 16px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 120px;
+            /* Estilo Padrão (Importar) */
+            background: #FF5722; /* Laranja/Importar */
+            color: white;
+            border-color: #FF5722;
+        }
+        #play-btn { background: #4CAF50; color: white; border-color: #4CAF50; }
+        #clear-btn { background: #f44336; color: white; border-color: #f44336; }
+        #undo-btn { background: #ff9800; color: white; border-color: #ff9800; }
+        #download-btn { background: #2196F3; color: white; border-color: #2196F3; }
+        #add-staff-btn { background: #9C27B0; color: white; border-color: #9C27B0; }
+        .score-container {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 15px;
+            max-height: 60vh;
+        }
+        .score-wrapper {
+            min-width: 900px;
+            min-height: 400px;
+            padding: 20px;
+        }
+        #score {
+            cursor: crosshair;
+            display: block;
+            background: white;
+        }
+        .info {
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            padding: 10px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 100%;
+        }
+        .modal h2 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 18px;
+        }
+        .modal-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        .modal-buttons button {
+            width: 100%;
+            padding: 12px;
+            font-size: 14px;
+        }
+        @media (min-width: 768px) {
+            .container { padding: 30px; max-width: 1400px; }
+            .header h1 { font-size: 28px; }
+            .metadata {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            .controls { max-height: none; }
+            .fig-button { width: 55px; height: 55px; font-size: 28px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 Editor de Partituras Profissional</h1>
+        </div>
+
+        <div class="metadata">
+            <input type="text" id="title-input" placeholder="Título da Música" value="Minha Composição">
+            <input type="text" id="composer-input" placeholder="Compositor">
+            <div class="meta-row">
+                <label>Compasso:</label>
+                <input type="number" id="time-top" min="1" max="16" value="4">
+                <span>/</span>
+                <input type="number" id="time-bottom" min="1" max="16" value="4">
+            </div>
+            <div class="meta-row">
+                <label>Tempo (BPM):</label>
+                <input type="number" id="tempo-input" min="40" max="240" value="120">
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-section">
+                <h3>Figuras Normais</h3>
+                <div class="button-group">
+                    <button class="fig-button selected" data-type="semibreve" data-dot="false">○</button>
+                    <button class="fig-button" data-type="minima" data-dot="false">𝅗𝅥</button>
+                    <button class="fig-button" data-type="seminima" data-dot="false">♩</button>
+                    <button class="fig-button" data-type="colcheia" data-dot="false">♪</button>
+                    <button class="fig-button" data-type="semicolcheia" data-dot="false">♬</button>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Figuras Pontuadas</h3>
+                <div class="button-group">
+                    <button class="fig-button" data-type="semibreve" data-dot="true">○.</button>
+                    <button class="fig-button" data-type="minima" data-dot="true">𝅗𝅥.</button>
+                    <button class="fig-button" data-type="seminima" data-dot="true">♩.</button>
+                    <button class="fig-button" data-type="colcheia" data-dot="true">♪.</button>
+                    <button class="fig-button" data-type="semicolcheia" data-dot="true">♬.</button>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Pausas</h3>
+                <div class="button-group">
+                    <button class="fig-button" data-type="pausa-semibreve" data-dot="false">𝄻</button>
+                    <button class="fig-button" data-type="pausa-minima" data-dot="false">𝄼</button>
+                    <button class="fig-button" data-type="pausa-seminima" data-dot="false">𝄽</button>
+                    <button class="fig-button" data-type="pausa-colcheia" data-dot="false">𝄾</button>
+                    <button class="fig-button" data-type="pausa-semicolcheia" data-dot="false">𝄿</button>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Acidentes</h3>
+                <div class="button-group">
+                    <button class="accidental-btn" data-accidental="sharp">♯</button>
+                    <button class="accidental-btn" data-accidental="flat">♭</button>
+                    <button class="accidental-btn" data-accidental="natural">♮</button>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Armadura de Clave</h3>
+                <div class="button-group">
+                    <button id="key-sharp-up">♯ +</button>
+                    <button id="key-sharp-down">♯ -</button>
+                    <button id="key-flat-up">♭ +</button>
+                    <button id="key-flat-down">♭ -</button>
+                    <button id="key-reset">⟲</button>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Clave Ativa</h3>
+                <div class="button-group">
+                    <button class="action-btn active" id="clef-treble-btn">🎼 Sol</button>
+                    <button class="action-btn" id="clef-bass-btn">🎹 Fá</button>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Ações</h3>
+                <div class="button-group">
+                    <button class="action-btn" id="play-btn">▶ Tocar</button>
+                    <label for="import-file" class="file-upload-label action-btn" id="import-btn">📥 Importar</label>
+                    <input type="file" id="import-file" accept=".json" style="display: none;">
+                    <button class="action-btn" id="harmony-btn">🎵 Harmonia</button>
+                    <button class="action-btn" id="add-staff-btn">➕ Pauta</button>
+                    <button class="action-btn" id="undo-btn">↶ Desfazer</button>
+                    <button class="action-btn" id="clear-btn">✕ Limpar</button>
+                    <button class="action-btn" id="download-btn">💾 Exportar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="score-container">
+            <div class="score-wrapper">
+                <canvas id="score"></canvas>
+            </div>
+        </div>
+
+        <div class="info">
+            👆 Clique na pauta • Barras de compasso automáticas • Pautas conectadas
+        </div>
+    </div>
+
+    <div id="export-modal" class="modal">
+        <div class="modal-content">
+            <h2>Exportar Partitura</h2>
+            <p style="margin-bottom: 15px; font-size: 14px;">Escolha o formato:</p>
+            <div class="modal-buttons">
+                <button id="export-json">📄 JSON</button>
+                <button id="export-musicxml">🎼 MusicXML</button>
+                <button id="export-pdf">🖼️ PNG</button>
+                <button id="export-cancel" style="background: #ccc;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Estado Global
+        let staffs = [[{ clef: 'treble', notes: [] }, { clef: 'bass', notes: [] }]];
+        let currentStaffIndex = 0;
+        let currentClef = 'treble';
+        let selectedType = "semibreve";
+        let useDot = false;
+        let selectedAccidental = null;
+        let isHarmonyMode = false;
+        let keySharps = 0;
+        let keyFlats = 0;
+        let timeSignature = { top: 4, bottom: 4 };
+        let tempo = 120;
+
+        const canvas = document.getElementById("score");
+        const ctx = canvas.getContext("2d");
+
+        // Constantes
+        const SPACING = 50;
+        const MIN_SCORE_WIDTH = 900;
+        const CLEF_MARGIN = 160;
+        const STAFF_OFFSET = 400;
+
+        const noteYTreble = {
+            "C6": 20, "B5": 30, "A5": 40, "G5": 50, "F5": 60, "E5": 70,
+            "D5": 80, "C5": 90, "B4": 100, "A4": 110, "G4": 120,
+            "F4": 130, "E4": 140, "D4": 150, "C4": 160, "B3": 170,
+            "A3": 180, "G3": 190
+        };
+
+        const noteYBass = {
+            "A3": 240, "G3": 250, "F3": 260, "E3": 270, "D3": 280,
+            "C3": 290, "B2": 300, "A2": 310, "G2": 320, "F2": 330,
+            "E2": 340, "D2": 350, "C2": 360, "B1": 370, "A1": 380
+        };
+
+        const freqs = {
+            "A1": 55.00, "B1": 61.74, "C2": 65.41, "D2": 73.42, "E2": 82.41, "F2": 87.31, "G2": 98.00,
+            "A2": 110.00, "B2": 123.47, "C3": 130.81, "D3": 146.83, "E3": 164.81, "F3": 174.61, "G3": 196.00,
+            "A3": 220.00, "B3": 246.94, "C4": 261.63, "D4": 293.66, "E4": 329.63, "F4": 349.23, "G4": 392.00,
+            "A4": 440.00, "B4": 493.88, "C5": 523.25, "D5": 587.33, "E5": 659.25,
+            "F5": 698.46, "G5": 783.99, "A5": 880.00, "B5": 987.77, "C6": 1046.50
+        };
+
+        const noteDurations = {
+            "semibreve": 2.0, "minima": 1.0, "seminima": 0.5, "colcheia": 0.25, "semicolcheia": 0.125,
+            "pausa-semibreve": 2.0, "pausa-minima": 1.0, "pausa-seminima": 0.5, 
+            "pausa-colcheia": 0.25, "pausa-semicolcheia": 0.125
+        };
+
+        const SHARP_FACTOR = 1.059463;
+        const FLAT_FACTOR = 1 / SHARP_FACTOR;
+
+        // Calcular duração em tempos (baseado no denominador do compasso)
+        function getDurationInBeats(noteType, dot, bottomNumber) {
+            const baseDurations = {
+                "semibreve": 4, "minima": 2, "seminima": 1, "colcheia": 0.5, "semicolcheia": 0.25,
+                "pausa-semibreve": 4, "pausa-minima": 2, "pausa-seminima": 1, 
+                "pausa-colcheia": 0.5, "pausa-semicolcheia": 0.25
+            };
+            
+            let duration = baseDurations[noteType] || 1;
+            
+            // Ajuste baseado no denominador (4/4, 3/4, 6/8, etc)
+            if (bottomNumber === 8) duration *= 0.5;
+            else if (bottomNumber === 2) duration *= 2;
+            
+            if (dot) duration *= 1.5;
+            
+            return duration;
+        }
+
+        // Funções de desenho
+        function drawAccidental(acc, x, y) {
+            ctx.font = "24px Arial";
+            ctx.fillStyle = "#333";
+            const symbol = acc === 'sharp' ? '♯' : acc === 'flat' ? '♭' : '♮';
+            ctx.fillText(symbol, x - 20, y + 8);
+        }
+
+        function drawDot(x, y) {
+            ctx.beginPath();
+            ctx.arc(x + 18, y, 3, 0, Math.PI * 2);
+            ctx.fillStyle = "#333";
+            ctx.fill();
+        }
+
+        function drawSemibreve(x, y, dot = false) {
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "#333";
+            ctx.beginPath();
+            ctx.ellipse(x, y, 10, 7, -0.3, 0, Math.PI * 2);
+            ctx.stroke();
+            if (dot) drawDot(x, y);
+        }
+
+        function drawMinima(x, y, dot = false) {
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "#333";
+            ctx.beginPath();
+            ctx.ellipse(x, y, 10, 7, -0.3, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x + 10, y);
+            ctx.lineTo(x + 10, y - 40);
+            ctx.stroke();
+            if (dot) drawDot(x, y);
+        }
+
+        function drawSeminima(x, y, dot = false) {
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "#333";
+            ctx.fillStyle = "#333";
+            ctx.beginPath();
+            ctx.ellipse(x, y, 10, 7, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(x + 10, y);
+            ctx.lineTo(x + 10, y - 40);
+            ctx.stroke();
+            if (dot) drawDot(x, y);
+        }
+
+        function drawColcheia(x, y, dot = false) {
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "#333";
+            ctx.fillStyle = "#333";
+            ctx.beginPath();
+            ctx.ellipse(x, y, 10, 7, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(x + 10, y);
+            ctx.lineTo(x + 10, y - 40);
+            ctx.stroke();
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(x + 10, y - 40);
+            ctx.quadraticCurveTo(x + 26, y - 33, x + 10, y - 20);
+            ctx.stroke();
+            if (dot) drawDot(x, y);
+        }
+
+        function drawSemicolcheia(x, y, dot = false) {
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "#333";
+            ctx.fillStyle = "#333";
+            ctx.beginPath();
+            ctx.ellipse(x, y, 10, 7, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(x + 10, y);
+            ctx.lineTo(x + 10, y - 40);
+            ctx.stroke();
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(x + 10, y - 40);
+            ctx.quadraticCurveTo(x + 26, y - 33, x + 10, y - 20);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x + 10, y - 35);
+            ctx.quadraticCurveTo(x + 26, y - 28, x + 10, y - 15);
+            ctx.stroke();
+            if (dot) drawDot(x, y);
+        }
+
+        function drawRest(type, x, y) {
+            ctx.font = "32px Arial";
+            ctx.fillStyle = "#333";
+            ctx.textAlign = "center";
+            const symbols = {
+                'pausa-semibreve': ['𝄻', 110],
+                'pausa-minima': ['𝄼', 130],
+                'pausa-seminima': ['𝄽', 120],
+                'pausa-colcheia': ['𝄾', 120],
+                'pausa-semicolcheia': ['𝄿', 120]
+            };
+            const [symbol, yOffset] = symbols[type] || ['', 120];
+            ctx.fillText(symbol, x, y - (noteYTreble['G4'] - yOffset));
+            ctx.textAlign = "left";
+        }
+
+        function drawNote(note, x, y) {
+            if (note.type.startsWith('pausa-')) {
+                drawRest(note.type, x, y);
+                return;
+            }
+            const dot = note.dot;
+            if (note.type === "semibreve") drawSemibreve(x, y, dot);
+            else if (note.type === "minima") drawMinima(x, y, dot);
+            else if (note.type === "seminima") drawSeminima(x, y, dot);
+            else if (note.type === "colcheia") drawColcheia(x, y, dot);
+            else if (note.type === "semicolcheia") drawSemicolcheia(x, y, dot);
+        }
+
+        function drawLedgerLines(x, y, yOffset, clef) {
+            ctx.strokeStyle = "#333";
+            ctx.lineWidth = 1.5;
+            
+            if (clef === 'treble') {
+                const topStaffLine = 80 + yOffset;
+                if (y < topStaffLine) {
+                    for (let lineY = topStaffLine - 20; lineY >= y - 5; lineY -= 20) {
+                        ctx.beginPath();
+                        ctx.moveTo(x - 15, lineY);
+                        ctx.lineTo(x + 15, lineY);
+                        ctx.stroke();
+                    }
+                }
+                const bottomStaffLine = 160 + yOffset;
+                if (y > bottomStaffLine) {
+                    for (let lineY = bottomStaffLine + 20; lineY <= y + 5; lineY += 20) {
+                        ctx.beginPath();
+                        ctx.moveTo(x - 15, lineY);
+                        ctx.lineTo(x + 15, lineY);
+                        ctx.stroke();
+                    }
+                }
+            } else {
+                const topStaffLine = 260 + yOffset;
+                if (y < topStaffLine) {
+                    for (let lineY = topStaffLine - 20; lineY >= y - 5; lineY -= 20) {
+                        ctx.beginPath();
+                        ctx.moveTo(x - 15, lineY);
+                        ctx.lineTo(x + 15, lineY);
+                        ctx.stroke();
+                    }
+                }
+                const bottomStaffLine = 340 + yOffset;
+                if (y > bottomStaffLine) {
+                    for (let lineY = bottomStaffLine + 20; lineY <= y + 5; lineY += 20) {
+                        ctx.beginPath();
+                        ctx.moveTo(x - 15, lineY);
+                        ctx.lineTo(x + 15, lineY);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function drawBarline(x, yOffset) {
+            ctx.strokeStyle = "#333";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x, 80 + yOffset);
+            ctx.lineTo(x, 160 + yOffset);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, 260 + yOffset);
+            ctx.lineTo(x, 340 + yOffset);
+            ctx.stroke();
+        }
+
+        function drawKeySharps(yBase, clef) {
+            const positions = clef === 'treble' ? 
+                ['F5', 'C5', 'G5', 'D5', 'A4', 'E5', 'B4'] :
+                ['A3', 'E3', 'B2', 'F3', 'C3', 'G3', 'D3'];
+            const noteYMap = clef === 'treble' ? noteYTreble : noteYBass;
+            
+            for (let i = 0; i < keySharps; i++) {
+                const pitch = positions[i];
+                const x = 80 + (i * 12);
+                const y = noteYMap[pitch];
+                ctx.font = "24px Arial";
+                ctx.fillStyle = "#333";
+                ctx.fillText("♯", x, y + 8);
+            }
+        }
+
+        function drawKeyFlats(yBase, clef) {
+            const positions = clef === 'treble' ?
+                ['B4', 'E5', 'A4', 'D5', 'G4', 'C5', 'F4'] :
+                ['D3', 'G3', 'C3', 'F3', 'B2', 'E3', 'A2'];
+            const noteYMap = clef === 'treble' ? noteYTreble : noteYBass;
+            
+            for (let i = 0; i < keyFlats; i++) {
+                const pitch = positions[i];
+                const x = 80 + (i * 12);
+                const y = noteYMap[pitch];
+                ctx.font = "24px Arial";
+                ctx.fillStyle = "#333";
+                ctx.fillText("♭", x, y + 8);
+            }
+        }
+
+        function drawTimeSignature(x, yBase) {
+            ctx.font = "bold 28px Georgia, serif";
+            ctx.fillStyle = "#333";
+            ctx.textAlign = "center";
+            const centerY = yBase + 120;
+            ctx.fillText(timeSignature.top.toString(), x, centerY - 12);
+            ctx.fillText(timeSignature.bottom.toString(), x, centerY + 22);
+            ctx.textAlign = "left";
+        }
+
+function drawSingleStaff(yBase, clef) {
+            ctx.strokeStyle = "#333";
+            ctx.lineWidth = 1.5;
+            
+            for (let i = 0; i < 5; i++) {
+                const y = yBase + 80 + i * 20;
+                ctx.beginPath();
+                ctx.moveTo(20, y);
+                ctx.lineTo(canvas.width - 20, y);
+                ctx.stroke();
+            }
+
+            if (clef === 'treble') {
+                //ctx.font = "70px Arial, sans-serif";
+				ctx.font = "70px 'Segoe UI Symbol', 'Noto Sans Symbols', Arial, sans-serif"; 
+                ctx.fillStyle = "#333";
+                ctx.textBaseline = "top";
+                ctx.fillText("𝄞", 35, yBase + 78);
+            } else {
+                //ctx.font = "50px Arial, sans-serif";
+                ctx.font = "50px 'Segoe UI Symbol', 'Noto Sans Symbols', Arial, sans-serif";
+				ctx.fillStyle = "#333";
+                ctx.textBaseline = "top";
+                ctx.fillText("𝄢", 35, yBase + 78);
+                ctx.beginPath();
+                ctx.arc(75, yBase + 100, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(75, yBase + 120, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            if (keySharps > 0) {
+                drawKeySharps(yBase, clef);
+            } else if (keyFlats > 0) {
+                drawKeyFlats(yBase, clef);
+            }
+
+            drawTimeSignature(110, yBase);
+            
+            ctx.beginPath();
+            ctx.moveTo(canvas.width - 20, yBase + 80);
+            ctx.lineTo(canvas.width - 20, yBase + 160);
+            ctx.stroke();
+        }
+
+        function drawStaff(staffIndex) {
+            const yOffset = staffIndex * STAFF_OFFSET;
+            
+            drawSingleStaff(yOffset, 'treble');
+            drawSingleStaff(yOffset + 180, 'bass');
+            
+            ctx.strokeStyle = "#333";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(15, 80 + yOffset);
+            ctx.lineTo(15, 340 + yOffset);
+            ctx.stroke();
+            
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(20, 80 + yOffset);
+            ctx.lineTo(20, 160 + yOffset);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(20, 260 + yOffset);
+            ctx.lineTo(20, 340 + yOffset);
+            ctx.stroke();
+        }
+
+        function redraw() {
+            let maxNotesCount = 0;
+            for (const grandStaff of staffs) {
+                const trebleCount = grandStaff[0].notes.length;
+                const bassCount = grandStaff[1].notes.length;
+                const maxCount = Math.max(trebleCount, bassCount);
+                if (maxCount > maxNotesCount) maxNotesCount = maxCount;
+            }
+            
+            let requiredWidth = CLEF_MARGIN + (maxNotesCount * SPACING) + SPACING + 20;
+            canvas.width = Math.max(MIN_SCORE_WIDTH, requiredWidth);
+
+            const requiredHeight = staffs.length * STAFF_OFFSET + 100;
+            canvas.height = requiredHeight;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            staffs.forEach((grandStaff, staffIndex) => {
+                drawStaff(staffIndex);
+                
+                const yOffsetBase = staffIndex * STAFF_OFFSET;
+                
+                // Desenhar clave de Sol com barras de compasso
+                let xTreble = CLEF_MARGIN;
+                let currentBeat = 0;
+                
+                for (const chord of grandStaff[0].notes) {
+                    for (const note of chord) {
+                        if (note.type.startsWith('pausa-')) {
+                            drawRest(note.type, xTreble, yOffsetBase);
+                        } else {
+                            const noteYPos = noteYTreble[note.pitch];
+                            drawLedgerLines(xTreble, noteYPos, yOffsetBase, 'treble');
+                            if (note.accidental) drawAccidental(note.accidental, xTreble, noteYPos);
+                            drawNote(note, xTreble, noteYPos);
+                        }
+                    }
+                    
+                    // Calcular batidas e adicionar barra de compasso
+                    const noteDuration = getDurationInBeats(chord[0].type, chord[0].dot, timeSignature.bottom);
+                    currentBeat += noteDuration;
+                    
+                    if (currentBeat >= timeSignature.top) {
+                        drawBarline(xTreble + SPACING/2, yOffsetBase);
+                        currentBeat = 0;
+                    }
+                    
+                    xTreble += SPACING;
+                }
+                
+                // Desenhar clave de Fá com barras de compasso
+                let xBass = CLEF_MARGIN;
+                currentBeat = 0;
+                
+                for (const chord of grandStaff[1].notes) {
+                    for (const note of chord) {
+                        if (note.type.startsWith('pausa-')) {
+                            drawRest(note.type, xBass, yOffsetBase + 180);
+                        } else {
+                            const noteYPos = noteYBass[note.pitch];
+                            drawLedgerLines(xBass, noteYPos, yOffsetBase, 'bass');
+                            if (note.accidental) drawAccidental(note.accidental, xBass, noteYPos);
+                            drawNote(note, xBass, noteYPos);
+                        }
+                    }
+                    
+                    const noteDuration = getDurationInBeats(chord[0].type, chord[0].dot, timeSignature.bottom);
+                    currentBeat += noteDuration;
+                    
+                    if (currentBeat >= timeSignature.top) {
+                        drawBarline(xBass + SPACING/2, yOffsetBase + 180);
+                        currentBeat = 0;
+                    }
+                    
+                    xBass += SPACING;
+                }
+            });
+        }
+
+        // Piano com Tone.js
+        let piano = null;
+        
+        async function initPiano() {
+            if (piano) return;
+            piano = new Tone.Sampler({
+                urls: {
+                    "C4": "C4.mp3",
+                    "D#4": "Ds4.mp3",
+                    "F#4": "Fs4.mp3",
+                    "A4": "A4.mp3",
+                },
+                release: 1,
+                baseUrl: "https://tonejs.github.io/audio/salamander/"
+            }).toDestination();
+            await Tone.loaded();
+        }
+
+        function freqToNoteName(freq) {
+            const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+            const A4 = 440;
+            const C0 = A4 * Math.pow(2, -4.75);
+            let halfSteps = Math.round(12 * Math.log2(freq / C0));
+            const octave = Math.floor(halfSteps / 12);
+            return notes[halfSteps % 12] + octave;
+        }
+
+        async function playFreq(freq, duration, startTime = 0) {
+            await initPiano();
+            const note = freqToNoteName(freq);
+            piano.triggerAttackRelease(note, duration, Tone.now() + startTime, 0.6);
+        }
+
+        async function playScore() {
+            await initPiano();
+            await Tone.start();
+            
+            let allNotes = [];
+            for (const grandStaff of staffs) {
+                const trebleNotes = grandStaff[0].notes;
+                const bassNotes = grandStaff[1].notes;
+                const maxLength = Math.max(trebleNotes.length, bassNotes.length);
+                
+                for (let i = 0; i < maxLength; i++) {
+                    const combined = [];
+                    if (i < trebleNotes.length) combined.push(...trebleNotes[i]);
+                    if (i < bassNotes.length) combined.push(...bassNotes[i]);
+                    allNotes.push(combined);
+                }
+            }
+            
+            if (allNotes.length === 0) {
+                alert("Adicione notas primeiro!");
+                return;
+            }
+
+            let t = 0;
+            const beatDuration = 60 / tempo;
+            
+            for (const chord of allNotes) {
+                if (chord.length === 0) continue;
+                const baseNote = chord[0];
+                
+                if (baseNote.type.startsWith('pausa-')) {
+                    let duration = noteDurations[baseNote.type] * beatDuration;
+                    if (baseNote.dot) duration *= 1.5;
+                    t += duration;
+                    continue;
+                }
+                
+                let duration = noteDurations[baseNote.type] * beatDuration;
+                if (baseNote.dot) duration *= 1.5;
+                
+                for (const note of chord) {
+                    if (note.type.startsWith('pausa-')) continue;
+                    let freq = freqs[note.pitch];
+                    if (note.accidental === 'sharp') freq *= SHARP_FACTOR;
+                    else if (note.accidental === 'flat') freq *= FLAT_FACTOR;
+                    await playFreq(freq, duration, t);
+                }
+                t += duration;
+            }
+        }
+function importFromJSON(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+
+            // 1. Verificar a versão do arquivo (opcional, mas bom)
+            if (data.version !== "1.0") {
+                alert("Versão do arquivo incompatível.");
+                return;
+            }
+
+            // 2. Restaurar Variáveis Globais de Estado
+            tempo = data.tempo || 120; // Usa 120 como fallback
+            timeSignature.top = data.timeSignature.top || 4;
+            timeSignature.bottom = data.timeSignature.bottom || 4;
+            keySharps = data.keySignature.sharps || 0;
+            keyFlats = data.keySignature.flats || 0;
+            staffs = data.staffs || [[{ clef: 'treble', notes: [] }, { clef: 'bass', notes: [] }]];
+            currentStaffIndex = 0; // Começa na primeira pauta
+
+            // 3. Restaurar Campos de Título e Compositor no HTML
+            document.getElementById('title-input').value = data.title || '';
+            document.getElementById('composer-input').value = data.composer || '';
+            
+            // 4. Restaurar os valores dos controles de Tempo e Compasso no HTML
+            document.getElementById('tempo-input').value = tempo;
+            document.getElementById('time-top').value = timeSignature.top;
+            document.getElementById('time-bottom').value = timeSignature.bottom;
+
+
+            // 5. Redesenhar a partitura com os novos dados
+            redraw();
+
+            alert("Partitura importada com sucesso!");
+
+        } catch (error) {
+            console.error("Erro ao importar ou analisar JSON:", error);
+            alert("Erro ao carregar o arquivo. Certifique-se de que é um arquivo JSON válido.");
+        }
+    };
+
+    reader.readAsText(file);
+}
+        // Exportação
+        function exportToJSON() {
+            const data = {
+                version: "1.0",
+                title: document.getElementById('title-input').value,
+                composer: document.getElementById('composer-input').value,
+                tempo: tempo,
+                timeSignature: timeSignature,
+                keySignature: { sharps: keySharps, flats: keyFlats },
+                staffs: staffs
+            };
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${data.title.replace(/\s+/g, '_')}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportToMusicXML() {
+            const title = document.getElementById('title-input').value;
+            const composer = document.getElementById('composer-input').value;
+            let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 3.1 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
+<score-partwise version="3.1">
+  <work><work-title>${title}</work-title></work>
+  <identification><creator type="composer">${composer}</creator></identification>
+  <part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list>
+  <part id="P1">
+    <measure number="1">
+      <attributes>
+        <divisions>4</divisions>
+        <key><fifths>${keySharps - keyFlats}</fifths></key>
+        <time><beats>${timeSignature.top}</beats><beat-type>${timeSignature.bottom}</beat-type></time>
+        <clef><sign>G</sign><line>2</line></clef>
+      </attributes>
+    </measure>
+  </part>
+</score-partwise>`;
+            const blob = new Blob([xml], { type: 'application/xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${title.replace(/\s+/g, '_')}.musicxml`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportToPDF() {
+            const title = document.getElementById('title-input').value;
+            const composer = document.getElementById('composer-input').value;
+            const pdfCanvas = document.createElement('canvas');
+            pdfCanvas.width = canvas.width;
+            pdfCanvas.height = canvas.height + 100;
+            const pdfCtx = pdfCanvas.getContext('2d');
+            pdfCtx.fillStyle = 'white';
+            pdfCtx.fillRect(0, 0, pdfCanvas.width, pdfCanvas.height);
+            pdfCtx.fillStyle = 'black';
+            pdfCtx.font = 'bold 24px Arial';
+            pdfCtx.textAlign = 'center';
+            pdfCtx.fillText(title, pdfCanvas.width / 2, 40);
+            if (composer) {
+                pdfCtx.font = '16px Arial';
+                pdfCtx.fillText(composer, pdfCanvas.width / 2, 70);
+            }
+            pdfCtx.drawImage(canvas, 0, 100);
+            pdfCanvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${title.replace(/\s+/g, '_')}.png`;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        // Event Listeners
+        redraw();
+
+        document.getElementById('time-top').addEventListener('change', (e) => {
+            timeSignature.top = parseInt(e.target.value);
+            redraw();
+        });
+
+        document.getElementById('time-bottom').addEventListener('change', (e) => {
+            timeSignature.bottom = parseInt(e.target.value);
+            redraw();
+        });
+
+        document.getElementById('tempo-input').addEventListener('change', (e) => {
+            tempo = parseInt(e.target.value);
+        });
+
+        document.querySelectorAll('.fig-button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.fig-button').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                selectedType = btn.dataset.type;
+                useDot = btn.dataset.dot === 'true';
+                isHarmonyMode = false;
+                document.getElementById('harmony-btn').classList.remove('active');
+            });
+        });
+
+        document.querySelectorAll('.accidental-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const accType = btn.dataset.accidental;
+                if (selectedAccidental === accType) {
+                    selectedAccidental = null;
+                    btn.classList.remove('selected');
+                } else {
+                    document.querySelectorAll('.accidental-btn').forEach(b => b.classList.remove('selected'));
+                    selectedAccidental = accType;
+                    btn.classList.add('selected');
+                }
+            });
+        });
+
+        document.getElementById('key-sharp-up').addEventListener('click', () => {
+            if (keyFlats > 0) {
+                alert('Remova os bemóis antes');
+                return;
+            }
+            if (keySharps < 7) {
+                keySharps++;
+                redraw();
+            }
+        });
+
+        document.getElementById('key-sharp-down').addEventListener('click', () => {
+            if (keySharps > 0) {
+                keySharps--;
+                redraw();
+            }
+        });
+
+        document.getElementById('key-flat-up').addEventListener('click', () => {
+            if (keySharps > 0) {
+                alert('Remova os sustenidos antes');
+                return;
+            }
+            if (keyFlats < 7) {
+                keyFlats++;
+                redraw();
+            }
+        });
+
+        document.getElementById('key-flat-down').addEventListener('click', () => {
+            if (keyFlats > 0) {
+                keyFlats--;
+                redraw();
+            }
+        });
+
+        document.getElementById('key-reset').addEventListener('click', () => {
+            keySharps = 0;
+            keyFlats = 0;
+            redraw();
+        });
+
+        document.getElementById('harmony-btn').addEventListener('click', () => {
+            isHarmonyMode = !isHarmonyMode;
+            document.getElementById('harmony-btn').classList.toggle('active');
+        });
+
+        document.getElementById('clef-treble-btn').addEventListener('click', () => {
+            currentClef = 'treble';
+            document.getElementById('clef-treble-btn').classList.add('active');
+            document.getElementById('clef-bass-btn').classList.remove('active');
+        });
+
+        document.getElementById('clef-bass-btn').addEventListener('click', () => {
+            currentClef = 'bass';
+            document.getElementById('clef-bass-btn').classList.add('active');
+            document.getElementById('clef-treble-btn').classList.remove('active');
+        });
+
+        document.getElementById('add-staff-btn').addEventListener('click', () => {
+            staffs.push([{ clef: 'treble', notes: [] }, { clef: 'bass', notes: [] }]);
+            currentStaffIndex = staffs.length - 1;
+            redraw();
+        });
+
+        document.getElementById('play-btn').addEventListener('click', playScore);
+
+        document.getElementById('undo-btn').addEventListener('click', () => {
+            const grandStaff = staffs[currentStaffIndex];
+            const clefIndex = currentClef === 'treble' ? 0 : 1;
+            const targetStaff = grandStaff[clefIndex].notes;
+            if (targetStaff.length > 0) {
+                const lastChord = targetStaff[targetStaff.length - 1];
+                if (lastChord.length > 1) lastChord.pop();
+                else targetStaff.pop();
+                redraw();
+            }
+        });
+
+        document.getElementById('clear-btn').addEventListener('click', () => {
+            let hasNotes = false;
+            for (const grandStaff of staffs) {
+                if (grandStaff[0].notes.length > 0 || grandStaff[1].notes.length > 0) {
+                    hasNotes = true;
+                    break;
+                }
+            }
+            if (hasNotes && confirm("Limpar tudo?")) {
+                staffs = [[{ clef: 'treble', notes: [] }, { clef: 'bass', notes: [] }]];
+                currentStaffIndex = 0;
+                redraw();
+            }
+        });
+
+        document.getElementById('download-btn').addEventListener('click', () => {
+            document.getElementById('export-modal').classList.add('active');
+        });
+
+        document.getElementById('export-json').addEventListener('click', () => {
+            exportToJSON();
+            document.getElementById('export-modal').classList.remove('active');
+        });
+
+		document.getElementById('import-file').addEventListener('change', importFromJSON);
+
+
+        document.getElementById('export-musicxml').addEventListener('click', () => {
+            exportToMusicXML();
+            document.getElementById('export-modal').classList.remove('active');
+        });
+
+        document.getElementById('export-pdf').addEventListener('click', () => {
+            exportToPDF();
+            document.getElementById('export-modal').classList.remove('active');
+        });
+
+        document.getElementById('export-cancel').addEventListener('click', () => {
+            document.getElementById('export-modal').classList.remove('active');
+        });
+
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const clickX = (e.clientX - rect.left) * scaleX;
+            const clickY = (e.clientY - rect.top) * scaleY;
+
+            let targetStaffIndex = Math.floor(clickY / STAFF_OFFSET);
+            if (targetStaffIndex >= staffs.length) targetStaffIndex = staffs.length - 1;
+            if (targetStaffIndex < 0) targetStaffIndex = 0;
+            currentStaffIndex = targetStaffIndex;
+
+            const staffYOffset = targetStaffIndex * STAFF_OFFSET;
+            const relativeY = clickY - staffYOffset;
+            
+            if (relativeY > 200) {
+                currentClef = 'bass';
+                document.getElementById('clef-bass-btn').classList.add('active');
+                document.getElementById('clef-treble-btn').classList.remove('active');
+            } else {
+                currentClef = 'treble';
+                document.getElementById('clef-treble-btn').classList.add('active');
+                document.getElementById('clef-bass-btn').classList.remove('active');
+            }
+
+            if (selectedType.startsWith('pausa-')) {
+                const newNote = {
+                    type: selectedType,
+                    dot: useDot,
+                    pitch: null,
+                    accidental: null
+                };
+                const clefIndex = currentClef === 'treble' ? 0 : 1;
+                const targetStaff = staffs[currentStaffIndex][clefIndex].notes;
+                if (isHarmonyMode && targetStaff.length > 0) {
+                    alert('Pausas não podem ser adicionadas em harmonia');
+                    return;
+                }
+                targetStaff.push([newNote]);
+                redraw();
+                return;
+            }
+
+            const noteYMap = currentClef === 'treble' ? noteYTreble : noteYBass;
+            let bestPitch = null;
+            let bestDist = Infinity;
+            
+            for (const p in noteYMap) {
+                const d = Math.abs(noteYMap[p] - relativeY);
+                if (d < bestDist) {
+                    bestDist = d;
+                    bestPitch = p;
+                }
+            }
+            
+            if (bestDist > 15) return;
+
+            const newNote = {
+                pitch: bestPitch,
+                type: selectedType,
+                dot: useDot,
+                accidental: selectedAccidental
+            };
+            
+            const clefIndex = currentClef === 'treble' ? 0 : 1;
+            const targetStaff = staffs[currentStaffIndex][clefIndex].notes;
+
+            if (isHarmonyMode && targetStaff.length > 0) {
+                const lastChord = targetStaff[targetStaff.length - 1];
+                const isPitchPresent = lastChord.some(note =>
+                    note.pitch === bestPitch && note.accidental === selectedAccidental
+                );
+                if (!isPitchPresent) lastChord.push(newNote);
+            } else {
+                targetStaff.push([newNote]);
+            }
+
+            selectedAccidental = null;
+            document.querySelectorAll('.accidental-btn').forEach(b => b.classList.remove('selected'));
+            redraw();
+        });
+
+        document.getElementById('export-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'export-modal') {
+                e.target.classList.remove('active');
+            }
+        });
+    </script>    
+</body>
+</html>
