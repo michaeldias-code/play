@@ -808,6 +808,26 @@ async function playScore() {
         for (const note of chord) {
             if (note.type.startsWith('pausa-')) continue;
             let freq = freqs[note.pitch];
+
+				
+			// Aplica acidentes da armadura de clave
+			if (!note.accidental) { // Só aplica se a nota não tem acidente próprio
+				const sharpOrder = ['F', 'C', 'G', 'D', 'A', 'E', 'B'];
+				const flatOrder = ['B', 'E', 'A', 'D', 'G', 'C', 'F'];
+				
+				const noteLetter = note.pitch[0]; // Pega só a letra (C, D, E, etc)
+				
+				if (keySharps > 0) {
+					if (sharpOrder.slice(0, keySharps).includes(noteLetter)) {
+						freq *= SHARP_FACTOR;
+					}
+				} else if (keyFlats > 0) {
+					if (flatOrder.slice(0, keyFlats).includes(noteLetter)) {
+						freq *= FLAT_FACTOR;
+					}
+				}
+			}
+
             if (note.accidental === 'sharp') freq *= SHARP_FACTOR;
             else if (note.accidental === 'flat') freq *= FLAT_FACTOR;
             await playFreq(freq, duration, t);
