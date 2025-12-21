@@ -365,6 +365,9 @@ const CLEF_MARGIN = 160;
 const STAFF_OFFSET = 400;
 const MAX_NOTES_PER_SYSTEM = Math.floor((MIN_SCORE_WIDTH - CLEF_MARGIN) / SPACING);
 
+const MAX_COMPASSOS_POR_PAUTA = 16; // Quantidade de compassos por pauta antes de adicionar uma nova
+
+
 const noteYTreble = {
     "C6": 20, "B5": 30, "A5": 40, "G5": 50, "F5": 60, "E5": 70,
     "D5": 80, "C5": 90, "B4": 100, "A4": 110, "G4": 120,
@@ -691,34 +694,40 @@ function drawStaff(staffIndex) {
 }
 function redraw() {
     let maxNotesCount = 0;
-    // Encontrar a quantidade máxima de notas entre as duas claves de cada staff
+    let totalCompassos = 0; // Contagem total de compassos
+
+    // Primeiro, contamos o número total de compassos (notas) nas pautas.
     for (const grandStaff of staffs) {
-        const trebleCount = grandStaff[0].notes.length;
-        const bassCount = grandStaff[1].notes.length;
-        const maxCount = Math.max(trebleCount, bassCount);
-        if (maxCount > maxNotesCount) maxNotesCount = maxCount;
+        const trebleNotes = grandStaff[0].notes;
+        const bassNotes = grandStaff[1].notes;
+        
+        const maxCount = Math.max(trebleNotes.length, bassNotes.length);
+        maxNotesCount = Math.max(maxNotesCount, maxCount);
+
+        // Contamos os compassos
+        totalCompassos += Math.max(trebleNotes.length, bassNotes.length);
     }
 
-    // Calcular a largura necessária para o canvas
+    // Calculando a largura necessária para o canvas
     let requiredWidth = CLEF_MARGIN + (maxNotesCount * SPACING) + SPACING + 20;
     canvas.width = Math.max(MIN_SCORE_WIDTH, requiredWidth);
 
-    // Calcular a altura necessária para o canvas
-    const requiredHeight = staffs.length * STAFF_OFFSET + 100;
-    canvas.height = requiredHeight;
-
-    // Limpar o canvas antes de desenhar novamente
+    // Calculando a altura necessária com base no número de compassos
+    const totalHeight = Math.ceil(totalCompassos / MAX_COMPASSOS_POR_PAUTA) * STAFF_OFFSET + 100; // Adiciona 100px de margem
+    canvas.height = totalHeight;
+    
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Desenhar todos os staffs
+    // Agora desenhamos cada grandStaff conforme necessário
+    let currentCompasso = 0;
     staffs.forEach((grandStaff, staffIndex) => {
         const yOffsetBase = staffIndex * STAFF_OFFSET;
-        drawStaff(staffIndex); // Desenha as pautas (treble e bass)
 
+        drawStaff(staffIndex);
+
+        // Desenha as notas da clave de sol
         let xTreble = CLEF_MARGIN;
         let currentBeat = 0;
-
-        // Desenhar notas da clave de Sol
         for (const chord of grandStaff[0].notes) {
             for (const note of chord) {
                 if (note.type.startsWith('pausa-')) {
@@ -731,7 +740,7 @@ function redraw() {
                 }
             }
 
-            // Calcular batidas e adicionar barra de compasso
+            // Calcular a duração e, se necessário, adicionar a barra de compasso
             const noteDuration = getDurationInBeats(chord[0].type, chord[0].dot, timeSignature.bottom);
             currentBeat += noteDuration;
             if (currentBeat >= timeSignature.top) {
@@ -739,12 +748,18 @@ function redraw() {
                 currentBeat = 0;
             }
             xTreble += SPACING;
+
+            // Se o número de compassos ultrapassar o limite, cria uma nova pauta
+            currentCompasso++;
+            if (currentCompasso >= MAX_COMPASSOS_POR_PAUTA) {
+                staffs.push([{ clef: 'treble', notes: [] }, { clef: 'bass', notes: [] }]);
+                currentCompasso = 0;
+            }
         }
 
+        // Desenha as notas da clave de fá
         let xBass = CLEF_MARGIN;
         currentBeat = 0;
-
-        // Desenhar notas da clave de Fá
         for (const chord of grandStaff[1].notes) {
             for (const note of chord) {
                 if (note.type.startsWith('pausa-')) {
@@ -757,7 +772,6 @@ function redraw() {
                 }
             }
 
-            // Calcular batidas e adicionar barra de compasso
             const noteDuration = getDurationInBeats(chord[0].type, chord[0].dot, timeSignature.bottom);
             currentBeat += noteDuration;
             if (currentBeat >= timeSignature.top) {
@@ -765,6 +779,13 @@ function redraw() {
                 currentBeat = 0;
             }
             xBass += SPACING;
+
+            // Se o número de compassos ultrapassar o limite, cria uma nova pauta
+            currentCompasso++;
+            if (currentCompasso >= MAX_COMPASSOS_POR_PAUTA) {
+                staffs.push([{ clef: 'treble', notes: [] }, { clef: 'bass', notes: [] }]);
+                currentCompasso = 0;
+            }
         }
     });
 }
