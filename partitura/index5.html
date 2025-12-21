@@ -412,8 +412,7 @@ function checkAndCreateNewStaff() {
     }
     return false;
 }
-
-function updateStaffIndicator() {
+    function updateStaffIndicator() {
     const indicator = document.getElementById('staff-indicator');
     if (indicator) {
         indicator.textContent = `Pauta ${currentStaffIndex + 1}/${staffs.length}`;
@@ -659,12 +658,6 @@ function drawTimeSignature(x, yBase) {
 }
 
 function drawSingleStaff(yBase, clef, isActive = false) {
-    // Destaca pauta ativa
-    if (isActive) {
-        ctx.fillStyle = 'rgba(59, 130, 246, 0.05)';
-        ctx.fillRect(10, yBase + 70, canvas.width - 30, 100);
-    }
-    
     ctx.strokeStyle = "#333";
     ctx.lineWidth = 1.5;
     
@@ -674,6 +667,13 @@ function drawSingleStaff(yBase, clef, isActive = false) {
         ctx.moveTo(20, y);
         ctx.lineTo(canvas.width - 20, y);
         ctx.stroke();
+    }
+    
+    // Destaca pauta ativa POR CIMA das linhas
+    if (isActive) {
+        ctx.strokeStyle = 'rgba(59, 130, 246, 0.6)';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(15, yBase + 75, canvas.width - 35, 90);
     }
 
     if (clef === 'treble') {
@@ -702,6 +702,8 @@ function drawSingleStaff(yBase, clef, isActive = false) {
 
     drawTimeSignature(110, yBase);
     
+    ctx.strokeStyle = "#333";
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.moveTo(canvas.width - 20, yBase + 80);
     ctx.lineTo(canvas.width - 20, yBase + 160);
@@ -802,7 +804,7 @@ function redraw() {
                 }
             }
             
-       const noteDuration = getDurationInBeats(chord[0].type, chord[0].dot, timeSignature.bottom);
+            const noteDuration = getDurationInBeats(chord[0].type, chord[0].dot, timeSignature.bottom);
             currentBeat += noteDuration;
             
             if (currentBeat >= timeSignature.top) {
@@ -816,7 +818,6 @@ function redraw() {
     
     updateStaffIndicator();
 }
-
 // Piano com Tone.js
 let piano = null;
 
@@ -960,7 +961,6 @@ function exportToJSON() {
     a.click();
     URL.revokeObjectURL(url);
 }
-
 
 function exportToMusicXML() {
     const title = document.getElementById('title-input').value;
@@ -1153,6 +1153,8 @@ document.getElementById('clear-btn').addEventListener('click', () => {
     if (hasNotes && confirm("Limpar tudo?")) {
         staffs = [[{ clef: 'treble', notes: [] }, { clef: 'bass', notes: [] }]];
         currentStaffIndex = 0;
+        keySharps = 0;
+        keyFlats = 0;
         redraw();
     }
 });
@@ -1189,22 +1191,31 @@ canvas.addEventListener('click', (e) => {
     const clickX = (e.clientX - rect.left) * scaleX;
     const clickY = (e.clientY - rect.top) * scaleY;
 
+    // Determina qual pauta foi clicada
     let targetStaffIndex = Math.floor(clickY / STAFF_OFFSET);
     if (targetStaffIndex >= staffs.length) targetStaffIndex = staffs.length - 1;
     if (targetStaffIndex < 0) targetStaffIndex = 0;
+    
+    // Atualiza pauta ativa
     currentStaffIndex = targetStaffIndex;
 
+    // Determina qual clave baseado na posição Y relativa dentro da pauta
     const staffYOffset = targetStaffIndex * STAFF_OFFSET;
     const relativeY = clickY - staffYOffset;
     
-    if (relativeY > 200) {
+    // Se clicou abaixo de Y=200 dentro da pauta = clave de Fá
+    // Senão = clave de Sol
+    if (relativeY > 200 && relativeY < 380) {
         currentClef = 'bass';
         document.getElementById('clef-bass-btn').classList.add('active');
         document.getElementById('clef-treble-btn').classList.remove('active');
-    } else {
+    } else if (relativeY >= 50 && relativeY <= 200) {
         currentClef = 'treble';
         document.getElementById('clef-treble-btn').classList.add('active');
         document.getElementById('clef-bass-btn').classList.remove('active');
+    } else {
+        // Clique fora da área de pautas, ignora
+        return;
     }
 
     if (selectedType.startsWith('pausa-')) {
@@ -1222,9 +1233,7 @@ canvas.addEventListener('click', (e) => {
         }
         targetStaff.push([newNote]);
         
-        // Verifica se precisa criar nova pauta
         checkAndCreateNewStaff();
-        
         redraw();
         return;
     }
@@ -1233,15 +1242,18 @@ canvas.addEventListener('click', (e) => {
     let bestPitch = null;
     let bestDist = Infinity;
     
+    // Busca pela nota mais próxima do clique
     for (const p in noteYMap) {
-        const d = Math.abs(noteYMap[p] - relativeY);
+        const noteAbsoluteY = noteYMap[p] + staffYOffset;
+        const d = Math.abs(noteAbsoluteY - clickY);
         if (d < bestDist) {
             bestDist = d;
             bestPitch = p;
         }
     }
     
-    if (bestDist > 15) return;
+    // Se o clique está muito longe de qualquer nota, ignora
+    if (bestDist > 25) return;
 
     const newNote = {
         pitch: bestPitch,
@@ -1266,9 +1278,7 @@ canvas.addEventListener('click', (e) => {
     selectedAccidental = null;
     document.querySelectorAll('.accidental-btn').forEach(b => b.classList.remove('selected'));
     
-    // Verifica se precisa criar nova pauta automaticamente
     checkAndCreateNewStaff();
-    
     redraw();
 });
 
@@ -1298,7 +1308,6 @@ document.addEventListener('keydown', (e) => {
         }
     }
 });
-    </script>    
     
 </body>
 </html>
