@@ -590,13 +590,14 @@ function drawKeySharps(yBase, clef) {
         ['F5', 'C5', 'G5', 'D5', 'A4', 'E5', 'B4'] :
         ['A3', 'E3', 'B2', 'F3', 'C3', 'G3', 'D3'];
     const noteYMap = clef === 'treble' ? noteYTreble : noteYBass;
+	const yOffsetFino = clef === 'treble' ? 10 : 170;
     for (let i = 0; i < keySharps; i++) {
         const pitch = positions[i];
         const x = 80 + (i * 12);
         const y = noteYMap[pitch] + yBase;
         ctx.font = "24px Arial";
         ctx.fillStyle = "#333";
-        ctx.fillText("♯", x, y + 8);
+        ctx.fillText("♯", x, y - yOffsetFino);
     }
 }
 function drawKeyFlats(yBase, clef) {
@@ -604,13 +605,14 @@ function drawKeyFlats(yBase, clef) {
         ['B4', 'E5', 'A4', 'D5', 'G4', 'C5', 'F4'] :
         ['D3', 'G3', 'C3', 'F3', 'B2', 'E3', 'A2'];
     const noteYMap = clef === 'treble' ? noteYTreble : noteYBass;
+	const yOffsetFino = clef === 'treble' ? 10 : 170;
     for (let i = 0; i < keyFlats; i++) {
         const pitch = positions[i];
         const x = 80 + (i * 12);
         const y = noteYMap[pitch] + yBase;
         ctx.font = "24px Arial";
         ctx.fillStyle = "#333";
-        ctx.fillText("♭", x, y + 8);
+        ctx.fillText("♭", x, y - yOffsetFino);
     }
 }
 function drawTimeSignature(x, yBase) {
