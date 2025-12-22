@@ -1,4 +1,4 @@
-// AI_Medium.js v2
+// AI_Medium.js v3
 // Estratégia melhorada com avaliação posicional, táticas avançadas e planejamento estratégico
 export class AI_Medium {
     constructor(board, validator, enPassant) {
@@ -109,14 +109,59 @@ export class AI_Medium {
         // 4. SALVAR PEÇAS AMEAÇADAS (análise de ameaças)
         const threatened = this.getThreatenedPieces(color);
         if (threatened.length > 0) {
-            const escapeMoves = this.findSafeEscapeMoves(myMoves, threatened, enemyColor);
-            if (escapeMoves.length > 0) {
-                console.log("🛡️ Salvando peça ameaçada");
-                const best = this.evaluateAndChooseBest(escapeMoves, color, enemyColor);
+            console.log(`⚠️ Peças ameaçadas: ${threatened.map(t => `${t.piece.tipo}(${this.valueOfPiece(t.piece)})`).join(', ')}`);
+            
+            // PRIORIDADE 1: Fugir para casa segura (sem capturar)
+            const safeEscapes = myMoves.filter(m => 
+                threatened.some(t => t.index === m.from) && 
+                !m.capturedPiece &&
+                !this.wouldBeAttackedAfterMove(m, enemyColor)
+            );
+            
+            if (safeEscapes.length > 0) {
+                console.log("🏃 Fugindo para casa segura (sem captura)");
+                const best = this.evaluateAndChooseBest(safeEscapes, color, enemyColor);
                 this.applyMoveWithEPAndRegister(best.move);
                 this.lastMove = { from: best.move.from, to: best.move.to };
                 return best.move;
             }
+            
+            // PRIORIDADE 2: Capturar peça de valor MAIOR OU IGUAL
+            const worthyCaptures = myMoves.filter(m => {
+                if (!threatened.some(t => t.index === m.from)) return false;
+                if (!m.capturedPiece) return false;
+                
+                const myValue = this.valueOfPiece(m.piece);
+                const captureValue = this.valueOfPiece(m.capturedPiece);
+                
+                // Só capturar se for troca justa ou favorável
+                const isWorthIt = captureValue >= myValue - 50; // tolerância de 50 pontos
+                
+                console.log(`   Avaliando captura: ${m.piece.tipo}(${myValue}) captura ${m.capturedPiece.tipo}(${captureValue}) = ${isWorthIt ? '✅' : '❌'}`);
+                
+                return isWorthIt;
+            });
+            
+            if (worthyCaptures.length > 0) {
+                console.log("⚔️ Peça ameaçada capturando peça de valor similar/maior");
+                const best = this.evaluateAndChooseBest(worthyCaptures, color, enemyColor);
+                this.applyMoveWithEPAndRegister(best.move);
+                this.lastMove = { from: best.move.from, to: best.move.to };
+                return best.move;
+            }
+            
+            // PRIORIDADE 3: Defender a peça (movendo outra peça para protegê-la)
+            const defenseMoves = this.findDefenseMoves(threatened, myMoves, color);
+            if (defenseMoves.length > 0) {
+                console.log("🛡️ Defendendo peça ameaçada com outra peça");
+                const best = this.evaluateAndChooseBest(defenseMoves, color, enemyColor);
+                this.applyMoveWithEPAndRegister(best.move);
+                this.lastMove = { from: best.move.from, to: best.move.to };
+                return best.move;
+            }
+            
+            // Última opção: aceitar perda da peça e fazer melhor movimento possível
+            console.log("😞 Não há como salvar a peça ameaçada sem prejuízo - fazendo melhor movimento geral");
         }
         
         // 5. CAPTURAS FAVORÁVEIS (com análise profunda)
@@ -560,6 +605,32 @@ export class AI_Medium {
             threatened.some(t => t.index === m.from) && 
             !this.wouldBeAttackedAfterMove(m, enemyColor)
         );
+    }
+    
+    findDefenseMoves(threatened, allMoves, color) {
+        const defenseMoves = [];
+        
+        for (const threat of threatened) {
+            // Procurar movimentos que protejam a peça ameaçada
+            for (const move of allMoves) {
+                // Não mover a própria peça ameaçada
+                if (move.from === threat.index) continue;
+                
+                // Verificar se após o movimento, a peça ameaçada fica protegida
+                let becomesProtected = false;
+                this.simulateMove(move, () => {
+                    const defenders = this.getAttackersOnSquare(threat.index, color);
+                    // Se agora há pelo menos 1 defensor
+                    becomesProtected = defenders.length > 0;
+                });
+                
+                if (becomesProtected) {
+                    defenseMoves.push(move);
+                }
+            }
+        }
+        
+        return defenseMoves;
     }
 
     filterRepeatingMoves(moves) {
