@@ -176,7 +176,7 @@ export class AI_Medium {
     // AVALIAÇÃO HEAVY HEURISTICS (COM BACKUP DE PEÇAS)
     // =====================================================
 // =====================================================
-// AVALIAÇÃO HEAVY HEURISTICS (com backup e exposição)
+// AVALIAÇÃO HEURÍSTICA COMPLETA (CORRIGIDA E ROBUSTA)
 // =====================================================
 evaluate(color) {
     let score = 0;
@@ -190,61 +190,100 @@ evaluate(color) {
         const sign = p.cor === color ? 1 : -1;
         const val = this.pieceValue[p.tipo];
 
-        // Material
+        // ================= MATERIAL =================
         score += sign * val;
 
-        // Valor posicional
+        // ================= POSICIONAL =================
         score += sign * this.positional(i, p, endgame);
 
-        // Desenvolvimento de peças menores (cavalos e bispos)
-        if ((p.tipo === "♘" || p.tipo === "♞" ||
-             p.tipo === "♗" || p.tipo === "♝") && i >= 16 && i <= 47) {
+        // ================= DESENVOLVIMENTO =================
+        if (
+            (p.tipo === "♘" || p.tipo === "♞" ||
+             p.tipo === "♗" || p.tipo === "♝") &&
+            i >= 16 && i <= 47
+        ) {
             score += sign * 25;
         }
 
-        // Penalidade dama precoce
+        // ================= DAMA PRECOCE =================
         if ((p.tipo === "♕" || p.tipo === "♛") && this.moveNumber < 10) {
             score -= sign * 40;
         }
 
-        // Segurança do rei
+        // ================= SEGURANÇA DO REI =================
         if ((p.tipo === "♔" || p.tipo === "♚") && !endgame && i >= 24 && i <= 39) {
             score -= sign * 80;
         }
 
-        // Controle do centro
-        if ([27, 28, 35, 36].includes(i)) score += sign * 20;
+        // ================= CONTROLE DO CENTRO =================
+        if ([27, 28, 35, 36].includes(i)) {
+            score += sign * 20;
+        }
 
-        // ------------------------- PEÇAS PENDURADAS -------------------------
-        const enemyAttackers = this.getAttackers(i, enemy);
-        if (enemyAttackers.length) {
-            const defenders = this.getAttackers(i, p.cor);
-            let totalRisk = 0;
+        // =====================================================
+        // ANÁLISE DE AMEAÇAS (CORRIGIDA)
+        // =====================================================
+        const attackers = this.getAttackers(i, enemy);
+        if (attackers.length === 0) continue; // não há ameaça
 
-            for (const attacker of enemyAttackers) {
-                const attackerVal = this.pieceValue[this.board.board[attacker].tipo] || 0;
-                totalRisk += val - attackerVal;
+        const defenders = this.getAttackers(i, p.cor);
+
+        // Caso 1: peça atacada MAS há defesa suficiente → risco reduzido
+        if (defenders.length >= attackers.length) {
+
+            // Rainha nunca deve ser exposta, mesmo com backup
+            if (val >= 900) {
+                score -= sign * 120;
+                console.log(
+                    `⚠️ Rainha ${p.tipo} em ${this.coord(i)} atacada mesmo com defesa | Penalidade = 120`
+                );
             }
 
-            // Penalidade ajustada: com backup diminui risco
-            if (defenders.length > 0) {
-                const backupFactor = val >= 500 ? 0.5 : 0.1; // torre/dama penalidade parcial, peões quase nada
-                totalRisk *= backupFactor;
-                console.log(`⚠️ Peça ${p.tipo} em ${this.coord(i)} atacada com defesa | Penalidade = ${Math.floor(totalRisk)}`);
-            } else {
-                console.log(`⚠️ Peça ${p.tipo} em ${this.coord(i)} atacada sem defesa | Penalidade = ${totalRisk}`);
-            }
+            // Peças menores com backup → penalidade simbólica
+            continue;
+        }
 
-            score -= sign * totalRisk;
+        // Caso 2: peça atacada SEM defesa suficiente → calcular troca real
+        let worstLoss = 0;
+
+        for (const attackerIdx of attackers) {
+            const attacker = this.board.board[attackerIdx];
+            if (!attacker) continue;
+
+            const attackerVal = this.pieceValue[attacker.tipo];
+
+            /*
+                REGRA CRÍTICA (a que estava faltando):
+
+                Só existe perda real se:
+                atacante + troca resulta em perda líquida
+
+                Ex:
+                Torre (500) capturou Rainha (900)
+                → mesmo que seja capturada depois, troca é +400
+                → NUNCA penalizar
+            */
+            const exchangeLoss = val - attackerVal;
+
+            if (exchangeLoss > 0) {
+                worstLoss = Math.max(worstLoss, exchangeLoss);
+            }
+        }
+
+        if (worstLoss > 0) {
+            score -= sign * worstLoss;
+            console.log(
+                `⚠️ Peça ${p.tipo} em ${this.coord(i)} atacada sem defesa | Penalidade = -${worstLoss}`
+            );
         }
     }
 
-    // Mobilidade
+    // ================= MOBILIDADE =================
     const mobilityOwn = this.getAllMoves(color).length;
     const mobilityEnemy = this.getAllMoves(enemy).length;
     score += (mobilityOwn - mobilityEnemy) * 3;
 
-    // Xeque
+    // ================= XEQUE =================
     if (this.validator.isKingInCheck(enemy)) score += 60;
     if (this.validator.isKingInCheck(color)) score -= 60;
 
