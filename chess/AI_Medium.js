@@ -100,7 +100,6 @@ export class AI_Medium {
                     Infinity
                 );
 
-                // Log detalhado de cada movimento avaliado
                 console.log(`📝 Avaliando ${this.coord(move.from)} -> ${this.coord(move.to)} | Score = ${score}`);
 
                 if (score > bestScore) {
@@ -112,7 +111,6 @@ export class AI_Medium {
             });
         }
 
-        // Seleção do movimento final
         const chosen = bestMoves[Math.floor(Math.random() * bestMoves.length)];
 
         if (chosen) {
@@ -153,13 +151,13 @@ export class AI_Medium {
                 best = Math.max(best, score);
                 alpha = Math.max(alpha, score);
             });
-            if (alpha >= beta) break; // poda alfa-beta
+            if (alpha >= beta) break;
         }
         return best;
     }
 
     // =====================================================
-    // AVALIAÇÃO HEAVY HEURISTICS (revisada)
+    // AVALIAÇÃO HEAVY HEURISTICS (COM BACKUP DE PEÇAS)
     // =====================================================
     evaluate(color) {
         let score = 0;
@@ -171,7 +169,7 @@ export class AI_Medium {
             if (!p) continue;
 
             const sign = p.cor === color ? 1 : -1;
-            const val = this.pieceValue[p.tipo];
+            const val = this.pieceValue[p.tipo] || 0;
 
             // Material
             score += sign * val;
@@ -180,8 +178,7 @@ export class AI_Medium {
             score += sign * this.positional(i, p, endgame);
 
             // Desenvolvimento de peças menores
-            if ((p.tipo === "♘" || p.tipo === "♞" ||
-                 p.tipo === "♗" || p.tipo === "♝") && i >= 16 && i <= 47) {
+            if ((p.tipo === "♘" || p.tipo === "♞" || p.tipo === "♗" || p.tipo === "♝") && i >= 16 && i <= 47) {
                 score += sign * 25;
             }
 
@@ -198,16 +195,33 @@ export class AI_Medium {
             // Controle do centro
             if ([27, 28, 35, 36].includes(i)) score += sign * 20;
 
-            // ------------------------- PEÇAS PENDURADAS -------------------------
-            if (this.isSquareAttacked(i, enemy) && !this.isSquareAttacked(i, p.cor)) {
-                const attackers = this.getAttackers(i, enemy);
+            // ------------------------- PEÇAS PENDURADAS COM E SEM BACKUP -------------------------
+            const attackers = this.getAttackers(i, enemy);
+            const defenders = this.getAttackers(i, p.cor);
+
+            if (attackers.length > 0) {
                 let totalRisk = 0;
                 for (const attacker of attackers) {
                     const attackerVal = this.pieceValue[this.board.board[attacker].tipo] || 0;
-                    totalRisk += val - attackerVal; // penaliza considerando troca real
+                    totalRisk += val - attackerVal;
                 }
-                score -= sign * totalRisk;
-                console.log(`⚠️ Peça ${p.tipo} em ${this.coord(i)} atacada e não defendida | Penalidade = ${totalRisk}`);
+
+                if (defenders.length === 0) {
+                    // sem backup
+                    score -= sign * totalRisk;
+                    console.log(`⚠️ Peça ${p.tipo} em ${this.coord(i)} atacada sem defesa | Penalidade = ${totalRisk}`);
+                } else {
+                    // com backup → fator baseado na peça
+                    let backupFactor = 0.1; // padrão baixo
+                    if (p.tipo === "♘" || p.tipo === "♞" || p.tipo === "♗" || p.tipo === "♝") backupFactor = 0.2;
+                    else if (p.tipo === "♖" || p.tipo === "♜") backupFactor = 0.5;
+                    else if (p.tipo === "♕" || p.tipo === "♛") backupFactor = 0.8;
+                    else if (p.tipo === "♔" || p.tipo === "♚") backupFactor = 0.9;
+
+                    const reducedRisk = totalRisk * backupFactor;
+                    score -= sign * reducedRisk;
+                    console.log(`⚠️ Peça ${p.tipo} em ${this.coord(i)} atacada com defesa | Penalidade = ${reducedRisk}`);
+                }
             }
         }
 
