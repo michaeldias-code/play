@@ -1,4 +1,4 @@
-// View.js — v1
+// View.js — v1 - nolog
 export class View {
     constructor(board, controller) {
         this.board = board;
@@ -141,7 +141,7 @@ export class View {
             const cell = e.target.closest(".cell");
             if (!cell) return;
             const index = Number(cell.dataset.index);
-            console.log(`DEBUG click em célula, alvo DOM:`, cell, 'dataset.index=', cell && cell.dataset && cell.dataset.index);
+            //console.log(`DEBUG click em célula, alvo DOM:`, cell, 'dataset.index=', cell && cell.dataset && cell.dataset.index);
             const piece = this.board.board[index];
             if (this.selected === null) {
                 // Seleção inicial: só permite selecionar peças brancas (jogador)
@@ -160,7 +160,7 @@ export class View {
                     this.clearHighlights(); 
                 } else {
                     // Tentativa de movimento
-                    console.log(`DEBUG tentativa de movimento: from=${this.selected} (${this.board.board[this.selected]?.tipo}), to=${index} (${this.board.board[index] ? this.board.board[index].tipo : 'vazio'})`);
+                    //console.log(`DEBUG tentativa de movimento: from=${this.selected} (${this.board.board[this.selected]?.tipo}), to=${index} (${this.board.board[index] ? this.board.board[index].tipo : 'vazio'})`);
                     const ok = this.controller.movePiece(this.selected, index);
                     if (ok) this.lastMove = { from: this.selected, to: index };
                     this.selected = null;
@@ -291,3 +291,4 @@ export class View {
         }
     }
 }
+
