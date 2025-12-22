@@ -1,4 +1,6 @@
-export class ChessAI {
+export class AI_Medium {
+    // todo o código completo aqui
+
     constructor(board, validator, enPassant) {
         this.board = board;
         this.validator = validator;
@@ -189,3 +191,4 @@ export class ChessAI {
         return c === "brancas" ? "pretas" : "brancas";
     }
 }
+
