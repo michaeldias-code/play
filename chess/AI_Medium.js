@@ -1,4 +1,4 @@
-// AI_Medium.js v3
+// AI_Medium.js v2
 // Estratégia melhorada com avaliação posicional, táticas avançadas e planejamento estratégico
 export class AI_Medium {
     constructor(board, validator, enPassant) {
@@ -109,24 +109,38 @@ export class AI_Medium {
         // 4. SALVAR PEÇAS AMEAÇADAS (análise de ameaças)
         const threatened = this.getThreatenedPieces(color);
         if (threatened.length > 0) {
-            console.log(`⚠️ Peças ameaçadas: ${threatened.map(t => `${t.piece.tipo}(${this.valueOfPiece(t.piece)})`).join(', ')}`);
+            console.log("🚨 PEÇAS AMEAÇADAS DETECTADAS:");
+            threatened.forEach(t => {
+                console.log(`   - ${t.piece.tipo} no ${this.indexToNotation(t.index)} (valor: ${this.valueOfPiece(t.piece)})`);
+            });
             
             // PRIORIDADE 1: Fugir para casa segura (sem capturar)
-            const safeEscapes = myMoves.filter(m => 
-                threatened.some(t => t.index === m.from) && 
-                !m.capturedPiece &&
-                !this.wouldBeAttackedAfterMove(m, enemyColor)
-            );
+            const safeEscapes = myMoves.filter(m => {
+                const isThreatened = threatened.some(t => t.index === m.from);
+                if (!isThreatened) return false;
+                
+                const hasNoCapture = !m.capturedPiece;
+                const willBeSafe = !this.wouldBeAttackedAfterMove(m, enemyColor);
+                
+                if (isThreatened && hasNoCapture && willBeSafe) {
+                    console.log(`   ✅ FUGA SEGURA: ${m.piece.tipo} ${this.indexToNotation(m.from)} → ${this.indexToNotation(m.to)}`);
+                }
+                
+                return hasNoCapture && willBeSafe;
+            });
             
             if (safeEscapes.length > 0) {
-                console.log("🏃 Fugindo para casa segura (sem captura)");
+                console.log(`🏃 ${safeEscapes.length} fugas seguras encontradas - EXECUTANDO`);
                 const best = this.evaluateAndChooseBest(safeEscapes, color, enemyColor);
                 this.applyMoveWithEPAndRegister(best.move);
                 this.lastMove = { from: best.move.from, to: best.move.to };
                 return best.move;
+            } else {
+                console.log("   ❌ Nenhuma fuga segura sem captura encontrada");
             }
             
-            // PRIORIDADE 2: Capturar peça de valor MAIOR OU IGUAL
+            // PRIORIDADE 2: Capturar peça de valor MAIOR OU IGUAL (REGRA RÍGIDA)
+            console.log("   🔍 Verificando capturas válidas para peça ameaçada:");
             const worthyCaptures = myMoves.filter(m => {
                 if (!threatened.some(t => t.index === m.from)) return false;
                 if (!m.capturedPiece) return false;
@@ -134,34 +148,68 @@ export class AI_Medium {
                 const myValue = this.valueOfPiece(m.piece);
                 const captureValue = this.valueOfPiece(m.capturedPiece);
                 
-                // Só capturar se for troca justa ou favorável
-                const isWorthIt = captureValue >= myValue - 50; // tolerância de 50 pontos
+                // REGRA RIGOROSA: só aceitar se captura >= 90% do valor da peça
+                const minAcceptable = myValue * 0.9;
+                const isWorthIt = captureValue >= minAcceptable;
                 
-                console.log(`   Avaliando captura: ${m.piece.tipo}(${myValue}) captura ${m.capturedPiece.tipo}(${captureValue}) = ${isWorthIt ? '✅' : '❌'}`);
+                console.log(`      ${m.piece.tipo}(${myValue}) captura ${m.capturedPiece.tipo}(${captureValue}) ` +
+                           `[mínimo: ${minAcceptable.toFixed(0)}] = ${isWorthIt ? '✅ ACEITO' : '❌ REJEITADO'}`);
                 
                 return isWorthIt;
             });
             
             if (worthyCaptures.length > 0) {
-                console.log("⚔️ Peça ameaçada capturando peça de valor similar/maior");
+                console.log(`⚔️ ${worthyCaptures.length} capturas válidas encontradas - EXECUTANDO`);
                 const best = this.evaluateAndChooseBest(worthyCaptures, color, enemyColor);
                 this.applyMoveWithEPAndRegister(best.move);
                 this.lastMove = { from: best.move.from, to: best.move.to };
                 return best.move;
+            } else {
+                console.log("   ❌ Nenhuma captura válida (todas perdem material)");
             }
             
             // PRIORIDADE 3: Defender a peça (movendo outra peça para protegê-la)
+            console.log("   🔍 Buscando movimentos de defesa:");
             const defenseMoves = this.findDefenseMoves(threatened, myMoves, color);
             if (defenseMoves.length > 0) {
-                console.log("🛡️ Defendendo peça ameaçada com outra peça");
+                console.log(`🛡️ ${defenseMoves.length} defesas encontradas - EXECUTANDO`);
                 const best = this.evaluateAndChooseBest(defenseMoves, color, enemyColor);
                 this.applyMoveWithEPAndRegister(best.move);
                 this.lastMove = { from: best.move.from, to: best.move.to };
                 return best.move;
+            } else {
+                console.log("   ❌ Nenhuma defesa possível");
             }
             
-            // Última opção: aceitar perda da peça e fazer melhor movimento possível
-            console.log("😞 Não há como salvar a peça ameaçada sem prejuízo - fazendo melhor movimento geral");
+            // ÚLTIMA OPÇÃO: Ignorar a peça ameaçada e fazer outro movimento
+            console.log("😞 Não há como salvar sem prejuízo - CONTINUANDO para próxima prioridade");
+            
+            // BLOQUEAR movimentos da peça ameaçada que resultem em perda
+            console.log("🚫 BLOQUEANDO movimentos ruins da peça ameaçada");
+            myMoves = myMoves.filter(m => {
+                // Se não é movimento da peça ameaçada, manter
+                if (!threatened.some(t => t.index === m.from)) return true;
+                
+                // Se for fuga segura, manter
+                if (!m.capturedPiece && !this.wouldBeAttackedAfterMove(m, enemyColor)) return true;
+                
+                // Se for captura boa, manter
+                if (m.capturedPiece) {
+                    const myValue = this.valueOfPiece(m.piece);
+                    const captureValue = this.valueOfPiece(m.capturedPiece);
+                    if (captureValue >= myValue * 0.9) return true;
+                }
+                
+                // Caso contrário, BLOQUEAR
+                console.log(`   🚫 BLOQUEADO: ${m.piece.tipo} ${this.indexToNotation(m.from)} → ${this.indexToNotation(m.to)}`);
+                return false;
+            });
+            
+            if (myMoves.length === 0) {
+                console.log("⚠️ Todos os movimentos foram bloqueados - restaurando movimentos");
+                myMoves = this.getAllMovesForColor(color);
+                myMoves = this.filterRepeatingMoves(myMoves);
+            }
         }
         
         // 5. CAPTURAS FAVORÁVEIS (com análise profunda)
