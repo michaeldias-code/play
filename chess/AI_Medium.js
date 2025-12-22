@@ -22,6 +22,29 @@ export class AI_Medium {
             futilityMargin: 200,      // Margem para futility pruning
         };
 
+        // ===== PESOS ESTRATÉGICOS (TRÊS LEIS) =====
+        this.weights = {
+            // LEI 1: DEFESA (prioridade máxima)
+            pieceUnderAttack: 10000,        // Peça atacada sem defesa
+            mustDefend: 50000,              // CRÍTICO: peça valiosa em perigo iminente
+            
+            // LEI 2: CAPTURA GRÁTIS (segunda prioridade)
+            freeCaptureBonus: 30000,        // Captura sem risco
+            profitableTrade: 20000,         // Troca favorável (ganho líquido)
+            materialAdvantage: 5000,        // Cada ponto de vantagem material
+            
+            // LEI 3: EVITAR RISCOS (última prioridade)
+            exposedPiece: -8000,            // Peça movida para casa atacada
+            unnecessaryRisk: -3000,         // Movimento arriscado sem motivo
+            
+            // Outros fatores (subordinados às 3 leis)
+            positional: 1,                  // Valor posicional (PST)
+            mobility: 2,                    // Mobilidade
+            centerControl: 10,              // Controle do centro
+            development: 15,                // Desenvolvimento
+            kingSafety: 100,                // Segurança do rei
+        };
+
         // ===== CACHE E OTIMIZAÇÃO =====
         this.transpositionTable = new Map(); // Tabela de transposição
         this.killerMoves = [];                // Killer moves por profundidade
@@ -86,49 +109,7 @@ export class AI_Medium {
     // =====================================================
     // BUSCA ITERATIVA COM ASPIRATION WINDOWS
     // =====================================================
-    findBestMove(color) {
-        const moves = this.generateMoves(color);
-        if (moves.length === 0) return null;
-        if (moves.length === 1) return { ...moves[0], score: 0 };
-
-        // Ordenar movimentos por heurísticas (critical optimization)
-        this.orderMoves(moves, color, 0);
-
-        let bestMove = moves[0];
-        let bestScore = -Infinity;
-        let alpha = -Infinity;
-        let beta = Infinity;
-
-        // Iterative Deepening (busca incremental)
-        for (let depth = 1; depth <= this.config.maxDepth; depth++) {
-            console.log(`🔎 Profundidade ${depth}/${this.config.maxDepth}`);
-            
-            let currentBest = null;
-            let currentScore = -Infinity;
-
-            // Aspiration Windows (otimização para profundidades > 2)
-            if (depth > 2 && bestScore > -Infinity) {
-                alpha = bestScore - this.config.aspirationWindow;
-                beta = bestScore + this.config.aspirationWindow;
-            }
-
-            for (const move of moves) {
-                const score = this.simulate(move, () => {
-                    return -this.minimax(
-                        depth - 1,
-                        this.opponent(color),
-                        -beta,
-                        -alpha,
-                        color,
-                        false
-                    );
-                });
-console.log(`📊 ${this.notation(move.from)}→${this.notation(move.to)} | Score: ${score.toFixed(0)} | ${move.isCapture ? '💎 Captura' : '📍 Movimento'}`);
-
-                if (score > currentScore) {
-                    currentScore = score;
-                    currentBest = move;
-                    alpha = Math.max(alpha, score);
+);
                 }
 
                 // Re-search se sair da janela
@@ -344,75 +325,190 @@ console.log(`📊 ${this.notation(move.from)}→${this.notation(move.to)} | Scor
     }
 
     // =====================================================
-    // FUNÇÃO DE AVALIAÇÃO COMPLETA
+    // FUNÇÃO DE AVALIAÇÃO COMPLETA (COM 3 LEIS)
     // =====================================================
     evaluate(color) {
-        let score = 0;
-        let materialScore = 0;  // ⬅️ ADICIONAR
-        let positionalScore = 0;  // ⬅️ ADICIONAR
-        let threatScore = 0;  // ⬅️ ADICIONAR
-
         const enemy = this.opponent(color);
-        const phase = this.gamePhase(); // 0=opening, 1=middlegame, 2=endgame
+        const phase = this.gamePhase();
 
-        // ===== MATERIAL E POSIÇÃO =====
+        // ===== BALANÇO MATERIAL ABSOLUTO (LEI 2) =====
+        const myMaterial = this.calculateTotalMaterial(color);
+        const enemyMaterial = this.calculateTotalMaterial(enemy);
+        const materialBalance = (myMaterial - enemyMaterial) * this.weights.materialAdvantage;
+
+        console.log(`   💰 Material: Meu=${myMaterial} | Inimigo=${enemyMaterial} | Balanço=${materialBalance}`);
+
+        // ===== INICIALIZAR COMPONENTES =====
+        let score = materialBalance; // Base: vantagem material
+        let defenseScore = 0;
+        let captureScore = 0;
+        let riskScore = 0;
+        let positionalScore = 0;
+
+        // ===== LEI 1: VERIFICAR PEÇAS EM PERIGO =====
+        const threatenedPieces = this.getThreatenedPieces(color);
+        for (const threat of threatenedPieces) {
+            const piece = this.board.board[threat.sq];
+            const value = this.PIECE_VALUES[piece.tipo];
+            const defenders = this.getAttackers(threat.sq, color);
+            const attackers = this.getAttackers(threat.sq, enemy);
+
+            // Peça valiosa sem defesa adequada
+            if (defenders.length < attackers.length) {
+                const penalty = this.weights.mustDefend * (value / 1000);
+                defenseScore -= penalty;
+                console.log(`   🚨 LEI 1: ${piece.tipo} em ${this.notation(threat.sq)} SEM DEFESA | Penalidade: -${penalty.toFixed(0)}`);
+            }
+        }
+
+        // ===== LEI 2: VERIFICAR CAPTURAS GRÁTIS DISPONÍVEIS =====
+        const freeCaptures = this.findFreeCaptures(color, enemy);
+        for (const capture of freeCaptures) {
+            const value = this.PIECE_VALUES[this.board.board[capture.to]?.tipo];
+            const bonus = this.weights.freeCaptureBonus + value;
+            captureScore += bonus;
+            console.log(`   💎 LEI 2: Captura GRÁTIS em ${this.notation(capture.to)} | Bônus: +${bonus.toFixed(0)}`);
+        }
+
+        // ===== LEI 3: VERIFICAR RISCOS DESNECESSÁRIOS =====
+        const exposedPieces = this.getExposedPieces(color, enemy);
+        for (const exposed of exposedPieces) {
+            const piece = this.board.board[exposed];
+            const value = this.PIECE_VALUES[piece.tipo];
+            const penalty = this.weights.exposedPiece * (value / 500);
+            riskScore -= penalty;
+            console.log(`   ⚠️ LEI 3: ${piece.tipo} em ${this.notation(exposed)} EXPOSTA | Penalidade: -${penalty.toFixed(0)}`);
+        }
+
+        // ===== COMPONENTES SECUNDÁRIOS =====
         for (let sq = 0; sq < 64; sq++) {
             const piece = this.board.board[sq];
             if (!piece) continue;
 
             const sign = piece.cor === color ? 1 : -1;
-            const value = this.PIECE_VALUES[piece.tipo];
-
-            // Material
-          const matGain = sign * value;
-        materialScore += matGain;  // ⬅️ ADICIONAR
-        score += matGain;
 
             // Posicional (PST)
-                const posGain = sign * this.getPSTValue(sq, piece, phase);
-        positionalScore += posGain;  // ⬅️ ADICIONAR
-        score += posGain;
+            positionalScore += sign * this.getPSTValue(sq, piece, phase) * this.weights.positional;
 
-            // Mobilidade (importante!)
+            // Mobilidade
             const mobility = (this.validator.getPossibleMoves(sq) || []).length;
-            score += sign * mobility * 2;
+            positionalScore += sign * mobility * this.weights.mobility;
         }
 
-        // ===== ESTRUTURA DE PEÕES =====
-        score += this.evaluatePawnStructure(color);
-        score -= this.evaluatePawnStructure(enemy);
+        // ===== OUTROS FATORES =====
+        positionalScore += this.evaluateCenterControl(color) * this.weights.centerControl;
+        positionalScore -= this.evaluateCenterControl(enemy) * this.weights.centerControl;
 
-        // ===== SEGURANÇA DO REI =====
-        score += this.evaluateKingSafety(color, phase);
-        score -= this.evaluateKingSafety(enemy, phase);
+        positionalScore += this.evaluateKingSafety(color, phase) * this.weights.kingSafety;
+        positionalScore -= this.evaluateKingSafety(enemy, phase) * this.weights.kingSafety;
 
-        // ===== CONTROLE DO CENTRO =====
-        score += this.evaluateCenterControl(color) * 15;
-        score -= this.evaluateCenterControl(enemy) * 15;
-
-        // ===== PEÇAS ATACADAS/DEFENDIDAS =====
-    const threats = this.evaluateThreats(color, enemy);
-    threatScore = threats;  // ⬅️ ADICIONAR
-    score += threats;
-
-
-        // ===== BÔNUS DE DESENVOLVIMENTO (OPENING) =====
         if (phase === 0) {
-            score += this.evaluateDevelopment(color) * 20;
-            score -= this.evaluateDevelopment(enemy) * 20;
+            positionalScore += this.evaluateDevelopment(color) * this.weights.development;
+            positionalScore -= this.evaluateDevelopment(enemy) * this.weights.development;
         }
 
-        // ===== PAR DE BISPOS =====
-        if (this.hasBishopPair(color)) score += 50;
-        if (this.hasBishopPair(enemy)) score -= 50;
+        // Par de bispos
+        if (this.hasBishopPair(color)) positionalScore += 50;
+        if (this.hasBishopPair(enemy)) positionalScore -= 50;
 
-        // ===== XEQUE =====
-        if (this.validator.isKingInCheck(enemy)) score += 50;
-        if (this.validator.isKingInCheck(color)) score -= 50;
+        // Xeque
+        if (this.validator.isKingInCheck(enemy)) positionalScore += 50;
+        if (this.validator.isKingInCheck(color)) positionalScore -= 50;
 
-        console.log(`🎯 Avaliação Final: ${score.toFixed(0)} | Material: ${materialScore} | Posição: ${positionalScore} | Ameaças: ${threatScore}`);
+        // ===== SCORE FINAL =====
+        score += defenseScore + captureScore + riskScore + positionalScore;
+
+        console.log(`   🎯 TOTAL: ${score.toFixed(0)} = Balanço(${materialBalance.toFixed(0)}) + Defesa(${defenseScore.toFixed(0)}) + Captura(${captureScore.toFixed(0)}) + Risco(${riskScore.toFixed(0)}) + Pos(${positionalScore.toFixed(0)})`);
 
         return score;
+    }
+
+    // =====================================================
+    // CALCULAR MATERIAL TOTAL
+    // =====================================================
+    calculateTotalMaterial(color) {
+        let total = 0;
+        for (let sq = 0; sq < 64; sq++) {
+            const piece = this.board.board[sq];
+            if (piece && piece.cor === color) {
+                total += this.PIECE_VALUES[piece.tipo];
+            }
+        }
+        return total;
+    }
+
+    // =====================================================
+    // ENCONTRAR PEÇAS AMEAÇADAS
+    // =====================================================
+    getThreatenedPieces(color) {
+        const enemy = this.opponent(color);
+        const threatened = [];
+
+        for (let sq = 0; sq < 64; sq++) {
+            const piece = this.board.board[sq];
+            if (!piece || piece.cor !== color) continue;
+
+            const attackers = this.getAttackers(sq, enemy);
+            if (attackers.length > 0) {
+                threatened.push({ sq, piece, attackers });
+            }
+        }
+
+        return threatened;
+    }
+
+    // =====================================================
+    // ENCONTRAR CAPTURAS GRÁTIS (SEM RISCO)
+    // =====================================================
+    findFreeCaptures(myColor, enemyColor) {
+        const freeCaptures = [];
+        const moves = this.generateMoves(myColor);
+
+        for (const move of moves) {
+            if (!move.isCapture) continue;
+
+            // Verificar se é captura sem risco (SEE > 0)
+            let isFree = false;
+            this.simulate(move, () => {
+                const attackers = this.getAttackers(move.to, enemyColor);
+                isFree = attackers.length === 0; // Ninguém pode recapturar
+            });
+
+            if (isFree) {
+                freeCaptures.push(move);
+            }
+        }
+
+        return freeCaptures;
+    }
+
+    // =====================================================
+    // ENCONTRAR PEÇAS EXPOSTAS (EM CASAS ATACADAS)
+    // =====================================================
+    getExposedPieces(myColor, enemyColor) {
+        const exposed = [];
+
+        for (let sq = 0; sq < 64; sq++) {
+            const piece = this.board.board[sq];
+            if (!piece || piece.cor !== myColor) continue;
+
+            const attackers = this.getAttackers(sq, enemyColor);
+            const defenders = this.getAttackers(sq, myColor);
+
+            // Exposta se: atacada E (sem defesa OU valor maior que atacante)
+            if (attackers.length > 0 && defenders.length === 0) {
+                const pieceValue = this.PIECE_VALUES[piece.tipo];
+                const smallestAttacker = Math.min(
+                    ...attackers.map(a => this.PIECE_VALUES[this.board.board[a]?.tipo])
+                );
+
+                if (pieceValue > smallestAttacker) {
+                    exposed.push(sq);
+                }
+            }
+        }
+
+        return exposed;
     }
 
     // =====================================================
@@ -439,15 +535,18 @@ console.log(`📊 ${this.notation(move.from)}→${this.notation(move.to)} | Scor
                 // Minha peça atacada
                 if (see < 0) {
                     // Troca desfavorável
+                    console.log(`   ⚠️ Peça ${piece.tipo} em ${this.notation(sq)} em risco | SEE: ${see}`);
                     score += see; // see já é negativo
                 } else if (value >= 900 && attackers.length > 0) {
                     // Rainha exposta (sempre ruim)
+                    console.log(`   ⚠️ Rainha ${piece.tipo} em ${this.notation(sq)} exposta`);
                     score -= 80;
                 }
             } else {
                 // Peça inimiga atacada
                 if (see > 0) {
                     // Posso ganhar material
+                    console.log(`   ✅ Posso capturar ${piece.tipo} em ${this.notation(sq)} | Ganho: +${see}`);
                     score += see * 0.5; // Bônus por ameaça
                 }
             }
@@ -607,36 +706,104 @@ console.log(`📊 ${this.notation(move.from)}→${this.notation(move.to)} | Scor
     }
 
     // =====================================================
-    // ORDENAÇÃO DE MOVIMENTOS (MVV-LVA + KILLER MOVES)
+    // ORDENAÇÃO DE MOVIMENTOS (PRIORIDADE PELAS 3 LEIS)
     // =====================================================
     orderMoves(moves, color, depth) {
+        const enemy = this.opponent(color);
+        
         for (const move of moves) {
             let score = 0;
+            let reasons = [];
 
-            // 1. Capturas (MVV-LVA: Most Valuable Victim - Least Valuable Attacker)
+            // ===== LEI 1: DEFESA =====
+            // Verificar se este movimento salva peça ameaçada
+            const savesPiece = this.simulate(move, () => {
+                const threatenedBefore = this.getThreatenedPieces(color);
+                return threatenedBefore.some(t => t.sq === move.from);
+            });
+
+            if (savesPiece) {
+                const pieceValue = this.PIECE_VALUES[this.board.board[move.from]?.tipo];
+                score += this.weights.mustDefend + pieceValue;
+                reasons.push(`🛡️ Defende ${this.board.board[move.from]?.tipo}`);
+            }
+
+            // ===== LEI 2: CAPTURA GRÁTIS =====
             if (move.isCapture) {
                 const victim = this.PIECE_VALUES[this.board.board[move.to]?.tipo] || 0;
                 const attacker = this.PIECE_VALUES[this.board.board[move.from]?.tipo] || 0;
-                score += 10000 + (victim - attacker / 10);
+
+                // Verificar se é captura grátis (sem recaptura)
+                let isFree = false;
+                this.simulate(move, () => {
+                    const recapturers = this.getAttackers(move.to, enemy);
+                    isFree = recapturers.length === 0;
+                });
+
+                if (isFree) {
+                    score += this.weights.freeCaptureBonus + victim;
+                    reasons.push(`💎 Captura GRÁTIS ${this.board.board[move.to]?.tipo}(${victim})`);
+                } else {
+                    // Verificar se é troca favorável (SEE)
+                    const see = this.simulate(move, () => {
+                        return this.staticExchangeEval(move.to, color);
+                    });
+
+                    if (see > 0) {
+                        score += this.weights.profitableTrade + see;
+                        reasons.push(`⚖️ Troca favorável (+${see})`);
+                    } else {
+                        score += 5000 + victim; // Ainda priorizar capturas, mas menos
+                        reasons.push(`💎 Captura ${this.board.board[move.to]?.tipo}(${victim}) SEE:${see}`);
+                    }
+                }
             }
 
-            // 2. Killer moves
+            // ===== LEI 3: EVITAR RISCOS =====
+            // Verificar se peça fica exposta após movimento
+            let becomesExposed = false;
+            this.simulate(move, () => {
+                const attackers = this.getAttackers(move.to, enemy);
+                const defenders = this.getAttackers(move.to, color);
+                becomesExposed = attackers.length > defenders.length;
+            });
+
+            if (becomesExposed && !move.isCapture) {
+                const pieceValue = this.PIECE_VALUES[this.board.board[move.from]?.tipo];
+                score += this.weights.exposedPiece;
+                reasons.push(`⚠️ RISCO: peça fica exposta`);
+            }
+
+            // ===== FATORES SECUNDÁRIOS =====
+            // Killer moves
             if (this.isKillerMove(move, depth)) {
-                score += 5000;
+                score += 2000;
+                reasons.push(`🎯 Killer`);
             }
 
-            // 3. History heuristic
+            // History heuristic
             score += this.getHistoryScore(move);
 
-            // 4. Xeques
+            // Xeques
             if (this.givesCheck(move, color)) {
-                score += 3000;
+                score += 1000;
+                reasons.push(`♔ Xeque`);
             }
 
             move.orderScore = score;
+            move.reasons = reasons;
         }
 
         moves.sort((a, b) => b.orderScore - a.orderScore);
+        
+        if (depth === 0) {
+            console.log(`\n📋 Top 10 movimentos ordenados:`);
+            moves.slice(0, 10).forEach((m, i) => {
+                const reasonStr = m.reasons.length > 0 ? m.reasons.join(' | ') : '📍 Normal';
+                console.log(`   ${i + 1}. ${this.notation(m.from)}→${this.notation(m.to)} [${m.orderScore.toFixed(0)}] ${reasonStr}`);
+            });
+            console.log('');
+        }
     }
 
     // =====================================================
@@ -943,5 +1110,3 @@ console.log(`📊 ${this.notation(move.from)}→${this.notation(move.to)} | Scor
         console.log(`⚔️ Agressividade ajustada para nível ${level}`);
     }
 }
-
-
