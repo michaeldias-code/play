@@ -89,27 +89,43 @@ export class AI_Medium {
 
         let bestScore = -Infinity;
         let bestMoves = [];
+		
+		const MAX_SCORE_THRESHOLD = 900; // Define o que consideramos "super valorizado" (ex.: captura de rainha)
+		
+		for (const move of moves) {
+			let earlyExit = false; // flag para sair do loop
+			this.simulate(move, () => {
+				const score = -this.minimax(
+					this.MAX_DEPTH - 1,
+					enemy,
+					color,
+					-Infinity,
+					Infinity
+				);
+		
+				console.log(`📝 Avaliando ${this.coord(move.from)} -> ${this.coord(move.to)} | Score = ${score}`);
+		
+				// Early cutoff: se a jogada for super valorizada
+				if (score >= MAX_SCORE_THRESHOLD) {
+					bestScore = score;
+					bestMoves = [move];
+					earlyExit = true;
+					return; // sai da simulação atual
+				}
+		
+				// Caso normal, continua comparando
+				if (score > bestScore) {
+					bestScore = score;
+					bestMoves = [move];
+				} else if (score >= bestScore - 20) {
+					bestMoves.push(move);
+				}
+			});
+		
+			// Sai do loop externo se já encontrou movimento excelente
+			if (earlyExit) break;
+		}
 
-        for (const move of moves) {
-            this.simulate(move, () => {
-                const score = -this.minimax(
-                    this.MAX_DEPTH - 1,
-                    enemy,
-                    color,
-                    -Infinity,
-                    Infinity
-                );
-
-                console.log(`📝 Avaliando ${this.coord(move.from)} -> ${this.coord(move.to)} | Score = ${score}`);
-
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestMoves = [move];
-                } else if (score >= bestScore - 20) {
-                    bestMoves.push(move);
-                }
-            });
-        }
 
         const chosen = bestMoves[Math.floor(Math.random() * bestMoves.length)];
 
