@@ -1,4 +1,4 @@
-/**
+/** v2
  * AI_Medium - Motor de Xadrez com Minimax e Alfa-Beta Pruning
  * Arquitetura: Single Responsibility Principle + Strategy Pattern
  * Performance: O(b^d) com poda agressiva e cache de avaliações
@@ -25,13 +25,13 @@ export class AI_Medium {
         // ===== PESOS ESTRATÉGICOS (TRÊS LEIS) =====
         this.weights = {
             // LEI 1: DEFESA (prioridade máxima)
-            pieceUnderAttack: 10000,        // Peça atacada sem defesa
-            mustDefend: 50000,              // CRÍTICO: peça valiosa em perigo iminente
+            pieceUnderAttack: 6000,        // Peça atacada sem defesa
+            mustDefend: 30000,              // CRÍTICO: peça valiosa em perigo iminente
             
             // LEI 2: CAPTURA GRÁTIS (segunda prioridade)
-            freeCaptureBonus: 30000,        // Captura sem risco
-            profitableTrade: 20000,         // Troca favorável (ganho líquido)
-            materialAdvantage: 5000,        // Cada ponto de vantagem material
+            freeCaptureBonus: 50000,        // Captura sem risco
+            profitableTrade: 40000,         // Troca favorável (ganho líquido)
+            materialAdvantage: 8000,        // Cada ponto de vantagem material
             
             // LEI 3: EVITAR RISCOS (última prioridade)
             exposedPiece: -8000,            // Peça movida para casa atacada
