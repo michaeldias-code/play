@@ -1,364 +1,634 @@
-// AI_Medium.js v1
-// Estratégia "Medium" com heurísticas: prefere capturas, evita casas atacadas,
-// não repete o último movimento sem motivo, avalia sacrifícios por valor.
+// AI_Medium.js v2
+// Estratégia melhorada com avaliação posicional, táticas avançadas e planejamento estratégico
 export class AI_Medium {
     constructor(board, validator, enPassant) {
         this.board = board;
         this.validator = validator;
         this.enPassant = enPassant;
-        // guarda último movimento que esta IA executou (para evitar repetir)
         this.lastMove = null;
-        // valores das peças por símbolo (fallbacks caso não reconheça)
+        
+        // Valores das peças
         this.pieceValueBySymbol = {
-            "♙": 1, "♟": 1,    // peão
-            "♘": 3, "♞": 3,    // cavalo
-            "♗": 3, "♝": 3,    // bispo
-            "♖": 5, "♜": 5,    // torre
-            "♕": 9, "♛": 9,    // rainha
-            "♔": 1000, "♚": 1000 // rei (valor alto para evitar trocas que percam o rei)
+            "♙": 100, "♟": 100,
+            "♘": 320, "♞": 320,
+            "♗": 330, "♝": 330,
+            "♖": 500, "♜": 500,
+            "♕": 900, "♛": 900,
+            "♔": 20000, "♚": 20000
         };
+        
+        // Tabelas de valores posicionais (piece-square tables)
+        this.pawnTable = [
+            0,  0,  0,  0,  0,  0,  0,  0,
+            50, 50, 50, 50, 50, 50, 50, 50,
+            10, 10, 20, 30, 30, 20, 10, 10,
+            5,  5, 10, 25, 25, 10,  5,  5,
+            0,  0,  0, 20, 20,  0,  0,  0,
+            5, -5,-10,  0,  0,-10, -5,  5,
+            5, 10, 10,-20,-20, 10, 10,  5,
+            0,  0,  0,  0,  0,  0,  0,  0
+        ];
+        
+        this.knightTable = [
+            -50,-40,-30,-30,-30,-30,-40,-50,
+            -40,-20,  0,  0,  0,  0,-20,-40,
+            -30,  0, 10, 15, 15, 10,  0,-30,
+            -30,  5, 15, 20, 20, 15,  5,-30,
+            -30,  0, 15, 20, 20, 15,  0,-30,
+            -30,  5, 10, 15, 15, 10,  5,-30,
+            -40,-20,  0,  5,  5,  0,-20,-40,
+            -50,-40,-30,-30,-30,-30,-40,-50
+        ];
+        
+        this.bishopTable = [
+            -20,-10,-10,-10,-10,-10,-10,-20,
+            -10,  0,  0,  0,  0,  0,  0,-10,
+            -10,  0,  5, 10, 10,  5,  0,-10,
+            -10,  5,  5, 10, 10,  5,  5,-10,
+            -10,  0, 10, 10, 10, 10,  0,-10,
+            -10, 10, 10, 10, 10, 10, 10,-10,
+            -10,  5,  0,  0,  0,  0,  5,-10,
+            -20,-10,-10,-10,-10,-10,-10,-20
+        ];
+        
+        this.kingMiddleGame = [
+            -30,-40,-40,-50,-50,-40,-40,-30,
+            -30,-40,-40,-50,-50,-40,-40,-30,
+            -30,-40,-40,-50,-50,-40,-40,-30,
+            -30,-40,-40,-50,-50,-40,-40,-30,
+            -20,-30,-30,-40,-40,-30,-30,-20,
+            -10,-20,-20,-20,-20,-20,-20,-10,
+            20, 20,  0,  0,  0,  0, 20, 20,
+            20, 30, 10,  0,  0, 10, 30, 20
+        ];
     }
-    // interface pública chamada pelo AI pai / GameController
+
     makeMove(color) {
-        console.log("Modo Medium:");
+        console.log("🧠 Modo Medium Avançado:");
         const enemyColor = color === "brancas" ? "pretas" : "brancas";
-        // 1) coletar movimentos
+        
         let myMoves = this.getAllMovesForColor(color);
         if (myMoves.length === 0) return null;
-        const enemyMoves = this.getAllMovesForColor(enemyColor);
-        // 2) filtrar movimentos que repetem o último sem motivo válido
-        myMoves = myMoves.filter(m => !this.isForbiddenRepeat(m));
-		// regra extra: impedir mover de volta para a posição anterior apenas por voltar
-		// (mesmo que não seja captura ou escape)
-		// regra extra: impedir mover de volta para a posição anterior apenas por voltar
-		myMoves = myMoves.filter(m => {
-			if (!this.lastMove) return true;
-			const isReverse = m.from === this.lastMove.to && m.to === this.lastMove.from;
-			if (!isReverse) return true;
-			if (m.capturedPiece) return true;
-			if (this.willRemoveCheck(m)) return true;
-			return false;
-		});
-		const threatened = this.getThreatenedPieces(color);
-		if (threatened.length > 0) {
-			console.log("⚠️ Tentando fugir de peças ameaçadas:", threatened.map(t => t.piece.tipo));
-			const escapeMoves = myMoves.filter(m =>
-				threatened.some(t => t.index === m.from) && !this.wouldBeAttackedAfterMove(m, enemyColor)
-			);
-			console.log("Possíveis movimentos de fuga:", escapeMoves.map(m => `${m.piece.tipo} ${this.indexToNotation(m.from)}->${this.indexToNotation(m.to)}`));
-			if (escapeMoves.length > 0) {
-				// priorizar capturas entre os movimentos de fuga
-				const captureEscapes = escapeMoves.filter(m => m.capturedPiece);
-				const chosen = captureEscapes.length > 0
-					? captureEscapes[Math.floor(Math.random() * captureEscapes.length)]
-					: escapeMoves[Math.floor(Math.random() * escapeMoves.length)];
-				this.applyMoveWithEPAndRegister(chosen);
-				this.lastMove = { from: chosen.from, to: chosen.to };
-				return chosen;
-			} else {
-				console.log("Nenhum movimento de fuga seguro encontrado.");
-			}
-		}
-        // 3) tentar capturas (priorizar melhores)
-        const captureMoves = myMoves.filter(m => m.capturedPiece !== null);
-		// filtra capturas que não deixam a peça capturada imediatamente (evitar suicídio)
-		const safeCaptures = captureMoves.filter(m => !this.wouldBeAttackedAfterMove(m, enemyColor));
-		// substitui captureMoves por safeCaptures se houver pelo menos uma segura
-		if (safeCaptures.length > 0) {
-			captureMoves.splice(0, captureMoves.length, ...safeCaptures);
-		}
-        if (captureMoves.length > 0) {
-            const bestCapture = this.chooseBestCapture(captureMoves, color, enemyMoves);
-            if (bestCapture) {
-                this.applyMoveWithEPAndRegister(bestCapture);
-                this.lastMove = { from: bestCapture.from, to: bestCapture.to };
-                return bestCapture;
+        
+        // Filtrar movimentos que repetem sem motivo
+        myMoves = this.filterRepeatingMoves(myMoves);
+        
+        // 1. VERIFICAR XEQUE-MATE EM UM MOVIMENTO
+        const checkmateMoves = this.findCheckmateMoves(myMoves, enemyColor);
+        if (checkmateMoves.length > 0) {
+            console.log("♔ XEQUE-MATE ENCONTRADO!");
+            const chosen = checkmateMoves[0];
+            this.applyMoveWithEPAndRegister(chosen);
+            this.lastMove = { from: chosen.from, to: chosen.to };
+            return chosen;
+        }
+        
+        // 2. ESCAPAR DE XEQUE (prioridade máxima)
+        if (this.validator.isKingInCheck(color)) {
+            console.log("⚠️ REI EM XEQUE - Buscando escape");
+            const escapeCheck = this.findBestCheckEscape(myMoves, color, enemyColor);
+            if (escapeCheck) {
+                this.applyMoveWithEPAndRegister(escapeCheck);
+                this.lastMove = { from: escapeCheck.from, to: escapeCheck.to };
+                return escapeCheck;
             }
         }
-		// 🔥 REGRA PRINCIPAL: se existe captura, a IA deve capturar SEMPRE,
-		// mesmo que a heurística chooseBestCapture não escolha uma.
-		if (captureMoves.length > 0) {
-			// fallback obrigatório: escolhe qualquer captura disponível
-			const forcedCapture = captureMoves[Math.floor(Math.random() * captureMoves.length)];
-			this.applyMoveWithEPAndRegister(forcedCapture);
-			this.lastMove = { from: forcedCapture.from, to: forcedCapture.to };
-			return forcedCapture;
-		}
-        // 4) buscar movimentos totalmente seguros (não atacados após execução)
-        const safeMoves = myMoves.filter(m => !this.wouldBeAttackedAfterMove(m, enemyColor));
-        if (safeMoves.length > 0) {
-            // desempate: preferir movimentos que capturem peças de maior valor (mesmo sem captura aqui)
-            const chosen = this.pickPreferableMove(safeMoves);
-            this.applyMoveWithEPAndRegister(chosen);
-            this.lastMove = { from: chosen.from, to: chosen.to };
-            return chosen;
+        
+        // 3. TÁTICAS: Garfos, Espetos, Cravadas
+        const tacticalMoves = this.findTacticalMoves(myMoves, enemyColor);
+        if (tacticalMoves.length > 0) {
+            console.log("⚔️ Movimento tático encontrado!");
+            const best = this.evaluateAndChooseBest(tacticalMoves, color, enemyColor);
+            if (best && best.score > 200) {
+                this.applyMoveWithEPAndRegister(best.move);
+                this.lastMove = { from: best.move.from, to: best.move.to };
+                return best.move;
+            }
         }
-        // 5) tentar movimentos que minimizam risco (menor valor do atacante possível)
-        const leastRiskMoves = this.rankMovesByRisk(myMoves, enemyColor);
-        if (leastRiskMoves.length > 0) {
-            const chosen = leastRiskMoves[0];
-            this.applyMoveWithEPAndRegister(chosen);
-            this.lastMove = { from: chosen.from, to: chosen.to };
-            return chosen;
+        
+        // 4. SALVAR PEÇAS AMEAÇADAS (análise de ameaças)
+        const threatened = this.getThreatenedPieces(color);
+        if (threatened.length > 0) {
+            const escapeMoves = this.findSafeEscapeMoves(myMoves, threatened, enemyColor);
+            if (escapeMoves.length > 0) {
+                console.log("🛡️ Salvando peça ameaçada");
+                const best = this.evaluateAndChooseBest(escapeMoves, color, enemyColor);
+                this.applyMoveWithEPAndRegister(best.move);
+                this.lastMove = { from: best.move.from, to: best.move.to };
+                return best.move;
+            }
         }
-        // 6) fallback: escolher aleatório entre todos os movimentos
-        const random = myMoves[Math.floor(Math.random() * myMoves.length)];
-        this.applyMoveWithEPAndRegister(random);
-        this.lastMove = { from: random.from, to: random.to };
-        return random;
+        
+        // 5. CAPTURAS FAVORÁVEIS (com análise profunda)
+        const captureMoves = myMoves.filter(m => m.capturedPiece !== null);
+        if (captureMoves.length > 0) {
+            const bestCapture = this.evaluateCapturesWithSEE(captureMoves, color, enemyColor);
+            if (bestCapture && bestCapture.score > 0) {
+                console.log(`💎 Captura favorável: ganho de ${bestCapture.score}`);
+                this.applyMoveWithEPAndRegister(bestCapture.move);
+                this.lastMove = { from: bestCapture.move.from, to: bestCapture.move.to };
+                return bestCapture.move;
+            }
+        }
+        
+        // 6. DESENVOLVIMENTO E CONTROLE DO CENTRO (early game)
+        if (this.isEarlyGame()) {
+            const developmentMoves = this.findDevelopmentMoves(myMoves, color);
+            if (developmentMoves.length > 0) {
+                console.log("📈 Movimento de desenvolvimento");
+                const best = this.evaluateAndChooseBest(developmentMoves, color, enemyColor);
+                this.applyMoveWithEPAndRegister(best.move);
+                this.lastMove = { from: best.move.from, to: best.move.to };
+                return best.move;
+            }
+        }
+        
+        // 7. MELHOR MOVIMENTO POSICIONAL (avaliação completa)
+        console.log("🎯 Escolhendo melhor movimento posicional");
+        const best = this.evaluateAndChooseBest(myMoves, color, enemyColor);
+        this.applyMoveWithEPAndRegister(best.move);
+        this.lastMove = { from: best.move.from, to: best.move.to };
+        return best.move;
     }
-    /* ---------------- Helper utilities ---------------- */
-    // retorna lista de movimentos { from, to, piece, capturedPiece }
+
+    // ============ AVALIAÇÃO DE MOVIMENTOS ============
+    
+    evaluateAndChooseBest(moves, color, enemyColor) {
+        const evaluated = moves.map(m => ({
+            move: m,
+            score: this.evaluateMove(m, color, enemyColor)
+        }));
+        
+        evaluated.sort((a, b) => b.score - a.score);
+        
+        // Adicionar aleatoriedade aos melhores movimentos (top 3)
+        const topScore = evaluated[0].score;
+        const topMoves = evaluated.filter(e => e.score >= topScore - 50);
+        
+        return topMoves[Math.floor(Math.random() * topMoves.length)];
+    }
+
+    evaluateMove(move, color, enemyColor) {
+        let score = 0;
+        
+        // 1. Valor da captura
+        if (move.capturedPiece) {
+            score += this.valueOfPiece(move.capturedPiece);
+        }
+        
+        // 2. Valor posicional (piece-square tables)
+        score += this.getPositionalValue(move.to, move.piece, color);
+        score -= this.getPositionalValue(move.from, move.piece, color);
+        
+        // 3. Penalidade se a peça ficar atacada
+        if (this.wouldBeAttackedAfterMove(move, enemyColor)) {
+            const pieceValue = this.valueOfPiece(move.piece);
+            const attackerValue = this.estimatedAttackerValueOnSquareAfterMove(move, enemyColor);
+            
+            if (attackerValue < pieceValue) {
+                score -= (pieceValue - attackerValue);
+            }
+        }
+        
+        // 4. Bônus por dar xeque
+        if (this.givesCheck(move, enemyColor)) {
+            score += 50;
+        }
+        
+        // 5. Controle de casas centrais
+        if (this.isCentralSquare(move.to)) {
+            score += 30;
+        }
+        
+        // 6. Mobilidade (quantas casas a peça controla)
+        score += this.calculateMobilityBonus(move, color) * 5;
+        
+        // 7. Proteção de peças aliadas
+        if (this.protectsAlly(move, color)) {
+            score += 20;
+        }
+        
+        // 8. Ameaça a peças inimigas
+        const threatenedValue = this.calculateThreatenedValue(move, enemyColor);
+        score += threatenedValue * 0.3;
+        
+        return score;
+    }
+
+    // ============ TÁTICAS AVANÇADAS ============
+    
+    findCheckmateMoves(moves, enemyColor) {
+        return moves.filter(move => {
+            let isCheckmate = false;
+            this.simulateMove(move, () => {
+                if (this.validator.isKingInCheck(enemyColor)) {
+                    const enemyResponses = this.getAllMovesForColor(enemyColor);
+                    isCheckmate = enemyResponses.length === 0;
+                }
+            });
+            return isCheckmate;
+        });
+    }
+
+    findTacticalMoves(moves, enemyColor) {
+        const tactical = [];
+        
+        for (const move of moves) {
+            // Garfo: atacar múltiplas peças
+            const fork = this.createsFork(move, enemyColor);
+            if (fork) {
+                tactical.push(move);
+                continue;
+            }
+            
+            // Ataque descoberto
+            if (this.createsDiscoveredAttack(move, enemyColor)) {
+                tactical.push(move);
+                continue;
+            }
+            
+            // Ameaça de captura valiosa
+            if (this.threatensMajorPiece(move, enemyColor)) {
+                tactical.push(move);
+            }
+        }
+        
+        return tactical;
+    }
+
+    createsFork(move, enemyColor) {
+        let forksMultiple = false;
+        this.simulateMove(move, () => {
+            const attacks = this.getAttacksFromSquare(move.to, move.piece);
+            const valuableTargets = attacks.filter(target => {
+                const piece = this.board.board[target];
+                return piece && piece.cor === enemyColor && 
+                       this.valueOfPiece(piece) >= 300;
+            });
+            forksMultiple = valuableTargets.length >= 2;
+        });
+        return forksMultiple;
+    }
+
+    createsDiscoveredAttack(move, enemyColor) {
+        // Detecta se ao mover uma peça, outra peça aliada ataca algo valioso
+        const fromSquare = move.from;
+        let discoversAttack = false;
+        
+        this.simulateMove(move, () => {
+            const color = move.piece.cor;
+            const allMoves = this.getAllMovesForColor(color);
+            
+            for (const m of allMoves) {
+                if (m.from === fromSquare) continue;
+                if (m.capturedPiece && this.valueOfPiece(m.capturedPiece) >= 300) {
+                    discoversAttack = true;
+                    break;
+                }
+            }
+        });
+        
+        return discoversAttack;
+    }
+
+    threatensMajorPiece(move, enemyColor) {
+        let threatens = false;
+        this.simulateMove(move, () => {
+            const attacks = this.getAttacksFromSquare(move.to, move.piece);
+            threatens = attacks.some(target => {
+                const piece = this.board.board[target];
+                return piece && piece.cor === enemyColor && 
+                       this.valueOfPiece(piece) >= 500;
+            });
+        });
+        return threatens;
+    }
+
+    // ============ STATIC EXCHANGE EVALUATION (SEE) ============
+    
+    evaluateCapturesWithSEE(captures, color, enemyColor) {
+        const evaluated = captures.map(move => {
+            const see = this.staticExchangeEvaluation(move, color, enemyColor);
+            return { move, score: see };
+        });
+        
+        evaluated.sort((a, b) => b.score - a.score);
+        
+        const best = evaluated.filter(e => e.score > 0);
+        if (best.length === 0) return null;
+        
+        return best[Math.floor(Math.random() * Math.min(3, best.length))];
+    }
+
+    staticExchangeEvaluation(move, color, enemyColor) {
+        const capturedValue = this.valueOfPiece(move.capturedPiece);
+        let score = capturedValue;
+        
+        this.simulateMove(move, () => {
+            const attackers = this.getAttackersOnSquare(move.to, enemyColor);
+            if (attackers.length === 0) return;
+            
+            const defenders = this.getAttackersOnSquare(move.to, color);
+            
+            let attValue = this.valueOfPiece(move.piece);
+            let defValue = attackers.length > 0 ? 
+                Math.min(...attackers.map(a => this.valueOfPiece(a.piece))) : Infinity;
+            
+            if (defValue < attValue) {
+                score -= attValue;
+                if (defenders.length > 0) {
+                    score += defValue;
+                }
+            }
+        });
+        
+        return score;
+    }
+
+    // ============ DESENVOLVIMENTO E ESTRATÉGIA ============
+    
+    isEarlyGame() {
+        let piecesInStartPosition = 0;
+        const backRanks = [0, 1, 6, 7];
+        
+        for (const rank of backRanks) {
+            for (let file = 0; file < 8; file++) {
+                const idx = rank * 8 + file;
+                const piece = this.board.board[idx];
+                if (piece && (piece.tipo.includes("♘") || piece.tipo.includes("♗") || 
+                              piece.tipo.includes("♞") || piece.tipo.includes("♝"))) {
+                    piecesInStartPosition++;
+                }
+            }
+        }
+        
+        return piecesInStartPosition >= 4;
+    }
+
+    findDevelopmentMoves(moves, color) {
+        return moves.filter(move => {
+            const fromRank = Math.floor(move.from / 8);
+            const toRank = Math.floor(move.to / 8);
+            
+            const isPieceInBackRank = (color === "brancas" && fromRank === 7) ||
+                                     (color === "pretas" && fromRank === 0);
+            
+            const movesToCenter = this.isCentralSquare(move.to);
+            
+            const isDevelopingPiece = move.piece.tipo.includes("♘") || 
+                                     move.piece.tipo.includes("♗") ||
+                                     move.piece.tipo.includes("♞") || 
+                                     move.piece.tipo.includes("♝");
+            
+            return (isPieceInBackRank || movesToCenter) && isDevelopingPiece;
+        });
+    }
+
+    // ============ FUNÇÕES AUXILIARES MELHORADAS ============
+    
+    getPositionalValue(index, piece, color) {
+        const adjustedIndex = color === "pretas" ? 63 - index : index;
+        
+        if (piece.tipo.includes("♙") || piece.tipo.includes("♟")) {
+            return this.pawnTable[adjustedIndex];
+        }
+        if (piece.tipo.includes("♘") || piece.tipo.includes("♞")) {
+            return this.knightTable[adjustedIndex];
+        }
+        if (piece.tipo.includes("♗") || piece.tipo.includes("♝")) {
+            return this.bishopTable[adjustedIndex];
+        }
+        if (piece.tipo.includes("♔") || piece.tipo.includes("♚")) {
+            return this.kingMiddleGame[adjustedIndex];
+        }
+        
+        return 0;
+    }
+
+    isCentralSquare(index) {
+        const file = index % 8;
+        const rank = Math.floor(index / 8);
+        return file >= 2 && file <= 5 && rank >= 2 && rank <= 5;
+    }
+
+    calculateMobilityBonus(move, color) {
+        let mobility = 0;
+        this.simulateMove(move, () => {
+            const possibleMoves = this.validator.getPossibleMoves(move.to) || [];
+            mobility = possibleMoves.length;
+        });
+        return mobility;
+    }
+
+    protectsAlly(move, color) {
+        let protects = false;
+        this.simulateMove(move, () => {
+            const attacks = this.getAttacksFromSquare(move.to, move.piece);
+            protects = attacks.some(target => {
+                const piece = this.board.board[target];
+                return piece && piece.cor === color;
+            });
+        });
+        return protects;
+    }
+
+    calculateThreatenedValue(move, enemyColor) {
+        let totalValue = 0;
+        this.simulateMove(move, () => {
+            const attacks = this.getAttacksFromSquare(move.to, move.piece);
+            attacks.forEach(target => {
+                const piece = this.board.board[target];
+                if (piece && piece.cor === enemyColor) {
+                    totalValue += this.valueOfPiece(piece);
+                }
+            });
+        });
+        return totalValue;
+    }
+
+    getAttacksFromSquare(square, piece) {
+        return this.validator.getPossibleMoves(square) || [];
+    }
+
+    getAttackersOnSquare(square, color) {
+        const attackers = [];
+        for (let i = 0; i < 64; i++) {
+            const piece = this.board.board[i];
+            if (!piece || piece.cor !== color) continue;
+            
+            const moves = this.validator.getPossibleMoves(i) || [];
+            if (moves.includes(square)) {
+                attackers.push({ index: i, piece });
+            }
+        }
+        return attackers;
+    }
+
+    givesCheck(move, enemyColor) {
+        let inCheck = false;
+        this.simulateMove(move, () => {
+            inCheck = this.validator.isKingInCheck(enemyColor);
+        });
+        return inCheck;
+    }
+
+    findBestCheckEscape(moves, color, enemyColor) {
+        const escapeMoves = moves.filter(m => {
+            let escapesCheck = false;
+            this.simulateMove(m, () => {
+                escapesCheck = !this.validator.isKingInCheck(color);
+            });
+            return escapesCheck;
+        });
+        
+        if (escapeMoves.length === 0) return null;
+        
+        return this.evaluateAndChooseBest(escapeMoves, color, enemyColor).move;
+    }
+
+    findSafeEscapeMoves(moves, threatened, enemyColor) {
+        return moves.filter(m => 
+            threatened.some(t => t.index === m.from) && 
+            !this.wouldBeAttackedAfterMove(m, enemyColor)
+        );
+    }
+
+    filterRepeatingMoves(moves) {
+        if (!this.lastMove) return moves;
+        
+        return moves.filter(m => {
+            const isReverse = m.from === this.lastMove.to && m.to === this.lastMove.from;
+            if (!isReverse) return true;
+            
+            return m.capturedPiece || this.willRemoveCheck(m);
+        });
+    }
+
+    // ============ FUNÇÕES HERDADAS (mantidas) ============
+    
     getAllMovesForColor(color) {
         const moves = [];
-        const boardArr = this.board.board;
         for (let from = 0; from < 64; from++) {
-            const piece = boardArr[from];
+            const piece = this.board.board[from];
             if (!piece || piece.cor !== color) continue;
+            
             const possible = this.validator.getPossibleMoves(from) || [];
             for (const to of possible) {
-                const captured = this.board.board[to] || null;
                 moves.push({
                     from,
                     to,
                     piece,
-                    capturedPiece: captured
+                    capturedPiece: this.board.board[to] || null
                 });
             }
         }
         return moves;
     }
-    // evita repetir o mesmo movimento sem motivo
-    isForbiddenRepeat(move) {
-        if (!this.lastMove) return false;
-        if (move.from === this.lastMove.from && move.to === this.lastMove.to) {
-            // permitir se for captura
-            if (move.capturedPiece) return false;
-            // permitir se o movimento evita perda (i.e., seria atacado antes mas não depois)
-            // vamos checar: se before it was threatened and after it's not -> allow
-            const color = move.piece.cor;
-            const enemyColor = color === "brancas" ? "pretas" : "brancas";
-            const wasAttackedBefore = this.isSquareAttacked(move.from, this.getAllMovesForColor(enemyColor));
-            const wouldBeAttackedAfter = this.wouldBeAttackedAfterMove(move, enemyColor);
-            if (wasAttackedBefore && !wouldBeAttackedAfter) return false;
-            // permitir se sair de check (simulação)
-            if (this.willRemoveCheck(move)) return false;
-            // caso contrário, proibimos repetir
-            return true;
-        }
-        return false;
+
+    valueOfPiece(piece) {
+        if (!piece) return 0;
+        return this.pieceValueBySymbol[piece.tipo] || 100;
     }
-    // escolhe melhor captura segundo ganho material (simula riscos).
-	chooseBestCapture(captureMoves, myColor, enemyMoves) {
-		// Para cada captura: calcular se é segura; se não for, avaliar ganho líquido
-		const evaluated = captureMoves.map(m => {
-			const capturedVal = this.valueOfPiece(m.capturedPiece);
-			// Simula se a peça ficará atacada depois
-			const wouldBeAttacked = this.wouldBeAttackedAfterMove(
-				m, 
-				myColor === "brancas" ? "pretas" : "brancas"
-			);
-			let netGain = capturedVal;
-			if (wouldBeAttacked) {
-				// Se atacado, estimar menor atacante que pode capturar no próximo turno
-				const attackerVal = this.estimatedAttackerValueOnSquareAfterMove(
-					m, 
-					myColor === "brancas" ? "pretas" : "brancas"
-				);
-				// Se não houver atacante, attackerVal = 0
-				netGain = capturedVal - attackerVal;
-			}
-			return { move: m, capturedVal, wouldBeAttacked, netGain };
-		});
-		// Filtra capturas com netGain <= 0 (evita suicídios)
-		const safeEvaluated = evaluated.filter(e => e.netGain > 0);
-		// Se houver capturas seguras, usar apenas elas
-		const usedEvaluated = safeEvaluated.length > 0 ? safeEvaluated : evaluated;
-		// Priorizar capturas com netGain > 0 e maiores capturedVal
-		const positive = usedEvaluated.filter(e => e.netGain > 0);
-		if (positive.length > 0) {
-			// Ordenar por capturedVal desc, netGain desc
-			positive.sort((a, b) => {
-				if (b.capturedVal !== a.capturedVal) return b.capturedVal - a.capturedVal;
-				return b.netGain - a.netGain;
-			});
-			// Se empate no capturedVal e netGain, escolher aleatório entre os empates
-			const topVal = positive[0].capturedVal;
-			const topCandidates = positive.filter(x => x.capturedVal === topVal);
-			return topCandidates[Math.floor(Math.random() * topCandidates.length)].move;
-		}
-		// Se não tem positive netGain, talvez aceitar captura neutra (netGain === 0)
-		const neutral = evaluated.filter(e => e.netGain === 0);
-		if (neutral.length > 0) {
-			const topVal = Math.max(...neutral.map(n => n.capturedVal));
-			const topCandidates = neutral.filter(x => x.capturedVal === topVal);
-			return topCandidates[Math.floor(Math.random() * topCandidates.length)].move;
-		}
-		// Nenhuma captura recomendada
-		return null;
-	}
-    // verifica se um quadrado será atacado depois de aplicar move (simulação)
-	wouldBeAttackedAfterMove(move, enemyColor) {
-    	let attacked = false;
-    	this.simulateMove(move, () => {
-        	const enemyMoves = this.getAllMovesForColor(enemyColor);
-        	attacked = enemyMoves.some(em => em.to === move.to);
-        	console.log(`Movimento de ${move.piece.tipo} ${this.indexToNotation(move.from)} -> ${this.indexToNotation(move.to)} ` +
-                    `foi simulado, atacado depois? ${attacked}`);
-    	});
-    	return attacked;
-	}
-    // estima valor do atacante que pode capturar nessa casa após move (menor valor atacante)
+
+    wouldBeAttackedAfterMove(move, enemyColor) {
+        let attacked = false;
+        this.simulateMove(move, () => {
+            const enemyMoves = this.getAllMovesForColor(enemyColor);
+            attacked = enemyMoves.some(em => em.to === move.to);
+        });
+        return attacked;
+    }
+
     estimatedAttackerValueOnSquareAfterMove(move, enemyColor) {
         let minVal = Infinity;
         this.simulateMove(move, () => {
-            const enemyMoves = this.getAllMovesForColor(enemyColor);
-            // todos os ataques que capturam na mesma casa
-            const attackers = enemyMoves.filter(em => em.to === move.to && em.capturedPiece);
+            const attackers = this.getAttackersOnSquare(move.to, enemyColor);
             for (const a of attackers) {
                 const val = this.valueOfPiece(a.piece);
                 if (val < minVal) minVal = val;
             }
         });
-        if (minVal === Infinity) return 0;
-        return minVal;
+        return minVal === Infinity ? 0 : minVal;
     }
-    // calcula valor heurístico de uma peça (aceita Piece ou null)
-    valueOfPiece(piece) {
-        if (!piece) return 0;
-        const v = this.pieceValueBySymbol[piece.tipo];
-        if (v !== undefined) return v;
-        // fallback: por cor (improvável) ou nome
-        return 1;
-    }
-    // filtra e ordena movimentos por risco (menor atacante preferido)
-    rankMovesByRisk(moves, enemyColor) {
-        const rated = moves.map(m => {
-            // se é captura e segura, alto valor
-            const capturedVal = this.valueOfPiece(m.capturedPiece);
-            let risk = 0;
-            this.simulateMove(m, () => {
-                const enemyMoves = this.getAllMovesForColor(enemyColor);
-                const attackers = enemyMoves.filter(em => em.to === m.to);
-                // risco medido pelo menor valor atacante (quanto pior, maior risco)
-                if (attackers.length > 0) {
-                    risk = Math.min(...attackers.map(a => this.valueOfPiece(a.piece)));
-                } else {
-                    risk = 0;
-                }
-            });
-            // score: priorizar mínimo risco, depois maior capturedVal
-            return { move: m, score: risk - capturedVal * 0.1 };
-        });
-        rated.sort((a, b) => a.score - b.score);
-        return rated.map(r => r.move);
-    }
-	indexToNotation(i) {
-    	const files = "abcdefgh";
-    	const file = files[i % 8];
-    	const rank = 8 - Math.floor(i / 8);
-    	return `${file}${rank}`;
-	}
-    // pick preferable among safe moves: choose capture of higher value, else random
-    pickPreferableMove(moves) {
-        const captures = moves.filter(m => m.capturedPiece);
-        if (captures.length > 0) {
-            // escolher captura de maior valor
-            captures.sort((a, b) => this.valueOfPiece(b.capturedPiece) - this.valueOfPiece(a.capturedPiece));
-            const topVal = this.valueOfPiece(captures[0].capturedPiece);
-            const topCandidates = captures.filter(c => this.valueOfPiece(c.capturedPiece) === topVal);
-            return topCandidates[Math.floor(Math.random() * topCandidates.length)];
+
+    getThreatenedPieces(color) {
+        const threatened = [];
+        const enemyColor = color === "brancas" ? "pretas" : "brancas";
+        const enemyMoves = this.getAllMovesForColor(enemyColor);
+        
+        for (let i = 0; i < 64; i++) {
+            const piece = this.board.board[i];
+            if (!piece || piece.cor !== color) continue;
+            
+            if (enemyMoves.some(m => m.to === i)) {
+                threatened.push({ index: i, piece });
+            }
         }
-        // senão aleatório
-        return moves[Math.floor(Math.random() * moves.length)];
+        return threatened;
     }
-    // verifica se o quadrado é atacado por enemyMoves (simples utilitária)
-    isSquareAttacked(squareIndex, enemyMoves) {
-        return enemyMoves.some(m => m.to === squareIndex);
+
+    willRemoveCheck(move) {
+        let removed = false;
+        const color = this.board.board[move.from]?.cor;
+        if (!color) return false;
+        
+        this.simulateMove(move, () => {
+            removed = !this.validator.isKingInCheck(color);
+        });
+        return removed;
     }
-    // executa move no board, detectando En Passant e registrando double-step se aplicável
+
+    simulateMove(move, callback) {
+        const from = move.from;
+        const to = move.to;
+        const originalFromPiece = this.board.board[from];
+        const originalToPiece = this.board.board[to];
+        
+        this.board.board[to] = originalFromPiece;
+        this.board.board[from] = null;
+        
+        try {
+            callback();
+        } finally {
+            this.board.board[from] = originalFromPiece;
+            this.board.board[to] = originalToPiece;
+        }
+    }
+
     applyMoveWithEPAndRegister(move) {
         if (!move) return;
+        
         const piece = this.board.board[move.from];
-        // detectar en passant (se módulo existir)
         let epCapturedPos = null;
+        
         try {
-            if (this.enPassant && typeof this.enPassant.isEnPassantMove === "function") {
+            if (this.enPassant?.isEnPassantMove) {
                 epCapturedPos = this.enPassant.isEnPassantMove(move.from, move.to, piece);
             }
         } catch (e) {
             epCapturedPos = null;
         }
-        // aplicar movimento (presume que board.movePiece aceita terceiro argumento opcional)
+        
         try {
             if (epCapturedPos !== null && epCapturedPos !== undefined) {
-                // se board.movePiece suporta remoção EP via terceiro argumento
                 this.board.movePiece(move.from, move.to, epCapturedPos);
             } else {
                 this.board.movePiece(move.from, move.to);
             }
         } catch (e) {
-            // fallback: manipular array diretamente se movePiece não aceitar terceiro argumento
             this.board.board[move.to] = this.board.board[move.from];
             this.board.board[move.from] = null;
         }
-        // registrar passo duplo se disponível no módulo
+        
         try {
-            if (this.enPassant && typeof this.enPassant.registerDoubleStep === "function") {
+            if (this.enPassant?.registerDoubleStep) {
                 this.enPassant.registerDoubleStep(move.from, move.to, piece);
             }
-        } catch (e) {
-            // ignore
-        }
+        } catch (e) {}
     }
-    // simula move diretamente no array board.board (restaura após callback)
-    simulateMove(move, callback) {
-        // guarda estado
-        const from = move.from;
-        const to = move.to;
-        const originalFromPiece = this.board.board[from];
-        const originalToPiece = this.board.board[to];
-        // aplica simulação (movimentação simples)
-        this.board.board[to] = originalFromPiece;
-        this.board.board[from] = null;
-        try {
-            callback();
-        } catch (e) {
-            console.error("simulateMove callback error:", e);
-        }
-        // restaura
-        this.board.board[from] = originalFromPiece;
-        this.board.board[to] = originalToPiece;
-    }
-	getThreatenedPieces(color) {
-		const threatened = [];
-		const enemyColor = color === "brancas" ? "pretas" : "brancas";
-		const enemyMoves = this.getAllMovesForColor(enemyColor);
-		for (let i = 0; i < 64; i++) {
-			const piece = this.board.board[i];
-			if (!piece || piece.cor !== color) continue;
-			if (enemyMoves.some(m => m.to === i)) {
-				console.log(`⚠️ Peça ameaçada: ${piece.tipo} em ${this.indexToNotation(i)} (índice ${i})`);
-				threatened.push({ index: i, piece });
-			}
-		}
-		console.log(`Peças ameaçadas para ${color}:`, threatened.map(t => `${t.piece.tipo}@${this.indexToNotation(t.index)}`));
-		return threatened;
-	}
-    // verifica se o move vai tirar do check (simulação)
-    willRemoveCheck(move) {
-        let removed = false;
-        const color = this.board.board[move.from]?.cor;
-        if (!color) return false;
-        this.simulateMove(move, () => {
-            try {
-                if (this.validator && typeof this.validator.isKingInCheck === "function") {
-                    removed = !this.validator.isKingInCheck(color);
-                }
-            } catch (e) {
-                removed = false;
-            }
-        });
-        return removed;
+
+    indexToNotation(i) {
+        const files = "abcdefgh";
+        return `${files[i % 8]}${8 - Math.floor(i / 8)}`;
     }
 }
