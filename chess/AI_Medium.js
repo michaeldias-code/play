@@ -82,6 +82,9 @@ export class AI_Medium {
     // =====================================================
     // INTERFACE PÚBLICA: ESCOLHA DE MOVIMENTO
     // =====================================================
+// =====================================================
+    // INTERFACE PÚBLICA: ESCOLHA DE MOVIMENTO
+    // =====================================================
     makeMove(color) {
         console.log("\n🧠 ============ TURNO DA IA ============");
         this.resetStats();
@@ -109,7 +112,55 @@ export class AI_Medium {
     // =====================================================
     // BUSCA ITERATIVA COM ASPIRATION WINDOWS
     // =====================================================
-);
+    findBestMove(color) {
+        const moves = this.generateMoves(color);
+        if (moves.length === 0) return null;
+        if (moves.length === 1) return { ...moves[0], score: 0 };
+
+        // Ordenar movimentos por heurísticas (critical optimization)
+        this.orderMoves(moves, color, 0);
+
+        let bestMove = moves[0];
+        let bestScore = -Infinity;
+        let alpha = -Infinity;
+        let beta = Infinity;
+
+        // Iterative Deepening (busca incremental)
+        for (let depth = 1; depth <= this.config.maxDepth; depth++) {
+            console.log(`🔎 Profundidade ${depth}/${this.config.maxDepth}`);
+            
+            let currentBest = null;
+            let currentScore = -Infinity;
+
+            // Aspiration Windows (otimização para profundidades > 2)
+            if (depth > 2 && bestScore > -Infinity) {
+                alpha = bestScore - this.config.aspirationWindow;
+                beta = bestScore + this.config.aspirationWindow;
+            }
+
+            for (const move of moves) {
+                const captureInfo = move.isCapture ? 
+                    `💎 Captura ${this.board.board[move.to]?.tipo}(${this.PIECE_VALUES[this.board.board[move.to]?.tipo]})` : 
+                    '📍 Movimento';
+                
+                const score = this.simulate(move, () => {
+                    return -this.minimax(
+                        depth - 1,
+                        this.opponent(color),
+                        -beta,
+                        -alpha,
+                        color,
+                        false
+                    );
+                });
+
+                console.log(`   ${this.notation(move.from)}→${this.notation(move.to)} | Score: ${score} | ${captureInfo}`);
+
+                if (score > currentScore) {
+                    currentScore = score;
+                    currentBest = move;
+                    alpha = Math.max(alpha, score);
+                    console.log(`      ⭐ NOVO MELHOR! Score: ${score}`);
                 }
 
                 // Re-search se sair da janela
@@ -132,6 +183,9 @@ export class AI_Medium {
         return { ...bestMove, score: bestScore };
     }
 
+    // =====================================================
+    // MINIMAX COM ALFA-BETA PRUNING (OTIMIZADO)
+    // =====================================================
     // =====================================================
     // MINIMAX COM ALFA-BETA PRUNING (OTIMIZADO)
     // =====================================================
