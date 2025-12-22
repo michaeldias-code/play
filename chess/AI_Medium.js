@@ -175,83 +175,81 @@ export class AI_Medium {
     // =====================================================
     // AVALIAÇÃO HEAVY HEURISTICS (COM BACKUP DE PEÇAS)
     // =====================================================
-    evaluate(color) {
-        let score = 0;
-        const enemy = this.opponent(color);
-        const endgame = this.isEndgame();
+// =====================================================
+// AVALIAÇÃO HEAVY HEURISTICS (com backup e exposição)
+// =====================================================
+evaluate(color) {
+    let score = 0;
+    const enemy = this.opponent(color);
+    const endgame = this.isEndgame();
 
-        for (let i = 0; i < 64; i++) {
-            const p = this.board.board[i];
-            if (!p) continue;
+    for (let i = 0; i < 64; i++) {
+        const p = this.board.board[i];
+        if (!p) continue;
 
-            const sign = p.cor === color ? 1 : -1;
-            const val = this.pieceValue[p.tipo] || 0;
+        const sign = p.cor === color ? 1 : -1;
+        const val = this.pieceValue[p.tipo];
 
-            // Material
-            score += sign * val;
+        // Material
+        score += sign * val;
 
-            // Valor posicional
-            score += sign * this.positional(i, p, endgame);
+        // Valor posicional
+        score += sign * this.positional(i, p, endgame);
 
-            // Desenvolvimento de peças menores
-            if ((p.tipo === "♘" || p.tipo === "♞" || p.tipo === "♗" || p.tipo === "♝") && i >= 16 && i <= 47) {
-                score += sign * 25;
-            }
-
-            // Penalidade dama precoce
-            if ((p.tipo === "♕" || p.tipo === "♛") && this.moveNumber < 10) {
-                score -= sign * 40;
-            }
-
-            // Segurança do rei
-            if ((p.tipo === "♔" || p.tipo === "♚") && !endgame && i >= 24 && i <= 39) {
-                score -= sign * 80;
-            }
-
-            // Controle do centro
-            if ([27, 28, 35, 36].includes(i)) score += sign * 20;
-
-            // ------------------------- PEÇAS PENDURADAS COM E SEM BACKUP -------------------------
-            const attackers = this.getAttackers(i, enemy);
-            const defenders = this.getAttackers(i, p.cor);
-
-            if (attackers.length > 0) {
-                let totalRisk = 0;
-                for (const attacker of attackers) {
-                    const attackerVal = this.pieceValue[this.board.board[attacker].tipo] || 0;
-                    totalRisk += val - attackerVal;
-                }
-
-                if (defenders.length === 0) {
-                    // sem backup
-                    score -= sign * totalRisk;
-                    console.log(`⚠️ Peça ${p.tipo} em ${this.coord(i)} atacada sem defesa | Penalidade = ${totalRisk}`);
-                } else {
-                    // com backup → fator baseado na peça
-                    let backupFactor = 0.1; // padrão baixo
-                    if (p.tipo === "♘" || p.tipo === "♞" || p.tipo === "♗" || p.tipo === "♝") backupFactor = 0.2;
-                    else if (p.tipo === "♖" || p.tipo === "♜") backupFactor = 0.5;
-                    else if (p.tipo === "♕" || p.tipo === "♛") backupFactor = 0.8;
-                    else if (p.tipo === "♔" || p.tipo === "♚") backupFactor = 0.9;
-
-                    const reducedRisk = totalRisk * backupFactor;
-                    score -= sign * reducedRisk;
-                    console.log(`⚠️ Peça ${p.tipo} em ${this.coord(i)} atacada com defesa | Penalidade = ${reducedRisk}`);
-                }
-            }
+        // Desenvolvimento de peças menores (cavalos e bispos)
+        if ((p.tipo === "♘" || p.tipo === "♞" ||
+             p.tipo === "♗" || p.tipo === "♝") && i >= 16 && i <= 47) {
+            score += sign * 25;
         }
 
-        // Mobilidade
-        const mobilityOwn = this.getAllMoves(color).length;
-        const mobilityEnemy = this.getAllMoves(enemy).length;
-        score += (mobilityOwn - mobilityEnemy) * 3;
+        // Penalidade dama precoce
+        if ((p.tipo === "♕" || p.tipo === "♛") && this.moveNumber < 10) {
+            score -= sign * 40;
+        }
 
-        // Xeque
-        if (this.validator.isKingInCheck(enemy)) score += 60;
-        if (this.validator.isKingInCheck(color)) score -= 60;
+        // Segurança do rei
+        if ((p.tipo === "♔" || p.tipo === "♚") && !endgame && i >= 24 && i <= 39) {
+            score -= sign * 80;
+        }
 
-        return score;
+        // Controle do centro
+        if ([27, 28, 35, 36].includes(i)) score += sign * 20;
+
+        // ------------------------- PEÇAS PENDURADAS -------------------------
+        const enemyAttackers = this.getAttackers(i, enemy);
+        if (enemyAttackers.length) {
+            const defenders = this.getAttackers(i, p.cor);
+            let totalRisk = 0;
+
+            for (const attacker of enemyAttackers) {
+                const attackerVal = this.pieceValue[this.board.board[attacker].tipo] || 0;
+                totalRisk += val - attackerVal;
+            }
+
+            // Penalidade ajustada: com backup diminui risco
+            if (defenders.length > 0) {
+                const backupFactor = val >= 500 ? 0.5 : 0.1; // torre/dama penalidade parcial, peões quase nada
+                totalRisk *= backupFactor;
+                console.log(`⚠️ Peça ${p.tipo} em ${this.coord(i)} atacada com defesa | Penalidade = ${Math.floor(totalRisk)}`);
+            } else {
+                console.log(`⚠️ Peça ${p.tipo} em ${this.coord(i)} atacada sem defesa | Penalidade = ${totalRisk}`);
+            }
+
+            score -= sign * totalRisk;
+        }
     }
+
+    // Mobilidade
+    const mobilityOwn = this.getAllMoves(color).length;
+    const mobilityEnemy = this.getAllMoves(enemy).length;
+    score += (mobilityOwn - mobilityEnemy) * 3;
+
+    // Xeque
+    if (this.validator.isKingInCheck(enemy)) score += 60;
+    if (this.validator.isKingInCheck(color)) score -= 60;
+
+    return score;
+}
 
     // =====================================================
     // VALOR POSICIONAL
@@ -276,16 +274,30 @@ export class AI_Medium {
     // =====================================================
     // Retorna todos atacantes de uma casa
     // =====================================================
-    getAttackers(square, byColor) {
-        const attackers = [];
-        for (let i = 0; i < 64; i++) {
-            const p = this.board.board[i];
-            if (!p || p.cor !== byColor) continue;
-            const moves = this.validator.getPossibleMoves(i) || [];
-            if (moves.includes(square)) attackers.push(i);
+// =====================================================
+// Retorna todos atacantes reais de uma casa
+// =====================================================
+getAttackers(square, byColor) {
+    const attackers = [];
+    for (let i = 0; i < 64; i++) {
+        const p = this.board.board[i];
+        if (!p || p.cor !== byColor) continue;
+
+        // Movimentos possíveis
+        const moves = this.validator.getPossibleMoves(i) || [];
+
+        // Considera ataque apenas se a casa é um destino de captura real
+        for (const to of moves) {
+            const target = this.board.board[to];
+            // Só adiciona se houver peça inimiga ou se for peão podendo en passant
+            if (target && target.cor !== byColor || 
+                (p.tipo === "♙" || p.tipo === "♟") && to === this.enPassant) {
+                if (to === square) attackers.push(i);
+            }
         }
-        return attackers;
     }
+    return attackers;
+}
 
     // =====================================================
     // FIM DE JOGO
