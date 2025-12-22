@@ -4,11 +4,10 @@ export class AI_Medium {
         this.validator = validator;   // Funções de validação de movimentos
         this.enPassant = enPassant;   // Controle de en passant (se houver)
 
-        this.MAX_DEPTH = 3;           // Profundidade da busca (pode ajustar para dificultar/facilitar)
-        this.moveNumber = 0;          // Conta quantos lances já foram feitos (útil para heurísticas de abertura)
+        this.MAX_DEPTH = 3;           // Profundidade da busca (ajustável)
+        this.moveNumber = 0;          // Contador de movimentos (útil para heurísticas de abertura)
 
         // ================= MATERIAL =================
-        // Valor das peças usado na avaliação
         this.pieceValue = {
             "♙": 100, "♟": 100,
             "♘": 320, "♞": 320,
@@ -19,7 +18,6 @@ export class AI_Medium {
         };
 
         // ================= PIECE-SQUARE TABLES =================
-        // Valores posicionais das peças
         this.pawnTable = [
              0,  0,  0,  0,  0,  0,  0,  0,
             50, 50, 50, 50, 50, 50, 50, 50,
@@ -77,7 +75,7 @@ export class AI_Medium {
     }
 
     // =====================================================
-    // MAIN MOVE SELECTION
+    // ESCOLHA PRINCIPAL DE JOGADA
     // =====================================================
     makeMove(color) {
         this.moveNumber++;
@@ -92,7 +90,6 @@ export class AI_Medium {
         let bestScore = -Infinity;
         let bestMoves = [];
 
-        // Avalia cada jogada possível
         for (const move of moves) {
             this.simulate(move, () => {
                 const score = -this.minimax(
@@ -103,18 +100,19 @@ export class AI_Medium {
                     Infinity
                 );
 
-                // Log da avaliação individual
+                // Log detalhado de cada movimento avaliado
                 console.log(`📝 Avaliando ${this.coord(move.from)} -> ${this.coord(move.to)} | Score = ${score}`);
 
                 if (score > bestScore) {
                     bestScore = score;
                     bestMoves = [move];
                 } else if (score >= bestScore - 20) {
-                    bestMoves.push(move); // margem para diversidade
+                    bestMoves.push(move);
                 }
             });
         }
 
+        // Seleção do movimento final
         const chosen = bestMoves[Math.floor(Math.random() * bestMoves.length)];
 
         if (chosen) {
@@ -126,13 +124,12 @@ export class AI_Medium {
     }
 
     // =====================================================
-    // MINIMAX COM ALPHA-BETA
+    // MINIMAX COM ALFA-BETA
     // =====================================================
     minimax(depth, color, root, alpha, beta) {
         const moves = this.getAllMoves(color);
 
         if (!moves.length) {
-            // Se sem jogadas → xeque ou empate
             if (this.validator.isKingInCheck(color)) {
                 return color === root ? -Infinity : Infinity;
             }
@@ -162,15 +159,12 @@ export class AI_Medium {
     }
 
     // =====================================================
-    // HEAVY HEURISTIC EVALUATION
+    // AVALIAÇÃO HEAVY HEURISTICS (revisada)
     // =====================================================
     evaluate(color) {
         let score = 0;
         const enemy = this.opponent(color);
         const endgame = this.isEndgame();
-
-        let mobilityOwn = 0;
-        let mobilityEnemy = 0;
 
         for (let i = 0; i < 64; i++) {
             const p = this.board.board[i];
@@ -179,21 +173,19 @@ export class AI_Medium {
             const sign = p.cor === color ? 1 : -1;
             const val = this.pieceValue[p.tipo];
 
-            // Material puro
+            // Material
             score += sign * val;
 
             // Valor posicional
             score += sign * this.positional(i, p, endgame);
 
-            // Heurísticas adicionais:
-            // -----------------------------
             // Desenvolvimento de peças menores
             if ((p.tipo === "♘" || p.tipo === "♞" ||
                  p.tipo === "♗" || p.tipo === "♝") && i >= 16 && i <= 47) {
                 score += sign * 25;
             }
 
-            // Penalidade para dama cedo
+            // Penalidade dama precoce
             if ((p.tipo === "♕" || p.tipo === "♛") && this.moveNumber < 10) {
                 score -= sign * 40;
             }
@@ -206,16 +198,22 @@ export class AI_Medium {
             // Controle do centro
             if ([27, 28, 35, 36].includes(i)) score += sign * 20;
 
-            // Peça pendurada (ataque sem defesa)
+            // ------------------------- PEÇAS PENDURADAS -------------------------
             if (this.isSquareAttacked(i, enemy) && !this.isSquareAttacked(i, p.cor)) {
-                score -= sign * val * 0.4;
-                console.log(`⚠️ Peça ${p.tipo} em ${this.coord(i)} atacada e não defendida`);
+                const attackers = this.getAttackers(i, enemy);
+                let totalRisk = 0;
+                for (const attacker of attackers) {
+                    const attackerVal = this.pieceValue[this.board.board[attacker].tipo] || 0;
+                    totalRisk += val - attackerVal; // penaliza considerando troca real
+                }
+                score -= sign * totalRisk;
+                console.log(`⚠️ Peça ${p.tipo} em ${this.coord(i)} atacada e não defendida | Penalidade = ${totalRisk}`);
             }
         }
 
         // Mobilidade
-        mobilityOwn = this.getAllMoves(color).length;
-        mobilityEnemy = this.getAllMoves(enemy).length;
+        const mobilityOwn = this.getAllMoves(color).length;
+        const mobilityEnemy = this.getAllMoves(enemy).length;
         score += (mobilityOwn - mobilityEnemy) * 3;
 
         // Xeque
@@ -226,7 +224,7 @@ export class AI_Medium {
     }
 
     // =====================================================
-    // Função auxiliar: valor posicional
+    // VALOR POSICIONAL
     // =====================================================
     positional(i, p, endgame) {
         const idx = p.cor === "pretas" ? 63 - i : i;
@@ -242,17 +240,25 @@ export class AI_Medium {
     // Verifica se uma casa é atacada
     // =====================================================
     isSquareAttacked(square, byColor) {
+        return this.getAttackers(square, byColor).length > 0;
+    }
+
+    // =====================================================
+    // Retorna todos atacantes de uma casa
+    // =====================================================
+    getAttackers(square, byColor) {
+        const attackers = [];
         for (let i = 0; i < 64; i++) {
             const p = this.board.board[i];
             if (!p || p.cor !== byColor) continue;
             const moves = this.validator.getPossibleMoves(i) || [];
-            if (moves.includes(square)) return true;
+            if (moves.includes(square)) attackers.push(i);
         }
-        return false;
+        return attackers;
     }
 
     // =====================================================
-    // Fim de jogo / fase final
+    // FIM DE JOGO
     // =====================================================
     isEndgame() {
         let queens = 0;
@@ -263,7 +269,7 @@ export class AI_Medium {
     }
 
     // =====================================================
-    // Retorna todas as jogadas legais de uma cor
+    // RETORNA TODAS AS JOGADAS LEGAIS
     // =====================================================
     getAllMoves(color) {
         const moves = [];
@@ -278,7 +284,7 @@ export class AI_Medium {
     }
 
     // =====================================================
-    // Simula uma jogada sem alterar o tabuleiro real
+    // SIMULA UMA JOGADA
     // =====================================================
     simulate(move, fn) {
         const a = this.board.board[move.from];
@@ -293,14 +299,14 @@ export class AI_Medium {
     }
 
     // =====================================================
-    // Cor oponente
+    // COR OPONENTE
     // =====================================================
     opponent(c) {
         return c === "brancas" ? "pretas" : "brancas";
     }
 
     // =====================================================
-    // Converte índice para coordenada tipo 'e4'
+    // ÍNDICE PARA COORDENADA (ex: 52 -> e2)
     // =====================================================
     coord(idx) {
         const file = "abcdefgh"[idx % 8];
