@@ -123,6 +123,7 @@ export class AI_Medium {
                         false
                     );
                 });
+console.log(`📊 ${this.notation(move.from)}→${this.notation(move.to)} | Score: ${score.toFixed(0)} | ${move.isCapture ? '💎 Captura' : '📍 Movimento'}`);
 
                 if (score > currentScore) {
                     currentScore = score;
@@ -347,6 +348,10 @@ export class AI_Medium {
     // =====================================================
     evaluate(color) {
         let score = 0;
+        let materialScore = 0;  // ⬅️ ADICIONAR
+        let positionalScore = 0;  // ⬅️ ADICIONAR
+        let threatScore = 0;  // ⬅️ ADICIONAR
+
         const enemy = this.opponent(color);
         const phase = this.gamePhase(); // 0=opening, 1=middlegame, 2=endgame
 
@@ -359,10 +364,14 @@ export class AI_Medium {
             const value = this.PIECE_VALUES[piece.tipo];
 
             // Material
-            score += sign * value;
+          const matGain = sign * value;
+        materialScore += matGain;  // ⬅️ ADICIONAR
+        score += matGain;
 
             // Posicional (PST)
-            score += sign * this.getPSTValue(sq, piece, phase);
+                const posGain = sign * this.getPSTValue(sq, piece, phase);
+        positionalScore += posGain;  // ⬅️ ADICIONAR
+        score += posGain;
 
             // Mobilidade (importante!)
             const mobility = (this.validator.getPossibleMoves(sq) || []).length;
@@ -382,7 +391,10 @@ export class AI_Medium {
         score -= this.evaluateCenterControl(enemy) * 15;
 
         // ===== PEÇAS ATACADAS/DEFENDIDAS =====
-        score += this.evaluateThreats(color, enemy);
+    const threats = this.evaluateThreats(color, enemy);
+    threatScore = threats;  // ⬅️ ADICIONAR
+    score += threats;
+
 
         // ===== BÔNUS DE DESENVOLVIMENTO (OPENING) =====
         if (phase === 0) {
@@ -397,6 +409,8 @@ export class AI_Medium {
         // ===== XEQUE =====
         if (this.validator.isKingInCheck(enemy)) score += 50;
         if (this.validator.isKingInCheck(color)) score -= 50;
+
+        console.log(`🎯 Avaliação Final: ${score.toFixed(0)} | Material: ${materialScore} | Posição: ${positionalScore} | Ameaças: ${threatScore}`);
 
         return score;
     }
@@ -929,4 +943,5 @@ export class AI_Medium {
         console.log(`⚔️ Agressividade ajustada para nível ${level}`);
     }
 }
+
 
