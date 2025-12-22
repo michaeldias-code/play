@@ -1,3 +1,4 @@
+//AI_Medium.js v2
 export class AI_Medium {
     constructor(board, validator, enPassant) {
         // Referências externas (motor do jogo)
@@ -26,10 +27,10 @@ export class AI_Medium {
         // Bônus/penalidade por posição
         // Ajustar aqui muda estilo (centralizador, defensivo, etc.)
         // ===============================
-        this.pawnTable = [...];
-        this.knightTable = [...];
-        this.bishopTable = [...];
-        this.kingMiddleGame = [...];
+        this.pawnTable = [];
+        this.knightTable = [];
+        this.bishopTable = [];
+        this.kingMiddleGame = [];
     }
 
     // =========================================================
@@ -255,3 +256,4 @@ export class AI_Medium {
         } catch {}
     }
 }
+
