@@ -122,12 +122,19 @@ export class AI_Medium {
         // 5. CAPTURAS FAVORÁVEIS (com análise profunda)
         const captureMoves = myMoves.filter(m => m.capturedPiece !== null);
         if (captureMoves.length > 0) {
-            const bestCapture = this.evaluateCapturesWithSEE(captureMoves, color, enemyColor);
-            if (bestCapture && bestCapture.score > 0) {
-                console.log(`💎 Captura favorável: ganho de ${bestCapture.score}`);
-                this.applyMoveWithEPAndRegister(bestCapture.move);
-                this.lastMove = { from: bestCapture.move.from, to: bestCapture.move.to };
-                return bestCapture.move;
+            // FILTRO CRÍTICO: verificar se cada captura vale a pena
+            const worthItCaptures = captureMoves.filter(m => this.isCaptureWorthIt(m, color, enemyColor));
+            
+            if (worthItCaptures.length > 0) {
+                const bestCapture = this.evaluateCapturesWithSEE(worthItCaptures, color, enemyColor);
+                if (bestCapture && bestCapture.score > 0) {
+                    console.log(`💎 Captura favorável: ganho líquido de ${bestCapture.score}`);
+                    this.applyMoveWithEPAndRegister(bestCapture.move);
+                    this.lastMove = { from: bestCapture.move.from, to: bestCapture.move.to };
+                    return bestCapture.move;
+                }
+            } else {
+                console.log("⚠️ Todas as capturas disponíveis resultam em perda material - ignorando");
             }
         }
         
@@ -314,35 +321,97 @@ export class AI_Medium {
         
         evaluated.sort((a, b) => b.score - a.score);
         
-        const best = evaluated.filter(e => e.score > 0);
-        if (best.length === 0) return null;
+        // FILTRO RIGOROSO: só aceita capturas com ganho líquido positivo
+        const profitable = evaluated.filter(e => e.score > 0);
         
-        return best[Math.floor(Math.random() * Math.min(3, best.length))];
+        if (profitable.length === 0) {
+            console.log("❌ Nenhuma captura lucrativa encontrada (todas perdem material)");
+            return null;
+        }
+        
+        console.log(`✅ ${profitable.length} capturas lucrativas encontradas`);
+        return profitable[Math.floor(Math.random() * Math.min(3, profitable.length))];
     }
 
     staticExchangeEvaluation(move, color, enemyColor) {
         const capturedValue = this.valueOfPiece(move.capturedPiece);
-        let score = capturedValue;
+        const myPieceValue = this.valueOfPiece(move.piece);
+        
+        // Verificação básica: não capturar peça de menor valor com peça de maior valor
+        // se a casa estiver defendida (REGRA CRÍTICA)
+        let wouldLosePiece = false;
+        let lowestEnemyAttacker = Infinity;
         
         this.simulateMove(move, () => {
             const attackers = this.getAttackersOnSquare(move.to, enemyColor);
-            if (attackers.length === 0) return;
             
-            const defenders = this.getAttackersOnSquare(move.to, color);
-            
-            let attValue = this.valueOfPiece(move.piece);
-            let defValue = attackers.length > 0 ? 
-                Math.min(...attackers.map(a => this.valueOfPiece(a.piece))) : Infinity;
-            
-            if (defValue < attValue) {
-                score -= attValue;
-                if (defenders.length > 0) {
-                    score += defValue;
-                }
+            if (attackers.length > 0) {
+                wouldLosePiece = true;
+                lowestEnemyAttacker = Math.min(...attackers.map(a => this.valueOfPiece(a.piece)));
+                console.log(`⚠️ Captura de ${move.capturedPiece.tipo} (${capturedValue}) com ${move.piece.tipo} (${myPieceValue})`);
+                console.log(`   Casa defendida por peça de valor ${lowestEnemyAttacker}`);
             }
         });
         
-        return score;
+        // CÁLCULO DO GANHO LÍQUIDO
+        let netGain = capturedValue;
+        
+        if (wouldLosePiece) {
+            // Pior caso: vou perder minha peça na resposta
+            netGain -= myPieceValue;
+            
+            // Melhor caso: posso recapturar com peça de menor valor
+            let canDefend = false;
+            this.simulateMove(move, () => {
+                const defenders = this.getAttackersOnSquare(move.to, color);
+                if (defenders.length > 0) {
+                    const lowestDefender = Math.min(...defenders.map(d => this.valueOfPiece(d.piece)));
+                    // Se tenho defensor mais barato que o atacante inimigo
+                    if (lowestDefender < lowestEnemyAttacker) {
+                        netGain += lowestEnemyAttacker;
+                        canDefend = true;
+                        console.log(`   ✅ Posso defender com peça de valor ${lowestDefender}`);
+                    }
+                }
+            });
+            
+            if (!canDefend) {
+                console.log(`   ❌ Não posso defender adequadamente - perco ${myPieceValue - capturedValue}`);
+            }
+        } else {
+            console.log(`✅ Captura segura: ${move.piece.tipo} captura ${move.capturedPiece.tipo} (+${capturedValue})`);
+        }
+        
+        return netGain;
+    }
+    
+    // Verificação adicional antes de qualquer captura
+    isCaptureWorthIt(move, color, enemyColor) {
+        const capturedValue = this.valueOfPiece(move.capturedPiece);
+        const myPieceValue = this.valueOfPiece(move.piece);
+        
+        // Regra 1: NUNCA capturar peão (100) com rainha (900) em casa defendida
+        if (myPieceValue > capturedValue + 200) {
+            let isDefended = false;
+            this.simulateMove(move, () => {
+                const attackers = this.getAttackersOnSquare(move.to, enemyColor);
+                isDefended = attackers.length > 0;
+            });
+            
+            if (isDefended) {
+                console.log(`🚫 BLOQUEIO: ${move.piece.tipo} (${myPieceValue}) não deve capturar ${move.capturedPiece.tipo} (${capturedValue}) - casa defendida`);
+                return false;
+            }
+        }
+        
+        // Regra 2: Avaliar troca completa
+        const see = this.staticExchangeEvaluation(move, color, enemyColor);
+        if (see < 0) {
+            console.log(`🚫 BLOQUEIO: captura resulta em perda líquida de ${-see}`);
+            return false;
+        }
+        
+        return true;
     }
 
     // ============ DESENVOLVIMENTO E ESTRATÉGIA ============
