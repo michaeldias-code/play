@@ -10,7 +10,6 @@ export class AI_Medium {
         this.board = board;
         this.validator = validator;
         this.enPassant = enPassant;
-
         // ===== CONFIGURAÇÃO DO MOTOR =====
         this.config = {
             maxDepth: 3,              // Profundidade de busca (ajustar conforme CPU)
@@ -21,37 +20,30 @@ export class AI_Medium {
             lmrThreshold: 3,          // Late Move Reduction após N movimentos
             futilityMargin: 200,      // Margem para futility pruning
         };
-
         // ===== PESOS ESTRATÉGICOS (TRÊS LEIS) =====
-this.weights = {
-    // ===== LEI 1: DEFESA =====
-    pieceUnderAttack: 300,        // cavalo sem defesa ≈ cavalo
-    mustDefend: 800,              // torre/dama em risco sério
-
-    // ===== LEI 2: CAPTURA =====
-    freeCaptureBonus: 200,        // incentivo, não substitui material
-    profitableTrade: 150,         // troca boa
-    materialAdvantage: 1,         // 1 = centipawn style
-
-    // ===== LEI 3: RISCO =====
-    exposedPiece: 250,            // peso POSITIVO
-    unnecessaryRisk: 120,         // peso POSITIVO
-
-    // ===== POSICIONAL =====
-    positional: 1,
-    mobility: 4,
-    centerControl: 15,
-    development: 20,
-    kingSafety: 120,
-};
-
-
+		this.weights = {
+			// ===== LEI 1: DEFESA =====
+			pieceUnderAttack: 300,        // cavalo sem defesa ≈ cavalo
+			mustDefend: 1200,              // torre/dama em risco sério
+			// ===== LEI 2: CAPTURA =====
+			freeCaptureBonus: 120,        // incentivo, não substitui material
+			profitableTrade: 150,         // troca boa
+			materialAdvantage: 1,         // 1 = centipawn style
+			// ===== LEI 3: RISCO =====
+			exposedPiece: 250,            // peso POSITIVO
+			unnecessaryRisk: 120,         // peso POSITIVO
+			// ===== POSICIONAL =====
+			positional: 1,
+			mobility: 4,
+			centerControl: 15,
+			development: 20,
+			kingSafety: 120,
+		};
         // ===== CACHE E OTIMIZAÇÃO =====
         this.transpositionTable = new Map(); // Tabela de transposição
         this.killerMoves = [];                // Killer moves por profundidade
         this.historyTable = new Map();        // History heuristic
         this.pawnHashTable = new Map();       // Cache de estrutura de peões
-        
         // ===== ESTATÍSTICAS (DEBUG) =====
         this.stats = {
             nodesSearched: 0,
@@ -59,7 +51,6 @@ this.weights = {
             cutoffs: 0,
             extensions: 0
         };
-
         // ===== VALORES DE MATERIAL =====
         this.PIECE_VALUES = Object.freeze({
             "♙": 100,  "♟": 100,
@@ -69,17 +60,14 @@ this.weights = {
             "♕": 900,  "♛": 900,
             "♔": 20000, "♚": 20000
         });
-
         // ===== PIECE-SQUARE TABLES (PST) =====
         this.pst = this.initializePST();
-        
         // ===== MÁSCARAS DE CASAS (para cálculo rápido) =====
         this.CENTER_SQUARES = new Set([27, 28, 35, 36]);
         this.EXTENDED_CENTER = new Set([18, 19, 20, 21, 26, 27, 28, 29, 34, 35, 36, 37, 42, 43, 44, 45]);
         this.BACK_RANK_WHITE = new Set([56, 57, 58, 59, 60, 61, 62, 63]);
         this.BACK_RANK_BLACK = new Set([0, 1, 2, 3, 4, 5, 6, 7]);
     }
-
     // =====================================================
     // INTERFACE PÚBLICA: ESCOLHA DE MOVIMENTO
     // =====================================================
@@ -89,27 +77,21 @@ this.weights = {
     makeMove(color) {
         console.log("\n🧠 ============ TURNO DA IA ============");
         this.resetStats();
-        
         const startTime = performance.now();
         const bestMove = this.findBestMove(color);
         const elapsed = (performance.now() - startTime).toFixed(1);
-
         if (!bestMove) {
             console.log("⚠️ Nenhum movimento legal encontrado");
             return null;
         }
-
         // Aplicar movimento
         this.board.movePiece(bestMove.from, bestMove.to);
-
         console.log(`\n✅ MOVIMENTO ESCOLHIDO: ${this.notation(bestMove.from)} → ${this.notation(bestMove.to)}`);
         console.log(`📊 Score: ${bestMove.score} | Tempo: ${elapsed}ms`);
         console.log(`🔍 Nós: ${this.stats.nodesSearched} | Cache: ${this.stats.cacheHits} | Cutoffs: ${this.stats.cutoffs}`);
         console.log("🧠 ======================================\n");
-
         return bestMove;
     }
-
     // =====================================================
     // BUSCA ITERATIVA COM ASPIRATION WINDOWS
     // =====================================================
@@ -120,15 +102,12 @@ this.weights = {
         const moves = this.generateMoves(color);
         if (moves.length === 0) return null;
         if (moves.length === 1) return { ...moves[0], score: 0 };
-
         // Ordenar movimentos por heurísticas (critical optimization)
         this.orderMoves(moves, color, 0);
-
         // ===== DETECTAR SITUAÇÃO CRÍTICA =====
         const inCheck = this.validator.isKingInCheck(color);
         const enemyInCheck = this.validator.isKingInCheck(this.opponent(color));
         const isCritical = inCheck || enemyInCheck || moves.length <= 5;
-
         // ===== FILTRO TOP-N (exceto em situações críticas) =====
         let movesToEvaluate = moves;
         if (!isCritical && moves.length > 10) {
@@ -137,31 +116,25 @@ this.weights = {
         } else if (isCritical) {
             console.log(`🚨 SITUAÇÃO CRÍTICA: Avaliando TODOS os ${moves.length} movimentos`);
         }
-
         let bestMove = movesToEvaluate[0];
         let bestScore = -Infinity;
         let alpha = -Infinity;
         let beta = Infinity;
-
         // Iterative Deepening (busca incremental)
         for (let depth = 1; depth <= this.config.maxDepth; depth++) {
             console.log(`🔎 Profundidade ${depth}/${this.config.maxDepth}`);
-            
             let currentBest = null;
             let currentScore = -Infinity;
             let foundMate = false;
-
             // Aspiration Windows (otimização para profundidades > 2)
             if (depth > 2 && bestScore > -Infinity) {
                 alpha = bestScore - this.config.aspirationWindow;
                 beta = bestScore + this.config.aspirationWindow;
             }
-
             for (const move of movesToEvaluate) {
                 const captureInfo = move.isCapture ? 
                     `💎 Captura ${this.board.board[move.to]?.tipo}(${this.PIECE_VALUES[this.board.board[move.to]?.tipo]})` : 
                     '📍 Movimento';
-                
                 const score = this.simulate(move, () => {
                     return -this.minimax(
                         depth - 1,
@@ -172,9 +145,7 @@ this.weights = {
                         false
                     );
                 });
-
                 console.log(`   ${this.notation(move.from)}→${this.notation(move.to)} | Score: ${score} | ${captureInfo}`);
-
                 // ===== DETECTAR CHECKMATE =====
                 if (score > 15000) {
                     console.log(`      ♔♔♔ CHECKMATE ENCONTRADO! ♔♔♔`);
@@ -183,35 +154,30 @@ this.weights = {
                     currentBest = move;
                     break; // Early exit - encontrou mate
                 }
-
                 if (score > currentScore) {
                     currentScore = score;
                     currentBest = move;
                     alpha = Math.max(alpha, score);
                     console.log(`      ⭐ NOVO MELHOR! Score: ${score}`);
                 }
-
                 // Re-search se sair da janela
                 if (score <= alpha || score >= beta) {
                     alpha = -Infinity;
                     beta = Infinity;
                 }
             }
-
             // ===== EXPANSÃO DINÂMICA EM CASO DE MATE IMINENTE =====
             if (foundMate && movesToEvaluate.length < moves.length) {
                 console.log(`🔍 MATE ENCONTRADO! Expandindo busca para verificar outros mates...`);
                 movesToEvaluate = moves; // Avaliar TODOS para confirmar o melhor mate
                 continue; // Re-avaliar tudo
             }
-
             // ===== VERIFICAR SE MELHOR MOVIMENTO ESTÁ FORA DO TOP-10 =====
             if (!isCritical && movesToEvaluate.length < moves.length && depth === this.config.maxDepth) {
                 // Se o melhor score é muito ruim, talvez haja algo melhor fora do top-10
                 if (currentScore < -5000) {
                     console.log(`⚠️ Score muito ruim (${currentScore}). Expandindo busca para top-20...`);
                     movesToEvaluate = moves.slice(0, Math.min(20, moves.length));
-                    
                     // Re-avaliar com mais movimentos
                     for (let i = 10; i < movesToEvaluate.length; i++) {
                         const move = movesToEvaluate[i];
@@ -225,9 +191,7 @@ this.weights = {
                                 false
                             );
                         });
-                        
                         console.log(`   [EXTRA] ${this.notation(move.from)}→${this.notation(move.to)} | Score: ${score}`);
-                        
                         if (score > currentScore) {
                             currentScore = score;
                             currentBest = move;
@@ -236,7 +200,6 @@ this.weights = {
                     }
                 }
             }
-
 			// ⬇️ INSERIR AQUI ⬇️
             console.log(`\n📌 Fim da profundidade ${depth}:`);
             console.log(`   currentBest: ${currentBest ? this.notation(currentBest.from) + '→' + this.notation(currentBest.to) : 'null'}`);
@@ -244,7 +207,6 @@ this.weights = {
             console.log(`   bestMove: ${this.notation(bestMove.from)}→${this.notation(bestMove.to)}`);
             console.log(`   bestScore: ${bestScore}\n`);
             // ⬆️ INSERIR AQUI ⬆️
-			
 			// ✅ SEMPRE usar o último resultado válido da maior profundidade
 			if (currentBest) {
 				// Na última profundidade, SEMPRE atualizar
@@ -266,7 +228,6 @@ this.weights = {
                 break;
             }
         }
-
         return { ...bestMove, score: bestScore };
     }
     // =====================================================
@@ -276,7 +237,6 @@ this.weights = {
     // =====================================================
     minimax(depth, color, alpha, beta, rootColor, inCheck) {
         this.stats.nodesSearched++;
-
         // ===== VERIFICAR CACHE (TRANSPOSITION TABLE) =====
         const hash = this.computeHash();
         const cached = this.transpositionTable.get(hash);
@@ -287,10 +247,8 @@ this.weights = {
             if (cached.flag === 'UPPERBOUND') beta = Math.min(beta, cached.score);
             if (alpha >= beta) return cached.score;
         }
-
         // ===== CONDIÇÕES DE PARADA =====
         const moves = this.generateMoves(color);
-        
         // Mate ou Stalemate
         if (moves.length === 0) {
             const kingInCheck = this.validator.isKingInCheck(color);
@@ -300,18 +258,15 @@ this.weights = {
             }
             return 0; // Stalemate
         }
-
         // Profundidade máxima → Quiescence Search
         if (depth <= 0) {
             return this.quiescence(color, alpha, beta, rootColor, 3);
         }
-
         // ===== EXTENSIONS (estender busca em posições críticas) =====
         if (inCheck && depth < this.config.maxDepth) {
             depth += this.config.checkExtension;
             this.stats.extensions++;
         }
-
         // ===== NULL MOVE PRUNING (otimização agressiva) =====
         if (depth >= 3 && !inCheck && this.hasNonPawnMaterial(color)) {
             const nullScore = -this.minimax(
@@ -327,18 +282,14 @@ this.weights = {
                 return beta; // Beta cutoff
             }
         }
-
         // ===== ORDENAR MOVIMENTOS =====
         this.orderMoves(moves, color, depth);
-
         let bestScore = -Infinity;
         let flag = 'UPPERBOUND';
         let moveCount = 0;
-
         for (const move of moves) {
             moveCount++;
             let score;
-
             // ===== LATE MOVE REDUCTION (LMR) =====
             let reduction = 0;
             if (moveCount > this.config.lmrThreshold && 
@@ -348,10 +299,8 @@ this.weights = {
                 !this.givesCheck(move, color)) {
                 reduction = 1;
             }
-
             score = this.simulate(move, () => {
                 const nextInCheck = this.validator.isKingInCheck(this.opponent(color));
-                
                 // PVS (Principal Variation Search)
                 if (moveCount === 1) {
                     return -this.minimax(
@@ -372,7 +321,6 @@ this.weights = {
                         rootColor,
                         nextInCheck
                     );
-                    
                     // Re-search se necessário
                     if (s > alpha && (s < beta || reduction > 0)) {
                         s = -this.minimax(
@@ -387,65 +335,50 @@ this.weights = {
                     return s;
                 }
             });
-
             bestScore = Math.max(bestScore, score);
-
             if (score >= beta) {
                 this.stats.cutoffs++;
-                
                 // Atualizar killer moves
                 if (!move.isCapture) {
                     this.updateKillerMove(move, depth);
                 }
-                
                 // Salvar em cache
                 this.transpositionTable.set(hash, {
                     depth,
                     score: beta,
                     flag: 'LOWERBOUND'
                 });
-                
                 return beta; // Beta cutoff
             }
-
             if (score > alpha) {
                 alpha = score;
                 flag = 'EXACT';
             }
         }
-
         // ===== SALVAR EM CACHE =====
         this.transpositionTable.set(hash, {
             depth,
             score: bestScore,
             flag
         });
-
         return bestScore;
     }
-
     // =====================================================
     // QUIESCENCE SEARCH (evita horizon effect)
     // =====================================================
     quiescence(color, alpha, beta, rootColor, depth) {
         this.stats.nodesSearched++;
-
         // Stand-pat: avaliar posição atual
         const standPat = this.evaluate(rootColor);
-        
         if (standPat >= beta) return beta;
         if (alpha < standPat) alpha = standPat;
-        
         if (depth <= 0) return standPat;
-
         // Apenas capturas e xeques
         const captures = this.generateMoves(color).filter(m => m.isCapture);
-        
         for (const move of captures) {
             // Delta pruning: não considerar capturas que não ajudam
             const capturedValue = this.PIECE_VALUES[this.board.board[move.to]?.tipo] || 0;
             if (standPat + capturedValue + 200 < alpha) continue;
-
             const score = this.simulate(move, () => {
                 return -this.quiescence(
                     this.opponent(color),
@@ -455,39 +388,31 @@ this.weights = {
                     depth - 1
                 );
             });
-
             if (score >= beta) return beta;
             if (score > alpha) alpha = score;
         }
-
         return alpha;
     }
-
     // =====================================================
     // FUNÇÃO DE AVALIAÇÃO COMPLETA (COM 3 LEIS)
     // =====================================================
    evaluate(color) {
     const enemy = this.opponent(color);
     const phase = this.gamePhase();
-
     // ===== LEI 2: BALANÇO MATERIAL ABSOLUTO =====
     const myMaterial = this.calculateTotalMaterial(color);
     const enemyMaterial = this.calculateTotalMaterial(enemy);
     const materialBalance =
         (myMaterial - enemyMaterial) * this.weights.materialAdvantage;
-
     console.log(
         `💰 Material: Meu=${myMaterial} | Inimigo=${enemyMaterial} | Balanço=${materialBalance}`
     );
-
     // ===== SCORE BASE =====
     let score = materialBalance;
-
     let defenseScore = 0;
     let captureScore = 0;
     let riskScore = 0;
     let positionalScore = 0;
-
     // ======================================================
     // LEI 1: PEÇAS EM PERIGO (PENALIDADE)
     // ======================================================
@@ -495,21 +420,17 @@ this.weights = {
     for (const threat of threatenedPieces) {
         const piece = this.board.board[threat.sq];
         const value = this.PIECE_VALUES[piece.tipo];
-
         const defenders = this.getAttackers(threat.sq, color).length;
         const attackers = this.getAttackers(threat.sq, enemy).length;
-
         if (attackers > defenders) {
             const penalty =
                 this.weights.mustDefend * (value / 1000);
             defenseScore += penalty;
-
             console.log(
-                `🚨 LEI 1: ${piece.tipo} em ${this.notation(threat.sq)} sem defesa | -${penalty.toFixed(0)}`
+                `🚨 LEI 1: ${piece.tipo} em ${this.notation(threat.sq)} sem defesa | ${penalty.toFixed(0)}`
             );
         }
     }
-
     // ======================================================
     // LEI 2: CAPTURAS GRATUITAS (BÔNUS)
     // ======================================================
@@ -517,18 +438,14 @@ this.weights = {
     for (const capture of freeCaptures) {
         const capturedPiece = this.board.board[capture.to];
         if (!capturedPiece) continue;
-
         const value = this.PIECE_VALUES[capturedPiece.tipo];
         const bonus =
             this.weights.freeCaptureBonus + value;
-
         captureScore += bonus;
-
         console.log(
             `💎 LEI 2: Captura grátis em ${this.notation(capture.to)} | +${bonus.toFixed(0)}`
         );
     }
-
     // ======================================================
     // LEI 3: PEÇAS EXPOSTAS (PENALIDADE)
     // ======================================================
@@ -536,38 +453,30 @@ this.weights = {
     for (const sq of exposedPieces) {
         const piece = this.board.board[sq];
         const value = this.PIECE_VALUES[piece.tipo];
-
         const penalty =
             this.weights.exposedPiece * (value / 500);
-
         riskScore += penalty;
-
         console.log(
-            `⚠️ LEI 3: ${piece.tipo} em ${this.notation(sq)} exposta | -${penalty.toFixed(0)}`
+            `⚠️ LEI 3: ${piece.tipo} em ${this.notation(sq)} exposta | ${penalty.toFixed(0)}`
         );
     }
-
     // ======================================================
     // POSICIONAL: PST + MOBILIDADE
     // ======================================================
     for (let sq = 0; sq < 64; sq++) {
         const piece = this.board.board[sq];
         if (!piece) continue;
-
         const sign = piece.cor === color ? 1 : -1;
-
         // PST (sempre positivo)
         const pstValue =
             this.getPSTValue(sq, piece, phase) * this.weights.positional;
         positionalScore += sign * pstValue;
-
         // Mobilidade (sempre positiva)
         const mobility =
             (this.validator.getPossibleMoves(sq) || []).length *
             this.weights.mobility;
         positionalScore += sign * mobility;
     }
-
     // ======================================================
     // OUTROS FATORES (SEM DOUBLE NEGATIVE)
     // ======================================================
@@ -575,27 +484,22 @@ this.weights = {
         this.evaluateCenterControl(color) * this.weights.centerControl;
     positionalScore -=
         this.evaluateCenterControl(enemy) * this.weights.centerControl;
-
     positionalScore +=
         this.evaluateKingSafety(color, phase) * this.weights.kingSafety;
     positionalScore -=
         this.evaluateKingSafety(enemy, phase) * this.weights.kingSafety;
-
     if (phase === 0) {
         positionalScore +=
             this.evaluateDevelopment(color) * this.weights.development;
         positionalScore -=
             this.evaluateDevelopment(enemy) * this.weights.development;
     }
-
     // Par de bispos
     if (this.hasBishopPair(color)) positionalScore += 50;
     if (this.hasBishopPair(enemy)) positionalScore -= 50;
-
     // Xeque
     if (this.validator.isKingInCheck(enemy)) positionalScore += 50;
     if (this.validator.isKingInCheck(color)) positionalScore -= 50;
-
     // ======================================================
     // SCORE FINAL (PENALIDADES SUBTRAÍDAS UMA VEZ)
     // ======================================================
@@ -604,7 +508,6 @@ this.weights = {
         positionalScore -
         defenseScore -
         riskScore;
-
     console.log(
         `🎯 TOTAL: ${score.toFixed(0)} ` +
         `= Material(${materialBalance.toFixed(0)}) ` +
@@ -613,10 +516,8 @@ this.weights = {
         `- Defesa(${defenseScore.toFixed(0)}) ` +
         `- Risco(${riskScore.toFixed(0)})`
     );
-
     return score;
 }
-
     // =====================================================
     // CALCULAR MATERIAL TOTAL
     // =====================================================
@@ -630,101 +531,80 @@ this.weights = {
         }
         return total;
     }
-
     // =====================================================
     // ENCONTRAR PEÇAS AMEAÇADAS
     // =====================================================
     getThreatenedPieces(color) {
         const enemy = this.opponent(color);
         const threatened = [];
-
         for (let sq = 0; sq < 64; sq++) {
             const piece = this.board.board[sq];
             if (!piece || piece.cor !== color) continue;
-
             const attackers = this.getAttackers(sq, enemy);
             if (attackers.length > 0) {
                 threatened.push({ sq, piece, attackers });
             }
         }
-
         return threatened;
     }
-
     // =====================================================
     // ENCONTRAR CAPTURAS GRÁTIS (SEM RISCO)
     // =====================================================
     findFreeCaptures(myColor, enemyColor) {
         const freeCaptures = [];
         const moves = this.generateMoves(myColor);
-
         for (const move of moves) {
             if (!move.isCapture) continue;
-
             // Verificar se é captura sem risco (SEE > 0)
             let isFree = false;
             this.simulate(move, () => {
                 const attackers = this.getAttackers(move.to, enemyColor);
                 isFree = attackers.length === 0; // Ninguém pode recapturar
             });
-
             if (isFree) {
                 freeCaptures.push(move);
             }
         }
-
         return freeCaptures;
     }
-
     // =====================================================
     // ENCONTRAR PEÇAS EXPOSTAS (EM CASAS ATACADAS)
     // =====================================================
     getExposedPieces(myColor, enemyColor) {
         const exposed = [];
-
         for (let sq = 0; sq < 64; sq++) {
             const piece = this.board.board[sq];
             if (!piece || piece.cor !== myColor) continue;
-
             const attackers = this.getAttackers(sq, enemyColor);
             const defenders = this.getAttackers(sq, myColor);
-
             // Exposta se: atacada E (sem defesa OU valor maior que atacante)
             if (attackers.length > 0 && defenders.length === 0) {
                 const pieceValue = this.PIECE_VALUES[piece.tipo];
                 const smallestAttacker = Math.min(
                     ...attackers.map(a => this.PIECE_VALUES[this.board.board[a]?.tipo])
                 );
-
                 if (pieceValue > smallestAttacker) {
                     exposed.push(sq);
                 }
             }
         }
-
         return exposed;
     }
-
     // =====================================================
     // AVALIAÇÃO DE AMEAÇAS (FIXED - SEM DOUBLE COUNTING)
     // =====================================================
     evaluateThreats(myColor, enemyColor) {
         let score = 0;
-
         for (let sq = 0; sq < 64; sq++) {
             const piece = this.board.board[sq];
             if (!piece) continue;
-
             const value = this.PIECE_VALUES[piece.tipo];
             const attackers = this.getAttackers(sq, this.opponent(piece.cor));
             const defenders = this.getAttackers(sq, piece.cor);
-
             // Peça não atacada → ignorar
             if (attackers.length === 0) continue;
-
             // ===== CÁLCULO DE TROCA (SEE - Static Exchange Evaluation) =====
             const see = this.staticExchangeEval(sq, piece.cor);
-
             if (piece.cor === myColor) {
                 // Minha peça atacada
                 if (see < 0) {
@@ -745,51 +625,72 @@ this.weights = {
                 }
             }
         }
-
         return score;
     }
-
     // =====================================================
     // STATIC EXCHANGE EVALUATION (SEE)
     // Calcula resultado de sequência de trocas
     // =====================================================
-    staticExchangeEval(square, defendingColor) {
-        const piece = this.board.board[square];
-        if (!piece) return 0;
-
-        const attackingColor = this.opponent(defendingColor);
-        let gain = [this.PIECE_VALUES[piece.tipo]];
-        let depth = 0;
-
-        // Simular trocas alternadas
-        let currentAttacker = this.getSmallestAttacker(square, attackingColor);
-        
-        while (currentAttacker !== null) {
-            depth++;
-            gain[depth] = this.PIECE_VALUES[this.board.board[currentAttacker]?.tipo] - gain[depth - 1];
-
-            // Trocar atacante por defensor
-            const nextColor = depth % 2 === 0 ? attackingColor : defendingColor;
-            currentAttacker = this.getSmallestAttacker(square, nextColor);
-
-            if (currentAttacker === null) break;
-        }
-
-        // Minimax nas trocas
-        while (--depth > 0) {
-            gain[depth - 1] = -Math.max(-gain[depth - 1], gain[depth]);
-        }
-
-        return gain[0];
-    }
-
+	staticExchangeEval(square, defendingColor) {
+		const board = this.board.board;
+		const attackedPiece = board[square];
+		if (!attackedPiece) return 0;
+		const attackerColor = this.opponent(defendingColor);
+		// ===== COLETAR ATACANTES INICIAIS =====
+		let attackers = {
+			[attackerColor]: this.getAttackers(square, attackerColor).slice(),
+			[defendingColor]: this.getAttackers(square, defendingColor).slice()
+		};
+		// Remover a peça que está sendo capturada da lista defensora
+		attackers[defendingColor] = attackers[defendingColor]
+			.filter(sq => sq !== square);
+		// ===== GANHOS =====
+		let gain = [];
+		gain[0] = this.PIECE_VALUES[attackedPiece.tipo];
+		let side = attackerColor;
+		let depth = 0;
+		while (true) {
+			// Menor atacante disponível
+			const from = this.getLeastValuableAttacker(
+				attackers[side]
+			);
+			if (from === null) break;
+			depth++;
+			const piece = board[from];
+			gain[depth] =
+				this.PIECE_VALUES[piece.tipo] - gain[depth - 1];
+			// Remover atacante usado
+			attackers[side] = attackers[side].filter(sq => sq !== from);
+			// Alternar lado
+			side = this.opponent(side);
+		}
+		// ===== MINIMAX REVERSO =====
+		for (let i = gain.length - 1; i > 0; i--) {
+			gain[i - 1] = -Math.max(-gain[i - 1], gain[i]);
+		}
+		return gain[0];
+	}
+	getLeastValuableAttacker(attackerSquares) {
+		if (attackerSquares.length === 0) return null;
+		let bestSq = null;
+		let bestValue = Infinity;
+		for (const sq of attackerSquares) {
+			const piece = this.board.board[sq];
+			if (!piece) continue;
+			const value = this.PIECE_VALUES[piece.tipo];
+			if (value < bestValue) {
+				bestValue = value;
+				bestSq = sq;
+			}
+		}
+		return bestSq;
+	}
     // =====================================================
     // ENCONTRAR MENOR ATACANTE
     // =====================================================
     getSmallestAttacker(square, color) {
         let smallest = null;
         let smallestValue = Infinity;
-
         const attackers = this.getAttackers(square, color);
         for (const attacker of attackers) {
             const piece = this.board.board[attacker];
@@ -799,24 +700,20 @@ this.weights = {
                 smallest = attacker;
             }
         }
-
         return smallest;
     }
-
     // =====================================================
     // AVALIAÇÕES AUXILIARES
     // =====================================================
     evaluatePawnStructure(color) {
         let score = 0;
         const pawns = this.getPieces(color, ["♙", "♟"]);
-
         // Peões dobrados
         const files = Array(8).fill(0);
         for (const sq of pawns) {
             files[sq % 8]++;
         }
         score -= files.filter(c => c > 1).length * 15;
-
         // Peões isolados
         for (const sq of pawns) {
             const file = sq % 8;
@@ -824,7 +721,6 @@ this.weights = {
                 score -= 20;
             }
         }
-
         // Peões passados
         for (const sq of pawns) {
             if (this.isPassedPawn(sq, color)) {
@@ -833,23 +729,17 @@ this.weights = {
                 score += bonus;
             }
         }
-
         return score;
     }
-
     evaluateKingSafety(color, phase) {
         if (phase === 2) return 0; // Não importa no endgame
-
         const kingSquare = this.findKing(color);
         if (kingSquare === null) return -1000;
-
         let safety = 0;
         const rank = Math.floor(kingSquare / 8);
         const file = kingSquare % 8;
-
         // Rei no centro = perigo
         if (this.EXTENDED_CENTER.has(kingSquare)) safety -= 50;
-
         // Peões na frente do rei
         const direction = color === "brancas" ? -8 : 8;
         for (let f = Math.max(0, file - 1); f <= Math.min(7, file + 1); f++) {
@@ -861,10 +751,8 @@ this.weights = {
                 }
             }
         }
-
         return safety;
     }
-
     evaluateCenterControl(color) {
         let control = 0;
         for (const sq of this.CENTER_SQUARES) {
@@ -873,11 +761,9 @@ this.weights = {
         }
         return control;
     }
-
     evaluateDevelopment(color) {
         let developed = 0;
         const backRank = color === "brancas" ? this.BACK_RANK_WHITE : this.BACK_RANK_BLACK;
-
         for (const sq of backRank) {
             const piece = this.board.board[sq];
             if (!piece) continue;
@@ -886,54 +772,51 @@ this.weights = {
                 developed--; // Penalidade por não desenvolver
             }
         }
-
         return developed;
     }
-
     hasBishopPair(color) {
         const bishops = this.getPieces(color, ["♗", "♝"]);
         if (bishops.length < 2) return false;
-
         // Verificar se estão em cores diferentes
         const colors = bishops.map(sq => (Math.floor(sq / 8) + sq % 8) % 2);
         return colors[0] !== colors[1];
     }
-
     // =====================================================
     // ORDENAÇÃO DE MOVIMENTOS (PRIORIDADE PELAS 3 LEIS)
     // =====================================================
-    orderMoves(moves, color, depth) {
-        const enemy = this.opponent(color);
-        
-        for (const move of moves) {
-            let score = 0;
-            let reasons = [];
-
-            // ===== LEI 1: DEFESA =====
-            // Verificar se este movimento salva peça ameaçada
-            const savesPiece = this.simulate(move, () => {
-                const threatenedBefore = this.getThreatenedPieces(color);
-                return threatenedBefore.some(t => t.sq === move.from);
-            });
-
-            if (savesPiece) {
-                const pieceValue = this.PIECE_VALUES[this.board.board[move.from]?.tipo];
-                score += this.weights.mustDefend + pieceValue;
-                reasons.push(`🛡️ Defende ${this.board.board[move.from]?.tipo}`);
-            }
-
+	orderMoves(moves, color, depth) {
+		const enemy = this.opponent(color);
+		// 🔹 calcular uma vez, antes do loop
+		const threatenedBefore = this.getThreatenedPieces(color)
+			.map(t => t.sq);
+		for (const move of moves) {
+			let score = 0;
+			let reasons = [];
+			// ===== LEI 1: DEFESA (CORRIGIDO) =====
+			const wasThreatened = threatenedBefore.includes(move.from);
+			let isThreatenedAfter = false;
+			if (wasThreatened) {
+				isThreatenedAfter = this.simulate(move, () => {
+					return this.getThreatenedPieces(color)
+						.some(t => t.sq === move.to);
+				});
+			}
+			const savesPiece = wasThreatened && !isThreatenedAfter;
+			if (savesPiece) {
+				const piece = this.board.board[move.from];
+				const pieceValue = this.PIECE_VALUES[piece?.tipo] || 0;
+				score += this.weights.mustDefend + pieceValue;
+				reasons.push(`🛡️ Defende ${piece.tipo}`);
+			}
 			// ===== LEI 2: CAPTURA (com SEE correto) =====
 			if (move.isCapture) {
 				const victim = this.PIECE_VALUES[this.board.board[move.to]?.tipo] || 0;
 				const attacker = this.PIECE_VALUES[this.board.board[move.from]?.tipo] || 0;
-			
 				// Calcular SEE (Static Exchange Evaluation)
 				const see = this.simulate(move, () => {
 					return this.staticExchangeEval(move.to, color);
 				});
-			
 				console.log(`   🔍 SEE: ${this.board.board[move.from]?.tipo}(${attacker}) captura ${this.board.board[move.to]?.tipo}(${victim}) = ${see > 0 ? '+' : ''}${see}`);
-			
 				if (see > 0) {
 					// Captura lucrativa
 					score += this.weights.freeCaptureBonus + see;
@@ -944,11 +827,10 @@ this.weights = {
 					reasons.push(`⚖️ Troca justa ${this.board.board[move.to]?.tipo}(${victim})`);
 				} else {
 					// Captura perdedora
-					score += 5000 + victim + see; // see é negativo
+					score += victim + see; // see é negativo
 					reasons.push(`⚠️ Captura RUIM ${this.board.board[move.to]?.tipo} | Perda: ${see}`);
 				}
 			}
-
             // ===== LEI 3: EVITAR RISCOS =====
             // Verificar se peça fica exposta após movimento
             let becomesExposed = false;
@@ -957,35 +839,28 @@ this.weights = {
                 const defenders = this.getAttackers(move.to, color);
                 becomesExposed = attackers.length > defenders.length;
             });
-
             if (becomesExposed && !move.isCapture) {
                 const pieceValue = this.PIECE_VALUES[this.board.board[move.from]?.tipo];
-                score += this.weights.exposedPiece;
+                score -= this.weights.exposedPiece * (pieceValue / 500);
                 reasons.push(`⚠️ RISCO: peça fica exposta`);
             }
-
             // ===== FATORES SECUNDÁRIOS =====
             // Killer moves
             if (this.isKillerMove(move, depth)) {
                 score += 2000;
                 reasons.push(`🎯 Killer`);
             }
-
             // History heuristic
             score += this.getHistoryScore(move);
-
             // Xeques
             if (this.givesCheck(move, color)) {
                 score += 1000;
                 reasons.push(`♔ Xeque`);
             }
-
             move.orderScore = score;
             move.reasons = reasons;
         }
-
         moves.sort((a, b) => b.orderScore - a.orderScore);
-        
         if (depth === 0) {
             console.log(`\n📋 Top 10 movimentos ordenados:`);
             moves.slice(0, 10).forEach((m, i) => {
@@ -995,7 +870,6 @@ this.weights = {
             console.log('');
         }
     }
-
     // =====================================================
     // GERAÇÃO DE MOVIMENTOS COM METADADOS
     // =====================================================
@@ -1004,7 +878,6 @@ this.weights = {
         for (let from = 0; from < 64; from++) {
             const piece = this.board.board[from];
             if (!piece || piece.cor !== color) continue;
-
             const destinations = this.validator.getPossibleMoves(from) || [];
             for (const to of destinations) {
                 const captured = this.board.board[to];
@@ -1019,7 +892,6 @@ this.weights = {
         }
         return moves;
     }
-
     // =====================================================
     // HELPERS E UTILIDADES
     // =====================================================
@@ -1028,7 +900,6 @@ this.weights = {
         for (let i = 0; i < 64; i++) {
             const piece = this.board.board[i];
             if (!piece || piece.cor !== byColor) continue;
-
             const moves = this.validator.getPossibleMoves(i) || [];
             if (moves.includes(square)) {
                 attackers.push(i);
@@ -1036,7 +907,6 @@ this.weights = {
         }
         return attackers;
     }
-
     getPieces(color, types) {
         const pieces = [];
         for (let i = 0; i < 64; i++) {
@@ -1047,7 +917,6 @@ this.weights = {
         }
         return pieces;
     }
-
     findKing(color) {
         const symbols = color === "brancas" ? ["♔"] : ["♚"];
         for (let i = 0; i < 64; i++) {
@@ -1056,12 +925,10 @@ this.weights = {
         }
         return null;
     }
-
     isPassedPawn(square, color) {
         const file = square % 8;
         const rank = Math.floor(square / 8);
         const direction = color === "brancas" ? -1 : 1;
-
         for (let r = rank + direction; r >= 0 && r < 8; r += direction) {
             for (let f = Math.max(0, file - 1); f <= Math.min(7, file + 1); f++) {
                 const sq = r * 8 + f;
@@ -1073,7 +940,6 @@ this.weights = {
         }
         return true;
     }
-
     gamePhase() {
         let material = 0;
         for (const p of this.board.board) {
@@ -1081,12 +947,10 @@ this.weights = {
                 material += this.PIECE_VALUES[p.tipo];
             }
         }
-        
         if (material < 1300) return 2; // Endgame
         if (material > 3000) return 0; // Opening
         return 1; // Middlegame
     }
-
     hasNonPawnMaterial(color) {
         for (const p of this.board.board) {
             if (p && p.cor === color && p.tipo !== "♙" && p.tipo !== "♟" && p.tipo !== "♔" && p.tipo !== "♚") {
@@ -1095,7 +959,6 @@ this.weights = {
         }
         return false;
     }
-
     givesCheck(move, color) {
         let check = false;
         this.simulate(move, () => {
@@ -1103,12 +966,10 @@ this.weights = {
         });
         return check;
     }
-
     // ===== PST HELPERS =====
     getPSTValue(square, piece, phase) {
         const idx = piece.cor === "pretas" ? 63 - square : square;
         const type = piece.tipo;
-
         if (type === "♙" || type === "♟") return this.pst.pawn[idx];
         if (type === "♘" || type === "♞") return this.pst.knight[idx];
         if (type === "♗" || type === "♝") return this.pst.bishop[idx];
@@ -1119,7 +980,6 @@ this.weights = {
         }
         return 0;
     }
-
     initializePST() {
         return {
             pawn: [
@@ -1194,7 +1054,6 @@ this.weights = {
             ]
         };
     }
-
     // ===== KILLER MOVES =====
     updateKillerMove(move, depth) {
         if (!this.killerMoves[depth]) {
@@ -1205,25 +1064,21 @@ this.weights = {
             this.killerMoves[depth].pop();
         }
     }
-
     isKillerMove(move, depth) {
         if (!this.killerMoves[depth]) return false;
         return this.killerMoves[depth].some(
             k => k.from === move.from && k.to === move.to
         );
     }
-
     getHistoryScore(move) {
         const key = `${move.from}-${move.to}`;
         return this.historyTable.get(key) || 0;
     }
-
     updateHistory(move, depth) {
         const key = `${move.from}-${move.to}`;
         const current = this.historyTable.get(key) || 0;
         this.historyTable.set(key, current + depth * depth);
     }
-
     // ===== HASH =====
     computeHash() {
         // Zobrist hashing simplificado
@@ -1236,15 +1091,12 @@ this.weights = {
         }
         return hash;
     }
-
     // ===== SIMULAÇÃO =====
     simulate(move, fn) {
         const fromPiece = this.board.board[move.from];
         const toPiece = this.board.board[move.to];
-        
         this.board.board[move.to] = fromPiece;
         this.board.board[move.from] = null;
-        
         try {
             return fn();
         } finally {
@@ -1252,18 +1104,15 @@ this.weights = {
             this.board.board[move.to] = toPiece;
         }
     }
-
     // ===== UTILIDADES =====
     opponent(color) {
         return color === "brancas" ? "pretas" : "brancas";
     }
-
     notation(square) {
         const file = "abcdefgh"[square % 8];
         const rank = 8 - Math.floor(square / 8);
         return `${file}${rank}`;
     }
-
     resetStats() {
         this.stats = {
             nodesSearched: 0,
@@ -1272,7 +1121,6 @@ this.weights = {
             extensions: 0
         };
     }
-
     // ===== LIMPEZA DE CACHE (opcional - chamar periodicamente) =====
     clearCaches() {
         this.transpositionTable.clear();
@@ -1281,13 +1129,11 @@ this.weights = {
         this.pawnHashTable.clear();
         console.log("🧹 Caches limpos");
     }
-
     // ===== CONFIGURAÇÃO DINÂMICA =====
     setDepth(depth) {
         this.config.maxDepth = Math.max(1, Math.min(6, depth));
         console.log(`📊 Profundidade ajustada para ${this.config.maxDepth}`);
     }
-
     setAggressiveness(level) {
         // level: 0=defensivo, 1=balanceado, 2=agressivo
         if (level === 0) {
@@ -1300,4 +1146,3 @@ this.weights = {
         console.log(`⚔️ Agressividade ajustada para nível ${level}`);
     }
 }
-
