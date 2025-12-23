@@ -866,36 +866,32 @@ export class AI_Medium {
                 reasons.push(`🛡️ Defende ${this.board.board[move.from]?.tipo}`);
             }
 
-            // ===== LEI 2: CAPTURA GRÁTIS =====
-            if (move.isCapture) {
-                const victim = this.PIECE_VALUES[this.board.board[move.to]?.tipo] || 0;
-                const attacker = this.PIECE_VALUES[this.board.board[move.from]?.tipo] || 0;
-
-                // Verificar se é captura grátis (sem recaptura)
-                let isFree = false;
-                this.simulate(move, () => {
-                    const recapturers = this.getAttackers(move.to, enemy);
-                    isFree = recapturers.length === 0;
-                });
-
-                if (isFree) {
-                    score += this.weights.freeCaptureBonus + victim;
-                    reasons.push(`💎 Captura GRÁTIS ${this.board.board[move.to]?.tipo}(${victim})`);
-                } else {
-                    // Verificar se é troca favorável (SEE)
-                    const see = this.simulate(move, () => {
-                        return this.staticExchangeEval(move.to, color);
-                    });
-
-                    if (see > 0) {
-                        score += this.weights.profitableTrade + see;
-                        reasons.push(`⚖️ Troca favorável (+${see})`);
-                    } else {
-                        score += 5000 + victim; // Ainda priorizar capturas, mas menos
-                        reasons.push(`💎 Captura ${this.board.board[move.to]?.tipo}(${victim}) SEE:${see}`);
-                    }
-                }
-            }
+			// ===== LEI 2: CAPTURA (com SEE correto) =====
+			if (move.isCapture) {
+				const victim = this.PIECE_VALUES[this.board.board[move.to]?.tipo] || 0;
+				const attacker = this.PIECE_VALUES[this.board.board[move.from]?.tipo] || 0;
+			
+				// Calcular SEE (Static Exchange Evaluation)
+				const see = this.simulate(move, () => {
+					return this.staticExchangeEval(move.to, color);
+				});
+			
+				console.log(`   🔍 SEE: ${this.board.board[move.from]?.tipo}(${attacker}) captura ${this.board.board[move.to]?.tipo}(${victim}) = ${see > 0 ? '+' : ''}${see}`);
+			
+				if (see > 0) {
+					// Captura lucrativa
+					score += this.weights.freeCaptureBonus + see;
+					reasons.push(`💎 Captura LUCRATIVA ${this.board.board[move.to]?.tipo} | Ganho: +${see}`);
+				} else if (see === 0) {
+					// Troca justa
+					score += 10000 + victim;
+					reasons.push(`⚖️ Troca justa ${this.board.board[move.to]?.tipo}(${victim})`);
+				} else {
+					// Captura perdedora
+					score += 5000 + victim + see; // see é negativo
+					reasons.push(`⚠️ Captura RUIM ${this.board.board[move.to]?.tipo} | Perda: ${see}`);
+				}
+			}
 
             // ===== LEI 3: EVITAR RISCOS =====
             // Verificar se peça fica exposta após movimento
