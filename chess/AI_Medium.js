@@ -115,8 +115,15 @@ export class AI_Medium {
 		if (allMoves.length === 0) return null;
 		if (allMoves.length === 1) return { ...allMoves[0], score: 0 };
 	
-		// ===== ORDENAÇÃO INICIAL (CRÍTICA) =====
+		// ===== ORDENAÇÃO ROOT =====
 		this.orderMoves(allMoves, color, 0);
+	
+		console.log("📋 Top 10 movimentos ordenados:");
+		allMoves.slice(0, 10).forEach((m, i) => {
+			console.log(
+				`   ${i + 1}. ${this.notation(m.from)}→${this.notation(m.to)}`
+			);
+		});
 	
 		let bestMove = allMoves[0];
 		let bestScore = -Infinity;
@@ -128,40 +135,33 @@ export class AI_Medium {
 			let alpha = -Infinity;
 			let beta = Infinity;
 	
-			// ===== ASPIRATION WINDOW =====
-			if (depth > 2 && bestScore > -Infinity) {
+			let aspirationFailed = false;
+	
+			// Aspiration window só após depth 2
+			if (depth >= 3 && bestScore > -Infinity) {
 				alpha = bestScore - this.config.aspirationWindow;
 				beta  = bestScore + this.config.aspirationWindow;
 			}
 	
-			let currentBest = null;
-			let currentScore = -Infinity;
+			let currentBestMove = null;
+			let currentBestScore = -Infinity;
 	
-			// ===== BEAM SEARCH NO ROOT =====
-			let rootMoves;
+			// ===== ROOT MOVE LIST =====
+			const rootMoves =
+				depth === 1
+					? allMoves
+					: allMoves.slice(0, this.config.rootMoveLimit);
 	
-			if (depth === 1) {
-				// Depth 1 avalia TODOS
-				rootMoves = allMoves;
-			} else {
-				rootMoves = allMoves.slice(0, this.config.rootMoveLimit);
-			
-				// Depth >= 2 → apenas TOP N
-				//const limit = Math.min(this.config.rootMoveLimit, allMoves.length);
+			console.log(
+				depth === 1
+					? `   🎯 Root completo: ${rootMoves.length} movimentos`
+					: `   🎯 Beam root: ${rootMoves.length}/${allMoves.length}`
+			);
 	
-				// Opcional: garantir diversidade mínima
-				//const captures = allMoves.filter(m => m.isCapture).slice(0, Math.ceil(limit / 2));
-				//const quiets   = allMoves.filter(m => !m.isCapture).slice(0, limit - captures.length);
+			// ===== LOOP ROOT (NUNCA QUEBRA POR ASPIRATION OU MATE) =====
+			for (let i = 0; i < rootMoves.length; i++) {
+				const move = rootMoves[i];
 	
-				//rootMoves = [...captures, ...quiets];
-	
-				console.log(
-					`   🎯 Beam root ativo: ${rootMoves.length}/${allMoves.length} movimentos`
-				);
-			}
-	
-			// ===== LOOP PRINCIPAL =====
-			for (const move of rootMoves) {
 				const score = this.simulate(move, () => {
 					return -this.minimax(
 						depth - 1,
@@ -177,32 +177,65 @@ export class AI_Medium {
 					`   ${this.notation(move.from)}→${this.notation(move.to)} | Score: ${score}`
 				);
 	
-				if (score > currentScore) {
-					currentScore = score;
-					currentBest = move;
-					alpha = Math.max(alpha, score);
+				if (score > currentBestScore) {
+					currentBestScore = score;
+					currentBestMove = move;
+	
+					if (score > alpha) alpha = score;
 	
 					console.log(`      ⭐ NOVO MELHOR | Score: ${score}`);
 				}
 	
-				// ===== FALHA DE ASPIRATION → RESEARCH =====
+				// ===== ASPIRATION FAIL (SÓ MARCA) =====
 				if (score <= alpha || score >= beta) {
-					console.log("   🔁 Aspiration falhou → re-search completo");
-					alpha = -Infinity;
-					beta = Infinity;
-					break; // força nova iteração de depth
+					aspirationFailed = true;
 				}
 			}
 	
-			// ===== ATUALIZAR MELHOR GLOBAL =====
-			if (currentBest && currentScore > bestScore) {
-				bestScore = currentScore;
-				bestMove = currentBest;
+			// ===== ATUALIZA MELHOR GLOBAL =====
+			if (currentBestMove) {
+				bestMove = currentBestMove;
+				bestScore = currentBestScore;
 			}
 	
-			// ===== EARLY EXIT (MATE DETECTADO) =====
+			// ===== RE-SEARCH SE ASPIRATION FALHOU =====
+			if (aspirationFailed) {
+				console.log("🔁 Aspiration falhou → re-search com janela completa");
+	
+				alpha = -Infinity;
+				beta = Infinity;
+	
+				currentBestScore = -Infinity;
+				currentBestMove = null;
+	
+				for (const move of rootMoves) {
+					const score = this.simulate(move, () => {
+						return -this.minimax(
+							depth - 1,
+							this.opponent(color),
+							-beta,
+							-alpha,
+							color,
+							false
+						);
+					});
+	
+					if (score > currentBestScore) {
+						currentBestScore = score;
+						currentBestMove = move;
+						alpha = Math.max(alpha, score);
+					}
+				}
+	
+				if (currentBestMove) {
+					bestMove = currentBestMove;
+					bestScore = currentBestScore;
+				}
+			}
+	
+			// ===== MATE CUTOFF (SÓ APÓS ROOT COMPLETO) =====
 			if (Math.abs(bestScore) > 10000) {
-				console.log("♚ Mate detectado, encerrando busca");
+				console.log("♚ Mate confirmado após root completo");
 				break;
 			}
 		}
