@@ -23,27 +23,28 @@ export class AI_Medium {
         };
 
         // ===== PESOS ESTRATÉGICOS (TRÊS LEIS) =====
-        this.weights = {
-            // LEI 1: DEFESA (prioridade máxima)
-            pieceUnderAttack: 10000,        // Peça atacada sem defesa
-            mustDefend: 50000,              // CRÍTICO: peça valiosa em perigo iminente
-            
-            // LEI 2: CAPTURA GRÁTIS (segunda prioridade)
-            freeCaptureBonus: 30000,        // Captura sem risco
-            profitableTrade: 20000,         // Troca favorável (ganho líquido)
-            materialAdvantage: 1, // 5000,        // Cada ponto de vantagem material
-            
-            // LEI 3: EVITAR RISCOS (última prioridade)
-            exposedPiece: -8000,            // Peça movida para casa atacada
-            unnecessaryRisk: -3000,         // Movimento arriscado sem motivo
-            
-            // Outros fatores (subordinados às 3 leis)
-            positional: 1,                  // Valor posicional (PST)
-            mobility: 2,                    // Mobilidade
-            centerControl: 10,              // Controle do centro
-            development: 15,                // Desenvolvimento
-            kingSafety: 100,                // Segurança do rei
-        };
+this.weights = {
+    // ===== LEI 1: DEFESA =====
+    pieceUnderAttack: 300,        // cavalo sem defesa ≈ cavalo
+    mustDefend: 800,              // torre/dama em risco sério
+
+    // ===== LEI 2: CAPTURA =====
+    freeCaptureBonus: 200,        // incentivo, não substitui material
+    profitableTrade: 150,         // troca boa
+    materialAdvantage: 1,         // 1 = centipawn style
+
+    // ===== LEI 3: RISCO =====
+    exposedPiece: 250,            // peso POSITIVO
+    unnecessaryRisk: 120,         // peso POSITIVO
+
+    // ===== POSICIONAL =====
+    positional: 1,
+    mobility: 4,
+    centerControl: 15,
+    development: 20,
+    kingSafety: 120,
+};
+
 
         // ===== CACHE E OTIMIZAÇÃO =====
         this.transpositionTable = new Map(); // Tabela de transposição
@@ -1299,3 +1300,4 @@ export class AI_Medium {
         console.log(`⚔️ Agressividade ajustada para nível ${level}`);
     }
 }
+
