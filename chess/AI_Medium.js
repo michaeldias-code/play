@@ -465,101 +465,156 @@ export class AI_Medium {
     // =====================================================
     // FUNÇÃO DE AVALIAÇÃO COMPLETA (COM 3 LEIS)
     // =====================================================
-    evaluate(color) {
-        const enemy = this.opponent(color);
-        const phase = this.gamePhase();
+   evaluate(color) {
+    const enemy = this.opponent(color);
+    const phase = this.gamePhase();
 
-        // ===== BALANÇO MATERIAL ABSOLUTO (LEI 2) =====
-        const myMaterial = this.calculateTotalMaterial(color);
-        const enemyMaterial = this.calculateTotalMaterial(enemy);
-        const materialBalance = (myMaterial - enemyMaterial) * this.weights.materialAdvantage;
+    // ===== LEI 2: BALANÇO MATERIAL ABSOLUTO =====
+    const myMaterial = this.calculateTotalMaterial(color);
+    const enemyMaterial = this.calculateTotalMaterial(enemy);
+    const materialBalance =
+        (myMaterial - enemyMaterial) * this.weights.materialAdvantage;
 
-        console.log(`   💰 Material: Meu=${myMaterial} | Inimigo=${enemyMaterial} | Balanço=${materialBalance}`);
+    console.log(
+        `💰 Material: Meu=${myMaterial} | Inimigo=${enemyMaterial} | Balanço=${materialBalance}`
+    );
 
-        // ===== INICIALIZAR COMPONENTES =====
-        let score = materialBalance; // Base: vantagem material
-        let defenseScore = 0;
-        let captureScore = 0;
-        let riskScore = 0;
-        let positionalScore = 0;
+    // ===== SCORE BASE =====
+    let score = materialBalance;
 
-        // ===== LEI 1: VERIFICAR PEÇAS EM PERIGO =====
-        const threatenedPieces = this.getThreatenedPieces(color);
-        for (const threat of threatenedPieces) {
-            const piece = this.board.board[threat.sq];
-            const value = this.PIECE_VALUES[piece.tipo];
-            const defenders = this.getAttackers(threat.sq, color);
-            const attackers = this.getAttackers(threat.sq, enemy);
+    let defenseScore = 0;
+    let captureScore = 0;
+    let riskScore = 0;
+    let positionalScore = 0;
 
-            // Peça valiosa sem defesa adequada
-            if (defenders.length < attackers.length) {
-                const penalty = this.weights.mustDefend * (value / 1000);
-                defenseScore -= penalty;
-                console.log(`   🚨 LEI 1: ${piece.tipo} em ${this.notation(threat.sq)} SEM DEFESA | Penalidade: -${penalty.toFixed(0)}`);
-            }
+    // ======================================================
+    // LEI 1: PEÇAS EM PERIGO (PENALIDADE)
+    // ======================================================
+    const threatenedPieces = this.getThreatenedPieces(color);
+    for (const threat of threatenedPieces) {
+        const piece = this.board.board[threat.sq];
+        const value = this.PIECE_VALUES[piece.tipo];
+
+        const defenders = this.getAttackers(threat.sq, color).length;
+        const attackers = this.getAttackers(threat.sq, enemy).length;
+
+        if (attackers > defenders) {
+            const penalty =
+                this.weights.mustDefend * (value / 1000);
+            defenseScore += penalty;
+
+            console.log(
+                `🚨 LEI 1: ${piece.tipo} em ${this.notation(threat.sq)} sem defesa | -${penalty.toFixed(0)}`
+            );
         }
-
-        // ===== LEI 2: VERIFICAR CAPTURAS GRÁTIS DISPONÍVEIS =====
-        const freeCaptures = this.findFreeCaptures(color, enemy);
-        for (const capture of freeCaptures) {
-            const value = this.PIECE_VALUES[this.board.board[capture.to]?.tipo];
-            const bonus = this.weights.freeCaptureBonus + value;
-            captureScore += bonus;
-            console.log(`   💎 LEI 2: Captura GRÁTIS em ${this.notation(capture.to)} | Bônus: +${bonus.toFixed(0)}`);
-        }
-
-        // ===== LEI 3: VERIFICAR RISCOS DESNECESSÁRIOS =====
-        const exposedPieces = this.getExposedPieces(color, enemy);
-        for (const exposed of exposedPieces) {
-            const piece = this.board.board[exposed];
-            const value = this.PIECE_VALUES[piece.tipo];
-            const penalty = this.weights.exposedPiece * (value / 500);
-            riskScore -= penalty;
-            console.log(`   ⚠️ LEI 3: ${piece.tipo} em ${this.notation(exposed)} EXPOSTA | Penalidade: -${penalty.toFixed(0)}`);
-        }
-
-        // ===== COMPONENTES SECUNDÁRIOS =====
-        for (let sq = 0; sq < 64; sq++) {
-            const piece = this.board.board[sq];
-            if (!piece) continue;
-
-            const sign = piece.cor === color ? 1 : -1;
-
-            // Posicional (PST)
-            positionalScore += sign * this.getPSTValue(sq, piece, phase) * this.weights.positional;
-
-            // Mobilidade
-            const mobility = (this.validator.getPossibleMoves(sq) || []).length;
-            positionalScore += sign * mobility * this.weights.mobility;
-        }
-
-        // ===== OUTROS FATORES =====
-        positionalScore += this.evaluateCenterControl(color) * this.weights.centerControl;
-        positionalScore -= this.evaluateCenterControl(enemy) * this.weights.centerControl;
-
-        positionalScore += this.evaluateKingSafety(color, phase) * this.weights.kingSafety;
-        positionalScore -= this.evaluateKingSafety(enemy, phase) * this.weights.kingSafety;
-
-        if (phase === 0) {
-            positionalScore += this.evaluateDevelopment(color) * this.weights.development;
-            positionalScore -= this.evaluateDevelopment(enemy) * this.weights.development;
-        }
-
-        // Par de bispos
-        if (this.hasBishopPair(color)) positionalScore += 50;
-        if (this.hasBishopPair(enemy)) positionalScore -= 50;
-
-        // Xeque
-        if (this.validator.isKingInCheck(enemy)) positionalScore += 50;
-        if (this.validator.isKingInCheck(color)) positionalScore -= 50;
-
-        // ===== SCORE FINAL =====
-        score += defenseScore + captureScore + riskScore + positionalScore;
-
-        console.log(`   🎯 TOTAL: ${score.toFixed(0)} = Balanço(${materialBalance.toFixed(0)}) + Defesa(${defenseScore.toFixed(0)}) + Captura(${captureScore.toFixed(0)}) + Risco(${riskScore.toFixed(0)}) + Pos(${positionalScore.toFixed(0)})`);
-
-        return score;
     }
+
+    // ======================================================
+    // LEI 2: CAPTURAS GRATUITAS (BÔNUS)
+    // ======================================================
+    const freeCaptures = this.findFreeCaptures(color, enemy);
+    for (const capture of freeCaptures) {
+        const capturedPiece = this.board.board[capture.to];
+        if (!capturedPiece) continue;
+
+        const value = this.PIECE_VALUES[capturedPiece.tipo];
+        const bonus =
+            this.weights.freeCaptureBonus + value;
+
+        captureScore += bonus;
+
+        console.log(
+            `💎 LEI 2: Captura grátis em ${this.notation(capture.to)} | +${bonus.toFixed(0)}`
+        );
+    }
+
+    // ======================================================
+    // LEI 3: PEÇAS EXPOSTAS (PENALIDADE)
+    // ======================================================
+    const exposedPieces = this.getExposedPieces(color, enemy);
+    for (const sq of exposedPieces) {
+        const piece = this.board.board[sq];
+        const value = this.PIECE_VALUES[piece.tipo];
+
+        const penalty =
+            this.weights.exposedPiece * (value / 500);
+
+        riskScore += penalty;
+
+        console.log(
+            `⚠️ LEI 3: ${piece.tipo} em ${this.notation(sq)} exposta | -${penalty.toFixed(0)}`
+        );
+    }
+
+    // ======================================================
+    // POSICIONAL: PST + MOBILIDADE
+    // ======================================================
+    for (let sq = 0; sq < 64; sq++) {
+        const piece = this.board.board[sq];
+        if (!piece) continue;
+
+        const sign = piece.cor === color ? 1 : -1;
+
+        // PST (sempre positivo)
+        const pstValue =
+            this.getPSTValue(sq, piece, phase) * this.weights.positional;
+        positionalScore += sign * pstValue;
+
+        // Mobilidade (sempre positiva)
+        const mobility =
+            (this.validator.getPossibleMoves(sq) || []).length *
+            this.weights.mobility;
+        positionalScore += sign * mobility;
+    }
+
+    // ======================================================
+    // OUTROS FATORES (SEM DOUBLE NEGATIVE)
+    // ======================================================
+    positionalScore +=
+        this.evaluateCenterControl(color) * this.weights.centerControl;
+    positionalScore -=
+        this.evaluateCenterControl(enemy) * this.weights.centerControl;
+
+    positionalScore +=
+        this.evaluateKingSafety(color, phase) * this.weights.kingSafety;
+    positionalScore -=
+        this.evaluateKingSafety(enemy, phase) * this.weights.kingSafety;
+
+    if (phase === 0) {
+        positionalScore +=
+            this.evaluateDevelopment(color) * this.weights.development;
+        positionalScore -=
+            this.evaluateDevelopment(enemy) * this.weights.development;
+    }
+
+    // Par de bispos
+    if (this.hasBishopPair(color)) positionalScore += 50;
+    if (this.hasBishopPair(enemy)) positionalScore -= 50;
+
+    // Xeque
+    if (this.validator.isKingInCheck(enemy)) positionalScore += 50;
+    if (this.validator.isKingInCheck(color)) positionalScore -= 50;
+
+    // ======================================================
+    // SCORE FINAL (PENALIDADES SUBTRAÍDAS UMA VEZ)
+    // ======================================================
+    score +=
+        captureScore +
+        positionalScore -
+        defenseScore -
+        riskScore;
+
+    console.log(
+        `🎯 TOTAL: ${score.toFixed(0)} ` +
+        `= Material(${materialBalance.toFixed(0)}) ` +
+        `+ Captura(${captureScore.toFixed(0)}) ` +
+        `+ Pos(${positionalScore.toFixed(0)}) ` +
+        `- Defesa(${defenseScore.toFixed(0)}) ` +
+        `- Risco(${riskScore.toFixed(0)})`
+    );
+
+    return score;
+}
 
     // =====================================================
     // CALCULAR MATERIAL TOTAL
