@@ -236,6 +236,14 @@ export class AI_Medium {
                 }
             }
 
+			// ⬇️ INSERIR AQUI ⬇️
+            console.log(`\n📌 Fim da profundidade ${depth}:`);
+            console.log(`   currentBest: ${currentBest ? this.notation(currentBest.from) + '→' + this.notation(currentBest.to) : 'null'}`);
+            console.log(`   currentScore: ${currentScore}`);
+            console.log(`   bestMove: ${this.notation(bestMove.from)}→${this.notation(bestMove.to)}`);
+            console.log(`   bestScore: ${bestScore}\n`);
+            // ⬆️ INSERIR AQUI ⬆️
+			
             // Atualizar melhor movimento
             if (currentBest && currentScore > bestScore) {
                 bestScore = currentScore;
