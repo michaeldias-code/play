@@ -31,7 +31,7 @@ export class AI_Medium {
             // LEI 2: CAPTURA GRÁTIS (segunda prioridade)
             freeCaptureBonus: 30000,        // Captura sem risco
             profitableTrade: 20000,         // Troca favorável (ganho líquido)
-            materialAdvantage: 5000,        // Cada ponto de vantagem material
+            materialAdvantage: 1, // 5000,        // Cada ponto de vantagem material
             
             // LEI 3: EVITAR RISCOS (última prioridade)
             exposedPiece: -8000,            // Peça movida para casa atacada
@@ -244,12 +244,21 @@ export class AI_Medium {
             console.log(`   bestScore: ${bestScore}\n`);
             // ⬆️ INSERIR AQUI ⬆️
 			
-            // Atualizar melhor movimento
-            if (currentBest && currentScore > bestScore) {
-                bestScore = currentScore;
-                bestMove = currentBest;
-            }
-
+			// ✅ SEMPRE usar o último resultado válido da maior profundidade
+			if (currentBest) {
+				// Na última profundidade, SEMPRE atualizar
+				if (depth === this.config.maxDepth) {
+					bestScore = currentScore;
+					bestMove = currentBest;
+					console.log(`   ✅ [DEPTH ${depth}] Resultado final: ${this.notation(bestMove.from)}→${this.notation(bestMove.to)} = ${bestScore}`);
+				} 
+				// Em profundidades intermediárias, só atualizar se melhor
+				else if (currentScore > bestScore) {
+					bestScore = currentScore;
+					bestMove = currentBest;
+					console.log(`   ✅ [DEPTH ${depth}] Melhor até agora: ${this.notation(bestMove.from)}→${this.notation(bestMove.to)} = ${bestScore}`);
+				}
+			}
             // Early exit se encontrar mate
             if (Math.abs(bestScore) > 10000) {
                 console.log(`🏁 Mate encontrado, encerrando busca antecipadamente`);
