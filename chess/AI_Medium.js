@@ -144,14 +144,16 @@ export class AI_Medium {
 				// Depth 1 avalia TODOS
 				rootMoves = allMoves;
 			} else {
+				rootMoves = allMoves.slice(0, this.config.rootMoveLimit);
+			
 				// Depth >= 2 → apenas TOP N
-				const limit = Math.min(this.config.rootMoveLimit, allMoves.length);
+				//const limit = Math.min(this.config.rootMoveLimit, allMoves.length);
 	
 				// Opcional: garantir diversidade mínima
-				const captures = allMoves.filter(m => m.isCapture).slice(0, Math.ceil(limit / 2));
-				const quiets   = allMoves.filter(m => !m.isCapture).slice(0, limit - captures.length);
+				//const captures = allMoves.filter(m => m.isCapture).slice(0, Math.ceil(limit / 2));
+				//const quiets   = allMoves.filter(m => !m.isCapture).slice(0, limit - captures.length);
 	
-				rootMoves = [...captures, ...quiets];
+				//rootMoves = [...captures, ...quiets];
 	
 				console.log(
 					`   🎯 Beam root ativo: ${rootMoves.length}/${allMoves.length} movimentos`
@@ -185,8 +187,10 @@ export class AI_Medium {
 	
 				// ===== FALHA DE ASPIRATION → RESEARCH =====
 				if (score <= alpha || score >= beta) {
+					console.log("   🔁 Aspiration falhou → re-search completo");
 					alpha = -Infinity;
 					beta = Infinity;
+					break; // força nova iteração de depth
 				}
 			}
 	
