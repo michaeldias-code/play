@@ -20,30 +20,30 @@ export class AI_Medium {
             nullMoveReduction: 2,     // R-value para null-move pruning
             lmrThreshold: 3,          // Late Move Reduction após N movimentos
             futilityMargin: 200,      // Margem para futility pruning
-			rootMoveLimit: 10   // 👈 NOVO: beam search no root
+            rootMoveLimit: 10         // 👈 NOVO: beam search no root
         };
 
         // ===== PESOS ESTRATÉGICOS (TRÊS LEIS) =====
         this.weights = {
             // LEI 1: DEFESA (prioridade máxima)
             pieceUnderAttack: 6000,        // Peça atacada sem defesa
-            mustDefend: 30000,              // CRÍTICO: peça valiosa em perigo iminente
+            mustDefend: 30000,             // CRÍTICO: peça valiosa em perigo iminente
             
             // LEI 2: CAPTURA GRÁTIS (segunda prioridade)
-            freeCaptureBonus: 60000,        // Captura sem risco
-            profitableTrade: 50000,         // Troca favorável (ganho líquido)
-            materialAdvantage: 9000,        // Cada ponto de vantagem material
+            freeCaptureBonus: 60000,       // Captura sem risco
+            profitableTrade: 50000,        // Troca favorável (ganho líquido)
+            materialAdvantage: 9000,       // Cada ponto de vantagem material
             
             // LEI 3: EVITAR RISCOS (última prioridade)
-            exposedPiece: -16000,            // Peça movida para casa atacada
-            unnecessaryRisk: -6000,         // Movimento arriscado sem motivo
+            exposedPiece: -16000,          // Peça movida para casa atacada
+            unnecessaryRisk: -6000,        // Movimento arriscado sem motivo
             
             // Outros fatores (subordinados às 3 leis)
-            positional: 1,                  // Valor posicional (PST)
-            mobility: 2,                    // Mobilidade
-            centerControl: 10,              // Controle do centro
-            development: 15,                // Desenvolvimento
-            kingSafety: 100,                // Segurança do rei
+            positional: 1,                 // Valor posicional (PST)
+            mobility: 2,                   // Mobilidade
+            centerControl: 10,             // Controle do centro
+            development: 15,               // Desenvolvimento
+            kingSafety: 100,               // Segurança do rei
         };
 
         // ===== CACHE E OTIMIZAÇÃO =====
@@ -80,363 +80,328 @@ export class AI_Medium {
         this.BACK_RANK_BLACK = new Set([0, 1, 2, 3, 4, 5, 6, 7]);
     }
 
+
+/**
+ * Retorna os melhores movimentos na raiz limitados pelo rootMoveLimit
+ */
+getRootMoves(moves) {
+    // Ordena movimentos pelo histórico + captura + material
+    moves.sort((a, b) => this.historyHeuristic(b) - this.historyHeuristic(a));
+    // Limita à quantidade configurada
+    return moves.slice(0, this.config.rootMoveLimit);
+}
+
+/**
+ * Avalia heurística simples para ordenar movimentos no root
+ * Pode considerar captura, valor de peça ou histórico
+ */
+historyHeuristic(move) {
+    let score = 0;
+
+    // Captura: valor da peça capturada
+    if (move.captured) {
+        score += this.PIECE_VALUES[move.captured];
+    }
+
+    // Prioridade para movimentos já bem-sucedidos no passado (history table)
+    const key = `${move.from}-${move.to}`;
+    if (this.historyTable.has(key)) {
+        score += this.historyTable.get(key);
+    }
+
+    return score;
+}
+
+
+
     // =====================================================
     // INTERFACE PÚBLICA: ESCOLHA DE MOVIMENTO
     // =====================================================
-    makeMove(color) {
-        console.log("\n🧠 ============ TURNO DA IA ============");
-        this.resetStats();
-        
-        const startTime = performance.now();
-        const bestMove = this.findBestMove(color);
-        const elapsed = (performance.now() - startTime).toFixed(1);
+makeMove(color) {
+    console.log("\n🧠 ============ TURNO DA IA ============");
+    this.resetStats();
 
-        if (!bestMove) {
-            console.log("⚠️ Nenhum movimento legal encontrado");
-            return null;
-        }
+    const startTime = performance.now();
+    const bestMove = this.findBestMove(color);
+    const elapsed = (performance.now() - startTime).toFixed(1);
 
-        // Aplicar movimento
-        this.board.movePiece(bestMove.from, bestMove.to);
-
-        console.log(`\n✅ MOVIMENTO ESCOLHIDO: ${this.notation(bestMove.from)} → ${this.notation(bestMove.to)}`);
-        console.log(`📊 Score: ${bestMove.score} | Tempo: ${elapsed}ms`);
-        console.log(`🔍 Nós: ${this.stats.nodesSearched} | Cache: ${this.stats.cacheHits} | Cutoffs: ${this.stats.cutoffs}`);
-        console.log("🧠 ======================================\n");
-
-        return bestMove;
+    if (!bestMove) {
+        console.log("⚠️ Nenhum movimento legal encontrado");
+        return null;
     }
 
-    // =====================================================
-    // BUSCA ITERATIVA COM ASPIRATION WINDOWS
-    // =====================================================
-	findBestMove(color) {
-		const allMoves = this.generateMoves(color);
-		if (allMoves.length === 0) return null;
-		if (allMoves.length === 1) return { ...allMoves[0], score: 0 };
-	
-		// ===== ORDENAÇÃO ROOT =====
-		this.orderMoves(allMoves, color, 0);
-	
-		console.log("📋 Top 10 movimentos ordenados:");
-		allMoves.slice(0, 10).forEach((m, i) => {
-			console.log(
-				`   ${i + 1}. ${this.notation(m.from)}→${this.notation(m.to)}`
-			);
-		});
-	
-		let bestMove = allMoves[0];
-		let bestScore = -Infinity;
-	
-		// ===== ITERATIVE DEEPENING =====
-		for (let depth = 1; depth <= this.config.maxDepth; depth++) {
-			console.log(`🔎 Profundidade ${depth}/${this.config.maxDepth}`);
-	
-			let alpha = -Infinity;
-			let beta = Infinity;
-	
-			let aspirationFailed = false;
-	
-			// Aspiration window só após depth 2
-			if (depth >= 3 && bestScore > -Infinity) {
-				alpha = bestScore - this.config.aspirationWindow;
-				beta  = bestScore + this.config.aspirationWindow;
-			}
-	
-			let currentBestMove = null;
-			let currentBestScore = -Infinity;
-	
-			// ===== ROOT MOVE LIST =====
-			const rootMoves =
-				depth === 1
-					? allMoves
-					: allMoves.slice(0, this.config.rootMoveLimit);
-	
-			console.log(
-				depth === 1
-					? `   🎯 Root completo: ${rootMoves.length} movimentos`
-					: `   🎯 Beam root: ${rootMoves.length}/${allMoves.length}`
-			);
-	
-			// ===== LOOP ROOT (NUNCA QUEBRA POR ASPIRATION OU MATE) =====
-			for (let i = 0; i < rootMoves.length; i++) {
-				const move = rootMoves[i];
-	
-				const score = this.simulate(move, () => {
-					return -this.minimax(
-						depth - 1,
-						this.opponent(color),
-						-beta,
-						-alpha,
-						color,
-						false
-					);
-				});
-	
-				console.log(
-					`   ${this.notation(move.from)}→${this.notation(move.to)} | Score: ${score}`
-				);
-	
-				if (score > currentBestScore) {
-					currentBestScore = score;
-					currentBestMove = move;
-	
-					if (score > alpha) alpha = score;
-	
-					console.log(`      ⭐ NOVO MELHOR | Score: ${score}`);
-				}
-	
-				// ===== ASPIRATION FAIL (SÓ MARCA) =====
-				if (score <= alpha || score >= beta) {
-					aspirationFailed = true;
-				}
-			}
-	
-			// ===== ATUALIZA MELHOR GLOBAL =====
-			if (currentBestMove) {
-				bestMove = currentBestMove;
-				bestScore = currentBestScore;
-			}
-	
-			// ===== RE-SEARCH SE ASPIRATION FALHOU =====
-			if (aspirationFailed) {
-				console.log("🔁 Aspiration falhou → re-search com janela completa");
-	
-				alpha = -Infinity;
-				beta = Infinity;
-	
-				currentBestScore = -Infinity;
-				currentBestMove = null;
-	
-				for (const move of rootMoves) {
-					const score = this.simulate(move, () => {
-						return -this.minimax(
-							depth - 1,
-							this.opponent(color),
-							-beta,
-							-alpha,
-							color,
-							false
-						);
-					});
-	
-					if (score > currentBestScore) {
-						currentBestScore = score;
-						currentBestMove = move;
-						alpha = Math.max(alpha, score);
-					}
-				}
-	
-				if (currentBestMove) {
-					bestMove = currentBestMove;
-					bestScore = currentBestScore;
-				}
-			}
-	
-			// ===== MATE CUTOFF (SÓ APÓS ROOT COMPLETO) =====
-			if (Math.abs(bestScore) > 10000) {
-				console.log("♚ Mate confirmado após root completo");
-				break;
-			}
-		}
-	
-		return { ...bestMove, score: bestScore };
-	}
+    // Aplicar movimento
+    this.board.movePiece(bestMove.from, bestMove.to);
 
-    // =====================================================
-    // MINIMAX COM ALFA-BETA PRUNING (OTIMIZADO)
-    // =====================================================
-    // =====================================================
-    // MINIMAX COM ALFA-BETA PRUNING (OTIMIZADO)
-    // =====================================================
-    minimax(depth, color, alpha, beta, rootColor, inCheck) {
-        this.stats.nodesSearched++;
+    console.log(`\n✅ MOVIMENTO ESCOLHIDO: ${this.notation(bestMove.from)} → ${this.notation(bestMove.to)}`);
+    console.log(`📊 Score: ${bestMove.score} | Tempo: ${elapsed}ms`);
+    console.log(`🔍 Nós: ${this.stats.nodesSearched} | Cache: ${this.stats.cacheHits} | Cutoffs: ${this.stats.cutoffs}`);
+    console.log("🧠 ======================================\n");
 
-        // ===== VERIFICAR CACHE (TRANSPOSITION TABLE) =====
-        const hash = this.computeHash();
-        const cached = this.transpositionTable.get(hash);
-        if (cached && cached.depth >= depth) {
-            this.stats.cacheHits++;
-            if (cached.flag === 'EXACT') return cached.score;
-            if (cached.flag === 'LOWERBOUND') alpha = Math.max(alpha, cached.score);
-            if (cached.flag === 'UPPERBOUND') beta = Math.min(beta, cached.score);
-            if (alpha >= beta) return cached.score;
+    return bestMove;
+}
+
+// =====================================================
+// BUSCA ITERATIVA COM ASPIRATION WINDOWS E ROOT LIMIT
+// =====================================================
+findBestMove(color) {
+    const allMoves = this.generateMoves(color);
+    if (allMoves.length === 0) return null;
+    if (allMoves.length === 1) return { ...allMoves[0], score: 0 };
+
+    // ===== ORDENAÇÃO ROOT =====
+    this.orderMoves(allMoves, color, 0);
+
+    console.log("📋 Top 10 movimentos ordenados:");
+    allMoves.slice(0, 10).forEach((m, i) => {
+        console.log(`   ${i + 1}. ${this.notation(m.from)}→${this.notation(m.to)}`);
+    });
+
+    let bestMove = allMoves[0];
+    let bestScore = -Infinity;
+
+    // ===== ITERATIVE DEEPENING =====
+    for (let depth = 1; depth <= this.config.maxDepth; depth++) {
+        console.log(`🔎 Profundidade ${depth}/${this.config.maxDepth}`);
+
+        let alpha = -Infinity;
+        let beta = Infinity;
+        let aspirationFailed = false;
+
+        // Aspiration window só após depth 2
+        if (depth >= 3 && bestScore > -Infinity) {
+            alpha = bestScore - this.config.aspirationWindow;
+            beta  = bestScore + this.config.aspirationWindow;
         }
 
-        // ===== CONDIÇÕES DE PARADA =====
-        const moves = this.generateMoves(color);
-        
-        // Mate ou Stalemate
-        if (moves.length === 0) {
-            const kingInCheck = this.validator.isKingInCheck(color);
-            if (kingInCheck) {
-                // Mate: quanto mais longe da raiz, menos grave
-                return color === rootColor ? -20000 + (this.config.maxDepth - depth) : 20000 - (this.config.maxDepth - depth);
-            }
-            return 0; // Stalemate
-        }
+        let currentBestMove = null;
+        let currentBestScore = -Infinity;
 
-        // Profundidade máxima → Quiescence Search
-        if (depth <= 0) {
-            return this.quiescence(color, alpha, beta, rootColor, 3);
-        }
+        // ===== ROOT MOVE LIST (BEAM SEARCH) =====
+        const rootMoves =
+            depth === 1
+                ? allMoves
+                : allMoves.slice(0, this.config.rootMoveLimit);
 
-        // ===== EXTENSIONS (estender busca em posições críticas) =====
-        if (inCheck && depth < this.config.maxDepth) {
-            depth += this.config.checkExtension;
-            this.stats.extensions++;
-        }
+        console.log(
+            depth === 1
+                ? `   🎯 Root completo: ${rootMoves.length} movimentos`
+                : `   🎯 Beam root: ${rootMoves.length}/${allMoves.length}`
+        );
 
-        // ===== NULL MOVE PRUNING (otimização agressiva) =====
-        if (depth >= 3 && !inCheck && this.hasNonPawnMaterial(color)) {
-            const nullScore = -this.minimax(
-                depth - 1 - this.config.nullMoveReduction,
-                this.opponent(color),
-                -beta,
-                -beta + 1,
-                rootColor,
-                false
-            );
-            if (nullScore >= beta) {
-                this.stats.cutoffs++;
-                return beta; // Beta cutoff
-            }
-        }
-
-        // ===== ORDENAR MOVIMENTOS =====
-        this.orderMoves(moves, color, depth);
-
-        let bestScore = -Infinity;
-        let flag = 'UPPERBOUND';
-        let moveCount = 0;
-
-        for (const move of moves) {
-            moveCount++;
-            let score;
-
-            // ===== LATE MOVE REDUCTION (LMR) =====
-            let reduction = 0;
-            if (moveCount > this.config.lmrThreshold && 
-                depth >= 3 && 
-                !inCheck && 
-                !move.isCapture && 
-                !this.givesCheck(move, color)) {
-                reduction = 1;
-            }
-
-            score = this.simulate(move, () => {
-                const nextInCheck = this.validator.isKingInCheck(this.opponent(color));
-                
-                // PVS (Principal Variation Search)
-                if (moveCount === 1) {
-                    return -this.minimax(
-                        depth - 1 - reduction,
-                        this.opponent(color),
-                        -beta,
-                        -alpha,
-                        rootColor,
-                        nextInCheck
-                    );
-                } else {
-                    // Null window search
-                    let s = -this.minimax(
-                        depth - 1 - reduction,
-                        this.opponent(color),
-                        -alpha - 1,
-                        -alpha,
-                        rootColor,
-                        nextInCheck
-                    );
-                    
-                    // Re-search se necessário
-                    if (s > alpha && (s < beta || reduction > 0)) {
-                        s = -this.minimax(
-                            depth - 1,
-                            this.opponent(color),
-                            -beta,
-                            -alpha,
-                            rootColor,
-                            nextInCheck
-                        );
-                    }
-                    return s;
-                }
-            });
-
-            bestScore = Math.max(bestScore, score);
-
-            if (score >= beta) {
-                this.stats.cutoffs++;
-                
-                // Atualizar killer moves
-                if (!move.isCapture) {
-                    this.updateKillerMove(move, depth);
-                }
-                
-                // Salvar em cache
-                this.transpositionTable.set(hash, {
-                    depth,
-                    score: beta,
-                    flag: 'LOWERBOUND'
-                });
-                
-                return beta; // Beta cutoff
-            }
-
-            if (score > alpha) {
-                alpha = score;
-                flag = 'EXACT';
-            }
-        }
-
-        // ===== SALVAR EM CACHE =====
-        this.transpositionTable.set(hash, {
-            depth,
-            score: bestScore,
-            flag
-        });
-
-        return bestScore;
-    }
-
-    // =====================================================
-    // QUIESCENCE SEARCH (evita horizon effect)
-    // =====================================================
-    quiescence(color, alpha, beta, rootColor, depth) {
-        this.stats.nodesSearched++;
-
-        // Stand-pat: avaliar posição atual
-        const standPat = this.evaluate(rootColor);
-        
-        if (standPat >= beta) return beta;
-        if (alpha < standPat) alpha = standPat;
-        
-        if (depth <= 0) return standPat;
-
-        // Apenas capturas e xeques
-        const captures = this.generateMoves(color).filter(m => m.isCapture);
-        
-        for (const move of captures) {
-            // Delta pruning: não considerar capturas que não ajudam
-            const capturedValue = this.PIECE_VALUES[this.board.board[move.to]?.tipo] || 0;
-            if (standPat + capturedValue + 200 < alpha) continue;
+        // ===== LOOP ROOT =====
+        for (let i = 0; i < rootMoves.length; i++) {
+            const move = rootMoves[i];
 
             const score = this.simulate(move, () => {
-                return -this.quiescence(
+                return -this.minimax(
+                    depth - 1,
                     this.opponent(color),
                     -beta,
                     -alpha,
-                    rootColor,
-                    depth - 1
+                    color,
+                    false
                 );
             });
 
-            if (score >= beta) return beta;
-            if (score > alpha) alpha = score;
+            console.log(`   ${this.notation(move.from)}→${this.notation(move.to)} | Score: ${score}`);
+
+            if (score > currentBestScore) {
+                currentBestScore = score;
+                currentBestMove = move;
+
+                if (score > alpha) alpha = score;
+                console.log(`      ⭐ NOVO MELHOR | Score: ${score}`);
+            }
+
+            // Apenas marca se aspiration falhar
+            if (score <= alpha || score >= beta) {
+                aspirationFailed = true;
+            }
         }
 
-        return alpha;
+        // ===== ATUALIZA MELHOR GLOBAL =====
+        if (currentBestMove) {
+            bestMove = currentBestMove;
+            bestScore = currentBestScore;
+        }
+
+        // ===== RE-SEARCH SE ASPIRATION FALHOU =====
+        if (aspirationFailed) {
+            console.log("🔁 Aspiration falhou → re-search com janela completa");
+
+            alpha = -Infinity;
+            beta = Infinity;
+            currentBestScore = -Infinity;
+            currentBestMove = null;
+
+            for (const move of rootMoves) {
+                const score = this.simulate(move, () => {
+                    return -this.minimax(
+                        depth - 1,
+                        this.opponent(color),
+                        -beta,
+                        -alpha,
+                        color,
+                        false
+                    );
+                });
+
+                if (score > currentBestScore) {
+                    currentBestScore = score;
+                    currentBestMove = move;
+                    alpha = Math.max(alpha, score);
+                }
+            }
+
+            if (currentBestMove) {
+                bestMove = currentBestMove;
+                bestScore = currentBestScore;
+            }
+        }
+
+        // ===== MATE CUTOFF (APÓS ROOT COMPLETO) =====
+        if (Math.abs(bestScore) > 10000) {
+            console.log("♚ Mate confirmado após root completo");
+            break;
+        }
     }
+
+    return { ...bestMove, score: bestScore };
+}
+
+    // =====================================================
+    // MINIMAX COM ALFA-BETA PRUNING (OTIMIZADO)
+    // =====================================================
+// =====================================================
+// MINIMAX COM ALFA-BETA PRUNING (OTIMIZADO)
+// =====================================================
+minimax(depth, color, alpha, beta, rootColor, inCheck) {
+    this.stats.nodesSearched++;
+
+    // ===== VERIFICAR CACHE (TRANSPOSITION TABLE) =====
+    const hash = this.computeHash();
+    const cached = this.transpositionTable.get(hash);
+    if (cached && cached.depth >= depth) {
+        this.stats.cacheHits++;
+        if (cached.flag === 'EXACT') return cached.score;
+        if (cached.flag === 'LOWERBOUND') alpha = Math.max(alpha, cached.score);
+        if (cached.flag === 'UPPERBOUND') beta = Math.min(beta, cached.score);
+        if (alpha >= beta) return cached.score;
+    }
+
+    // ===== CONDIÇÕES DE PARADA =====
+    const moves = this.generateMoves(color);
+
+    if (moves.length === 0) {
+        const kingInCheck = this.validator.isKingInCheck(color);
+        if (kingInCheck) return color === rootColor ? -20000 + (this.config.maxDepth - depth) : 20000 - (this.config.maxDepth - depth);
+        return 0; // Stalemate
+    }
+
+    if (depth <= 0) {
+        return this.quiescence(color, alpha, beta, rootColor, 3);
+    }
+
+    if (inCheck && depth < this.config.maxDepth) {
+        depth += this.config.checkExtension;
+        this.stats.extensions++;
+    }
+
+    if (depth >= 3 && !inCheck && this.hasNonPawnMaterial(color)) {
+        const nullScore = -this.minimax(
+            depth - 1 - this.config.nullMoveReduction,
+            this.opponent(color),
+            -beta,
+            -beta + 1,
+            rootColor,
+            false
+        );
+        if (nullScore >= beta) {
+            this.stats.cutoffs++;
+            return beta;
+        }
+    }
+
+    this.orderMoves(moves, color, depth);
+
+    let bestScore = -Infinity;
+    let flag = 'UPPERBOUND';
+    let moveCount = 0;
+
+    for (const move of moves) {
+        moveCount++;
+        let reduction = 0;
+
+        if (moveCount > this.config.lmrThreshold &&
+            depth >= 3 &&
+            !inCheck &&
+            !move.isCapture &&
+            !this.givesCheck(move, color)) {
+            reduction = 1;
+        }
+
+        const score = this.simulate(move, () => {
+            const nextInCheck = this.validator.isKingInCheck(this.opponent(color));
+            if (moveCount === 1) {
+                return -this.minimax(depth - 1 - reduction, this.opponent(color), -beta, -alpha, rootColor, nextInCheck);
+            } else {
+                let s = -this.minimax(depth - 1 - reduction, this.opponent(color), -alpha - 1, -alpha, rootColor, nextInCheck);
+                if (s > alpha && (s < beta || reduction > 0)) {
+                    s = -this.minimax(depth - 1, this.opponent(color), -beta, -alpha, rootColor, nextInCheck);
+                }
+                return s;
+            }
+        });
+
+        bestScore = Math.max(bestScore, score);
+
+        if (score >= beta) {
+            this.stats.cutoffs++;
+            if (!move.isCapture) this.updateKillerMove(move, depth);
+            this.transpositionTable.set(hash, { depth, score: beta, flag: 'LOWERBOUND' });
+            return beta;
+        }
+
+        if (score > alpha) {
+            alpha = score;
+            flag = 'EXACT';
+        }
+    }
+
+    this.transpositionTable.set(hash, { depth, score: bestScore, flag });
+    return bestScore;
+}
+
+// =====================================================
+// QUIESCENCE SEARCH (evita horizon effect)
+// =====================================================
+quiescence(color, alpha, beta, rootColor, depth) {
+    this.stats.nodesSearched++;
+
+    const standPat = this.evaluate(rootColor);
+
+    if (standPat >= beta) return beta;
+    if (alpha < standPat) alpha = standPat;
+
+    if (depth <= 0) return standPat;
+
+    const captures = this.generateMoves(color).filter(m => m.isCapture);
+
+    for (const move of captures) {
+        const capturedValue = this.PIECE_VALUES[this.board.board[move.to]?.tipo] || 0;
+        if (standPat + capturedValue + 200 < alpha) continue;
+
+        const score = this.simulate(move, () => {
+            return -this.quiescence(this.opponent(color), -beta, -alpha, rootColor, depth - 1);
+        });
+
+        if (score >= beta) return beta;
+        if (score > alpha) alpha = score;
+    }
+
+    return alpha;
+}
 
     // =====================================================
     // FUNÇÃO DE AVALIAÇÃO COMPLETA (COM 3 LEIS)
