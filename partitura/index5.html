@@ -137,6 +137,187 @@
             color: white;
             border-color: #FF5722;
         }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            background: #f0f4ff;
+            border-color: #764ba2;
+        }
+
+        .upload-area.has-file {
+            border-color: #48bb78;
+            background: #f0fff4;
+        }
+
+        .upload-area.error {
+            border-color: #f56565;
+            background: #fff5f5;
+        }
+
+        .upload-area input[type="file"] {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .audio-info {
+            background: #f0fff4;
+            border: 2px solid #48bb78;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .audio-info strong {
+            color: #2f855a;
+        }
+
+        .error-message {
+            background: #fff5f5;
+            border: 2px solid #f56565;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            color: #c53030;
+            display: none;
+        }
+
+        .progress {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .settings {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .setting-group {
+            margin-bottom: 15px;
+        }
+
+        .settings label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .settings input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #e2e8f0;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .settings input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        .settings input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+            appearance: none;
+        }
+
+        .settings select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .settings select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .value-display {
+            display: inline-block;
+            margin-left: 10px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .btn-process {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        .btn-process:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-process:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
         #play-btn { background: #4CAF50; color: white; border-color: #4CAF50; }
         #clear-btn { background: #f44336; color: white; border-color: #f44336; }
         #undo-btn { background: #ff9800; color: white; border-color: #ff9800; }
@@ -238,6 +419,52 @@
                 <input type="number" id="tempo-input" min="40" max="240" value="120">
             </div>
         </div>
+
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">🎵</div>
+            <p><strong>Clique para selecionar</strong> ou arraste um arquivo de áudio</p>
+            <p style="font-size: 12px; color: #999; margin-top: 5px;">Recomendado: WAV ou MP3 de alta qualidade</p>
+            <input type="file" id="audioFile" accept="audio/*">
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="audio-info" id="audioInfo"></div>
+
+        <div class="settings">
+            <div class="setting-group">
+                <label>
+                    Intensidade do Autotune
+                    <span class="value-display" id="strengthValue">80%</span>
+                </label>
+                <input type="range" id="strength" min="0" max="100" value="80">
+                <p style="font-size: 12px; color: #666; margin-top: 5px;">
+                    0% = natural | 100% = robótico (efeito T-Pain)
+                </p>
+            </div>
+
+            <div class="setting-group">
+                <label>Escala Musical</label>
+                <select id="scale">
+                    <option value="chromatic">Cromática (todas as notas)</option>
+                    <option value="major">Maior (Dó maior)</option>
+                    <option value="minor">Menor (Lá menor)</option>
+                    <option value="pentatonic">Pentatônica</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="btn-process" id="processBtn" disabled>
+            🎵 Processar Áudio e Importar para Partitura
+        </button>
+
+        <div class="progress" id="progress">
+            <p id="progressText">Processando...</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
         <div class="controls">
             <div class="control-section">
                 <h3>Figuras Normais</h3>
@@ -344,6 +571,16 @@ let keySharps = 0;
 let keyFlats = 0;
 let timeSignature = { top: 4, bottom: 4 };
 let tempo = 120;
+
+// Variáveis para processamento de áudio
+let audioBuffer = null;
+let processedBuffer = null;
+let audioContext = null;
+let musicalNotes = []; // Array para armazenar notas musicais ao longo do tempo
+let currentNoteData = null; // Dados da nota atual sendo coletada
+let lastNoteStartTime = 0;
+let noteChangeBuffer = []; // Buffer para confirmar mudança de nota
+let lastStablePitch = null; // Último pitch estável detectado
 const canvas = document.getElementById("score");
 const ctx = canvas.getContext("2d");
 const SPACING = 50;
@@ -387,6 +624,14 @@ const noteDurations = {
 };
 const SHARP_FACTOR = 1.059463;
 const FLAT_FACTOR = 1 / SHARP_FACTOR;
+
+// Escalas musicais (semitons relativos a C)
+const scales = {
+    chromatic: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    major: [0, 2, 4, 5, 7, 9, 11],
+    minor: [0, 2, 3, 5, 7, 8, 10],
+    pentatonic: [0, 2, 4, 7, 9]
+};
 function checkAndCreateNewStaff() {
     const currentGrandStaff = staffs[currentStaffIndex];
     const trebleCount = currentGrandStaff[0].notes.length;
@@ -406,6 +651,597 @@ function updateStaffIndicator() {
         indicator.textContent = `Pauta ${currentStaffIndex + 1}/${staffs.length}`;
     }
 }
+
+// Converte tempo em segundos para tipo de nota musical com lógica matemática
+function calculateNoteType(seconds, bpm = 30) {
+    // BPM = batidas por minuto
+    // Uma batida = 60/BPM segundos para colcheia (quarter note)
+    const quarterNoteDuration = 60 / bpm; // duração de uma colcheia em segundos
+
+    // Calcular quantas colcheias cabem no tempo
+    const quarterNotes = seconds / quarterNoteDuration;
+
+    // Lógica matemática: usar potências de 2 para durações
+    // minima (4 colcheias), seminima (2 colcheias), colcheia (1 colcheia)
+    if (quarterNotes >= 3.5) return 'minima';      // >= 3.5 colcheias = minima
+    if (quarterNotes >= 1.5) return 'seminima';    // >= 1.5 colcheias = seminima
+    return 'colcheia';                             // < 1.5 colcheias = colcheia
+}
+
+function hideError() {
+    const errorMessage = document.getElementById('errorMessage');
+    errorMessage.style.display = 'none';
+}
+
+function showError(message) {
+    const errorMessage = document.getElementById('errorMessage');
+    errorMessage.textContent = '❌ ' + message;
+    errorMessage.style.display = 'block';
+
+    // Sugestões baseadas no erro
+    if (message.includes('não suportado')) {
+        errorMessage.innerHTML += '<br><br><strong>Solução:</strong> Converta o arquivo para WAV ou MP3 usando um app como:<br>• <a href="https://online-audio-converter.com" target="_blank" style="color: #c53030;">Online Audio Converter</a><br>• Media Converter (Android)<br>• The Audio Converter (iOS)';
+    }
+}
+
+function showAudioInfo(buffer, file) {
+    const audioInfo = document.getElementById('audioInfo');
+    const duration = buffer.duration.toFixed(1);
+    const sampleRate = buffer.sampleRate;
+    const channels = buffer.numberOfChannels;
+    const fileSize = (file.size / 1024 / 1024).toFixed(2);
+
+    audioInfo.innerHTML = `
+        <strong>Informações do áudio:</strong><br>
+        Duração: ${duration}s | Taxa: ${sampleRate}Hz | Canais: ${channels} | Tamanho: ${fileSize}MB
+    `;
+    audioInfo.style.display = 'block';
+}
+
+function getNoteName(freq) {
+    const A4 = 440;
+    const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+    const halfSteps = 12 * Math.log2(freq / A4) + 69; // 69 semitons = A4 (correto)
+    const octave = Math.floor(halfSteps / 12);
+    const note = Math.round(halfSteps % 12);
+
+    return noteNames[note] + octave;
+}
+
+function closestNoteInScale(freq, scale) {
+    const A4 = 440;
+    const C0 = A4 * Math.pow(2, -4.75); // C0 frequency
+
+    // Converter frequência para semitons de C0
+    const halfSteps = 12 * Math.log2(freq / C0);
+    const octave = Math.floor(halfSteps / 12);
+    const noteInOctave = Math.round(halfSteps % 12);
+
+    // Encontrar nota mais próxima na escala
+    let closest = scale[0];
+    let minDist = Math.abs(noteInOctave - scale[0]);
+
+    for (let note of scale) {
+        const dist = Math.abs(noteInOctave - note);
+        if (dist < minDist) {
+            minDist = dist;
+            closest = note;
+        }
+    }
+
+    // Converter de volta para frequência
+    const targetHalfSteps = octave * 12 + closest;
+    return C0 * Math.pow(2, targetHalfSteps / 12);
+}
+
+function phaseVocoder(buffer, ratio, fftSize) {
+    // Implementação simplificada de phase vocoder
+    // Para produção seria ideal usar FFT, mas aqui uso interpolação de alta qualidade
+    const output = new Float32Array(buffer.length);
+
+    for (let i = 0; i < output.length; i++) {
+        const sourcePos = i / ratio;
+
+        // Interpolação cúbica (melhor que linear)
+        const i0 = Math.floor(sourcePos) - 1;
+        const i1 = Math.floor(sourcePos);
+        const i2 = Math.floor(sourcePos) + 1;
+        const i3 = Math.floor(sourcePos) + 2;
+        const frac = sourcePos - Math.floor(sourcePos);
+
+        // Garantir limites
+        const s0 = (i0 >= 0 && i0 < buffer.length) ? buffer[i0] : 0;
+        const s1 = (i1 >= 0 && i1 < buffer.length) ? buffer[i1] : 0;
+        const s2 = (i2 >= 0 && i2 < buffer.length) ? buffer[i2] : 0;
+        const s3 = (i3 >= 0 && i3 < buffer.length) ? buffer[i3] : 0;
+
+        // Interpolação cúbica de Catmull-Rom
+        const a0 = -0.5 * s0 + 1.5 * s1 - 1.5 * s2 + 0.5 * s3;
+        const a1 = s0 - 2.5 * s1 + 2 * s2 - 0.5 * s3;
+        const a2 = -0.5 * s0 + 0.5 * s2;
+        const a3 = s1;
+
+        output[i] = a0 * frac * frac * frac + a1 * frac * frac + a2 * frac + a3;
+    }
+
+    return output;
+}
+
+function detectPitch(buffer, sampleRate) {
+    const SIZE = buffer.length;
+    let rms = 0;
+
+    // Calcular RMS
+    for (let i = 0; i < SIZE; i++) {
+        rms += buffer[i] * buffer[i];
+    }
+    rms = Math.sqrt(rms / SIZE);
+
+    if (rms < 0.005) return -1; // Silêncio
+
+    // Autocorrelação usando YIN algorithm (mais preciso)
+    const threshold = 0.1;
+    const minLag = Math.floor(sampleRate / 1000); // 1000 Hz max
+    const maxLag = Math.floor(sampleRate / 80);   // 80 Hz min
+
+    // Difference function
+    const diff = new Float32Array(maxLag);
+    for (let lag = 0; lag < maxLag; lag++) {
+        let sum = 0;
+        for (let i = 0; i < SIZE - maxLag; i++) {
+            const delta = buffer[i] - buffer[i + lag];
+            sum += delta * delta;
+        }
+        diff[lag] = sum;
+    }
+
+    // Cumulative mean normalized difference
+    const cmndf = new Float32Array(maxLag);
+    cmndf[0] = 1;
+    let runningSum = 0;
+
+    for (let lag = 1; lag < maxLag; lag++) {
+        runningSum += diff[lag];
+        cmndf[lag] = diff[lag] / (runningSum / lag);
+    }
+
+    // Find first minimum below threshold
+    let bestLag = -1;
+    for (let lag = minLag; lag < maxLag; lag++) {
+        if (cmndf[lag] < threshold) {
+            // Parabolic interpolation for sub-sample accuracy
+            if (lag > 0 && lag < maxLag - 1) {
+                const s0 = cmndf[lag - 1];
+                const s1 = cmndf[lag];
+                const s2 = cmndf[lag + 1];
+                const adjustment = (s2 - s0) / (2 * (2 * s1 - s2 - s0));
+                bestLag = lag + adjustment;
+            } else {
+                bestLag = lag;
+            }
+            break;
+        }
+    }
+
+    if (bestLag > 0) {
+        const pitch = sampleRate / bestLag;
+        if (pitch >= 80 && pitch <= 1000) {
+            return pitch;
+        }
+    }
+
+    return -1;
+}
+
+function updateProgress(percent, text) {
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    progressFill.style.width = percent + '%';
+    if (text) progressText.textContent = text;
+}
+
+function bufferToWave(buffer) {
+    const numChannels = buffer.numberOfChannels;
+    const sampleRate = buffer.sampleRate;
+    const format = 1; // PCM
+    const bitDepth = 16;
+
+    const bytesPerSample = bitDepth / 8;
+    const blockAlign = numChannels * bytesPerSample;
+
+    const data = [];
+    for (let i = 0; i < buffer.length; i++) {
+        for (let ch = 0; ch < numChannels; ch++) {
+            let sample = buffer.getChannelData(ch)[i];
+            sample = Math.max(-1, Math.min(1, sample));
+            sample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+            data.push(sample);
+        }
+    }
+
+    const dataSize = data.length * bytesPerSample;
+    const view = new DataView(new ArrayBuffer(44 + dataSize));
+
+    // RIFF header
+    writeString(view, 0, 'RIFF');
+    view.setUint32(4, 36 + dataSize, true);
+    writeString(view, 8, 'WAVE');
+
+    // fmt chunk
+    writeString(view, 12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, format, true);
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * blockAlign, true);
+    view.setUint16(32, blockAlign, true);
+    view.setUint16(34, bitDepth, true);
+
+    // data chunk
+    writeString(view, 36, 'data');
+    view.setUint32(40, dataSize, true);
+
+    let offset = 44;
+    for (let i = 0; i < data.length; i++) {
+        view.setInt16(offset, data[i], true);
+        offset += 2;
+    }
+
+    return view.buffer;
+}
+
+function writeString(view, offset, string) {
+    for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+    }
+}
+
+async function handleFileSelect() {
+    const fileInput = document.getElementById('audioFile');
+    const uploadArea = document.getElementById('uploadArea');
+    const processBtn = document.getElementById('processBtn');
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    hideError();
+    document.getElementById('audioInfo').style.display = 'none';
+    uploadArea.classList.remove('has-file', 'error');
+    processBtn.disabled = true;
+
+    // Mostrar que está carregando
+    uploadArea.querySelector('p').innerHTML = `<strong>⏳ Carregando ${file.name}...</strong>`;
+
+    try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Tentar carregar o áudio
+        const arrayBuffer = await file.arrayBuffer();
+
+        // Tentar decodificar
+        try {
+            audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+            // Sucesso!
+            uploadArea.classList.add('has-file');
+            uploadArea.querySelector('p').innerHTML = `<strong>✓ ${file.name}</strong><br><span style="font-size: 12px;">Pronto para processar</span>`;
+            processBtn.disabled = false;
+
+            // Mostrar informações do áudio
+            showAudioInfo(audioBuffer, file);
+
+        } catch (decodeError) {
+            // Erro ao decodificar - formato não suportado
+            throw new Error('Formato de áudio não suportado pelo navegador. Use WAV ou MP3 de alta qualidade.');
+        }
+
+    } catch (error) {
+        uploadArea.classList.add('error');
+        uploadArea.querySelector('p').innerHTML = `<strong>❌ Erro ao carregar</strong>`;
+        showError(error.message);
+    }
+}
+
+async function autotune(buffer, sampleRate, strength, scale) {
+    const windowSize = 4096; // Janela maior = melhor detecção
+    const hopSize = 1024;
+    const output = new Float32Array(buffer.length);
+    const overlapAdd = new Float32Array(buffer.length); // Para contagem de sobreposição
+
+    // Para tracking de pitch médio
+    let pitchSum = 0;
+    let pitchCount = 0;
+    let lastDisplayedPitch = 0;
+
+    // Para coleta de dados de frequência
+    lastNoteStartTime = 0;
+
+    // Processar em janelas com yield para não travar
+    const totalWindows = Math.floor((buffer.length - windowSize) / hopSize);
+    let windowCount = 0;
+
+    for (let i = 0; i < buffer.length - windowSize; i += hopSize) {
+        // Criar janela
+        const window = new Float32Array(windowSize);
+        for (let j = 0; j < windowSize; j++) {
+            window[j] = buffer[i + j];
+        }
+
+        // Detectar pitch
+        const pitch = detectPitch(window, sampleRate);
+
+        if (pitch > 0) {
+            // Acumular para estatísticas
+            pitchSum += pitch;
+            pitchCount++;
+
+            // Encontrar nota mais próxima na escala
+            const targetPitch = closestNoteInScale(pitch, scale);
+            const noteName = getNoteName(targetPitch);
+
+            // Coletar dados musicais - detectar mudança de nota com buffer para evitar notas fantasma
+            const currentTime = (i / sampleRate);
+
+            // Adicionar ao buffer de mudança de nota
+            noteChangeBuffer.push({
+                pitch: noteName,
+                time: currentTime,
+                frequency: targetPitch
+            });
+
+            // Manter apenas últimas 5 detecções no buffer
+            if (noteChangeBuffer.length > 5) {
+                noteChangeBuffer.shift();
+            }
+
+            // Verificar se há mudança consistente de nota (pelo menos 3 das últimas 5 detecções)
+            let noteChanged = false;
+            if (noteChangeBuffer.length >= 3) {
+                const recentPitches = noteChangeBuffer.slice(-3);
+                const majorityPitch = recentPitches[0].pitch;
+                const consistentCount = recentPitches.filter(n => n.pitch === majorityPitch).length;
+
+                // Se 3 das últimas 3 detecções são consistentes e diferentes da atual
+                if (consistentCount >= 3 && currentNoteData && currentNoteData.pitch !== majorityPitch) {
+                    noteChanged = true;
+                    lastStablePitch = majorityPitch;
+                }
+            }
+
+            if (currentNoteData === null) {
+                // Primeira nota
+                currentNoteData = {
+                    pitch: noteName,
+                    startTime: currentTime,
+                    sampleCount: 1
+                };
+                lastStablePitch = noteName;
+            } else if (noteChanged && lastStablePitch !== currentNoteData.pitch) {
+                // Nota mudou consistentemente - salvar a anterior e começar nova
+                const duration = currentTime - currentNoteData.startTime;
+                const noteType = calculateNoteType(duration, 30); // 30 BPM
+
+                // Só adicionar se a duração for significativa (> 50ms)
+                if (duration > 0.05) {
+                    musicalNotes.push({
+                        pitch: currentNoteData.pitch,
+                        type: noteType,
+                        dot: false,
+                        accidental: null
+                    });
+                }
+
+                // Começar nova nota
+                currentNoteData = {
+                    pitch: lastStablePitch,
+                    startTime: currentTime,
+                    sampleCount: 1
+                };
+
+                // Limpar buffer após mudança confirmada
+                noteChangeBuffer = [];
+            } else {
+                // Mesma nota - incrementar contador
+                currentNoteData.sampleCount++;
+            }
+
+            // Calcular correção - aplicar strength como fator de "velocidade"
+            const ratio = targetPitch / pitch;
+            const finalRatio = 1 + (ratio - 1) * strength;
+
+            // Phase vocoder simplificado para melhor qualidade
+            const fftSize = windowSize;
+            const shiftedWindow = phaseVocoder(window, finalRatio, fftSize);
+
+            // Aplicar janela de Hann e adicionar
+            for (let j = 0; j < shiftedWindow.length && i + j < output.length; j++) {
+                const hannWindow = 0.5 * (1 - Math.cos(2 * Math.PI * j / windowSize));
+                output[i + j] += shiftedWindow[j] * hannWindow;
+                overlapAdd[i + j] += hannWindow;
+            }
+        } else {
+            // Sem pitch detectado, copiar original com janela
+            for (let j = 0; j < windowSize && i + j < output.length; j++) {
+                const hannWindow = 0.5 * (1 - Math.cos(2 * Math.PI * j / windowSize));
+                output[i + j] += window[j] * hannWindow;
+                overlapAdd[i + j] += hannWindow;
+            }
+        }
+
+        // Atualizar progresso e dar chance ao navegador respirar
+        windowCount++;
+        if (windowCount % 50 === 0) {
+            updateProgress((windowCount / totalWindows) * 100);
+            await new Promise(resolve => setTimeout(resolve, 0));
+        }
+    }
+
+    // Finalizar a última nota se existir (apenas se duração significativa)
+    if (currentNoteData !== null) {
+        const finalTime = buffer.length / sampleRate;
+        const duration = finalTime - currentNoteData.startTime;
+
+        // Só adicionar se a duração for significativa (> 50ms)
+        if (duration > 0.05) {
+            const noteType = calculateNoteType(duration, 30);
+            musicalNotes.push({
+                pitch: currentNoteData.pitch,
+                type: noteType,
+                dot: false,
+                accidental: null
+            });
+        }
+    }
+
+    // Normalizar pela sobreposição
+    for (let i = 0; i < output.length; i++) {
+        if (overlapAdd[i] > 0) {
+            output[i] /= overlapAdd[i];
+        }
+    }
+
+    // Normalizar amplitude
+    let max = 0;
+    for (let i = 0; i < output.length; i++) {
+        const abs = Math.abs(output[i]);
+        if (abs > max) max = abs;
+    }
+
+    if (max > 0) {
+        const normFactor = 0.95 / max; // Deixa margem para evitar clipping
+        for (let i = 0; i < output.length; i++) {
+            output[i] *= normFactor;
+        }
+    }
+
+    return output;
+}
+
+async function processAudio() {
+    if (!audioBuffer) return;
+
+    const processBtn = document.getElementById('processBtn');
+    const progress = document.getElementById('progress');
+
+    processBtn.disabled = true;
+    progress.style.display = 'block';
+    musicalNotes = []; // Limpar dados anteriores
+    currentNoteData = null; // Limpar dados da nota atual
+    lastNoteStartTime = 0; // Resetar tempo inicial
+    hideError();
+
+    const strengthSlider = document.getElementById('strength');
+    const scaleSelect = document.getElementById('scale');
+
+    const strength = strengthSlider.value / 100;
+    const selectedScale = scales[scaleSelect.value];
+
+    try {
+        // Processar cada canal
+        const channels = [];
+        for (let ch = 0; ch < audioBuffer.numberOfChannels; ch++) {
+            updateProgress(0, `Processando canal ${ch + 1}/${audioBuffer.numberOfChannels}...`);
+            const channelData = audioBuffer.getChannelData(ch);
+            const processed = await autotune(channelData, audioBuffer.sampleRate, strength, selectedScale);
+            channels.push(processed);
+        }
+
+        // Criar buffer de saída
+        processedBuffer = audioContext.createBuffer(
+            channels.length,
+            channels[0].length,
+            audioBuffer.sampleRate
+        );
+
+        channels.forEach((channel, i) => {
+            processedBuffer.copyToChannel(channel, i);
+        });
+
+        updateProgress(100, 'Processamento concluído! Importando notas para a partitura...');
+        setTimeout(() => {
+            progress.style.display = 'none';
+            // Importar as notas detectadas para a partitura
+            importMusicalNotesToScore();
+            processBtn.disabled = false;
+        }, 1000);
+
+    } catch (error) {
+        showError('Erro ao processar: ' + error.message);
+        progress.style.display = 'none';
+        processBtn.disabled = false;
+    }
+}
+
+function importMusicalNotesToScore() {
+    if (musicalNotes.length === 0) {
+        showError('Nenhuma nota musical foi detectada no áudio.');
+        return;
+    }
+
+    // Limpar partitura atual
+    staffs = [[{ clef: 'treble', notes: [] }, { clef: 'bass', notes: [] }]];
+    currentStaffIndex = 0;
+
+    // Organizar notas sequencialmente na clave de Sol (treble)
+    const trebleStaff = staffs[0][0]; // Clave de Sol
+
+    // Converter cada nota detectada para o formato da partitura
+    musicalNotes.forEach(note => {
+        // Converter nome da nota para o formato usado na partitura
+        const convertedNote = convertNoteForScore(note);
+        trebleStaff.notes.push([convertedNote]);
+    });
+
+    // Redesenhar a partitura
+    redraw();
+
+    // Mostrar mensagem de sucesso
+    const successMessage = document.createElement('div');
+    successMessage.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #48bb78;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 1000;
+        font-weight: bold;
+    `;
+    successMessage.textContent = `✓ ${musicalNotes.length} notas importadas para a partitura!`;
+    document.body.appendChild(successMessage);
+
+    setTimeout(() => {
+        document.body.removeChild(successMessage);
+    }, 3000);
+}
+
+function convertNoteForScore(note) {
+    // Converte uma nota do formato autotune para o formato da partitura
+    // Exemplo: "C4" -> "C4", "C#4" -> "C4" com accidental, etc.
+
+    const pitch = note.pitch;
+    let convertedPitch = pitch;
+    let accidental = null;
+
+    // Verificar se há acidente na nota (sustenido ou bemol)
+    if (pitch.includes('#')) {
+        convertedPitch = pitch.replace('#', '');
+        accidental = 'sharp';
+    } else if (pitch.includes('b') || pitch.includes('♭')) {
+        convertedPitch = pitch.replace('b', '').replace('♭', '');
+        accidental = 'flat';
+    }
+
+    return {
+        pitch: convertedPitch,
+        type: note.type,
+        dot: note.dot || false,
+        accidental: accidental
+    };
+}
+
 function getDurationInBeats(noteType, dot, bottomNumber) {
     const baseDurations = {
         "semibreve": 4, "minima": 2, "seminima": 1, "colcheia": 0.5, "semicolcheia": 0.25,
@@ -941,6 +1777,42 @@ function exportToPDF() {
     });
 }
 redraw();
+
+// Event listeners para upload de áudio
+const uploadArea = document.getElementById('uploadArea');
+const fileInput = document.getElementById('audioFile');
+const processBtn = document.getElementById('processBtn');
+const strengthSlider = document.getElementById('strength');
+const strengthValue = document.getElementById('strengthValue');
+
+uploadArea.addEventListener('click', () => fileInput.click());
+
+uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.style.background = '#f0f4ff';
+});
+
+uploadArea.addEventListener('dragleave', () => {
+    uploadArea.style.background = '';
+});
+
+uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.style.background = '';
+    if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        handleFileSelect();
+    }
+});
+
+fileInput.addEventListener('change', handleFileSelect);
+
+strengthSlider.addEventListener('input', (e) => {
+    strengthValue.textContent = e.target.value + '%';
+});
+
+processBtn.addEventListener('click', processAudio);
+
 document.getElementById('time-top').addEventListener('change', (e) => {
     timeSignature.top = parseInt(e.target.value);
     redraw();
