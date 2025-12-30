@@ -12,7 +12,7 @@ export class AI_Medium {
         this.enPassant = enPassant;
         // ===== CONFIGURAÇÃO DO MOTOR =====
         this.config = {
-            maxDepth: 1,              // Profundidade de busca (ajustar conforme CPU)
+            maxDepth: 0,              // Profundidade de busca (ajustar conforme CPU)
             aspirationWindow: 50,     // Janela para aspiration search
             checkExtension: 1,        // Estender busca em xeques
             captureExtension: 0,      // Estender capturas críticas
@@ -52,14 +52,15 @@ export class AI_Medium {
             extensions: 0
         };
         // ===== VALORES DE MATERIAL =====
-        this.PIECE_VALUES = Object.freeze({
-            "♙": 100,  "♟": 100,
-            "♘": 320,  "♞": 320,
-            "♗": 330,  "♝": 330,
-            "♖": 500,  "♜": 500,
-            "♕": 900,  "♛": 900,
-            "♔": 20000, "♚": 20000
-        });
+PIECE_VALUES = {
+    "♙": 100, "♟": 100,
+    "♘": 320, "♞": 320,
+    "♗": 330, "♝": 330,
+    "♖": 500, "♜": 500,
+    "♕": 900, "♛": 900,
+    "♔": 20000, "♚": 20000
+};
+
         // ===== PIECE-SQUARE TABLES (PST) =====
         this.pst = this.initializePST();
         // ===== MÁSCARAS DE CASAS (para cálculo rápido) =====
@@ -534,19 +535,20 @@ export class AI_Medium {
     // =====================================================
     // ENCONTRAR PEÇAS AMEAÇADAS
     // =====================================================
-    getThreatenedPieces(color) {
-        const enemy = this.opponent(color);
-        const threatened = [];
-        for (let sq = 0; sq < 64; sq++) {
-            const piece = this.board.board[sq];
-            if (!piece || piece.cor !== color) continue;
-            const attackers = this.getAttackers(sq, enemy);
-            if (attackers.length > 0) {
-                threatened.push({ sq, piece, attackers });
-            }
+getThreatenedPieces(color) {
+    const enemy = this.opponent(color);
+    const threatened = [];
+    for (let sq = 0; sq < 64; sq++) {
+        const piece = this.board.board[sq];
+        if (!piece || piece.cor !== color) continue;
+        const attackers = this.getAttackers(sq, enemy);
+        if (attackers.length > 0) {
+            threatened.push({ sq, piece, attackers });
         }
-        return threatened;
     }
+    return threatened;
+}
+
     // =====================================================
     // ENCONTRAR CAPTURAS GRÁTIS (SEM RISCO)
     // =====================================================
@@ -570,121 +572,100 @@ export class AI_Medium {
     // =====================================================
     // ENCONTRAR PEÇAS EXPOSTAS (EM CASAS ATACADAS)
     // =====================================================
-    getExposedPieces(myColor, enemyColor) {
-        const exposed = [];
-        for (let sq = 0; sq < 64; sq++) {
-            const piece = this.board.board[sq];
-            if (!piece || piece.cor !== myColor) continue;
-            const attackers = this.getAttackers(sq, enemyColor);
-            const defenders = this.getAttackers(sq, myColor);
-            // Exposta se: atacada E (sem defesa OU valor maior que atacante)
-            if (attackers.length > 0 && defenders.length === 0) {
-                const pieceValue = this.PIECE_VALUES[piece.tipo];
-                const smallestAttacker = Math.min(
-                    ...attackers.map(a => this.PIECE_VALUES[this.board.board[a]?.tipo])
-                );
-                if (pieceValue > smallestAttacker) {
-                    exposed.push(sq);
-                }
+getExposedPieces(myColor, enemyColor) {
+    const exposed = [];
+    for (let sq = 0; sq < 64; sq++) {
+        const piece = this.board.board[sq];
+        if (!piece || piece.cor !== myColor) continue;
+        const attackers = this.getAttackers(sq, enemyColor);
+        const defenders = this.getAttackers(sq, myColor);
+        if (attackers.length > 0 && defenders.length === 0) {
+            const pieceValue = this.PIECE_VALUES[piece.tipo];
+            const smallestAttacker = Math.min(
+                ...attackers.map(a => this.PIECE_VALUES[this.board.board[a]?.tipo])
+            );
+            if (pieceValue > smallestAttacker) {
+                exposed.push(sq);
             }
         }
-        return exposed;
     }
+    return exposed;
+}
+
     // =====================================================
     // AVALIAÇÃO DE AMEAÇAS (FIXED - SEM DOUBLE COUNTING)
     // =====================================================
-    evaluateThreats(myColor, enemyColor) {
-        let score = 0;
-        for (let sq = 0; sq < 64; sq++) {
-            const piece = this.board.board[sq];
-            if (!piece) continue;
-            const value = this.PIECE_VALUES[piece.tipo];
-            const attackers = this.getAttackers(sq, this.opponent(piece.cor));
-            const defenders = this.getAttackers(sq, piece.cor);
-            // Peça não atacada → ignorar
-            if (attackers.length === 0) continue;
-            // ===== CÁLCULO DE TROCA (SEE - Static Exchange Evaluation) =====
-            const see = this.staticExchangeEval(sq, piece.cor);
-            if (piece.cor === myColor) {
-                // Minha peça atacada
-                if (see < 0) {
-                    // Troca desfavorável
-                    console.log(`   ⚠️ Peça ${piece.tipo} em ${this.notation(sq)} em risco | SEE: ${see}`);
-                    score += see; // see já é negativo
-                } else if (value >= 900 && attackers.length > 0) {
-                    // Rainha exposta (sempre ruim)
-                    console.log(`   ⚠️ Rainha ${piece.tipo} em ${this.notation(sq)} exposta`);
-                    score -= 80;
-                }
-            } else {
-                // Peça inimiga atacada
-                if (see > 0) {
-                    // Posso ganhar material
-                    console.log(`   ✅ Posso capturar ${piece.tipo} em ${this.notation(sq)} | Ganho: +${see}`);
-                    score += see * 0.5; // Bônus por ameaça
-                }
-            }
+evaluateThreats(myColor, enemyColor) {
+    let score = 0;
+    for (let sq = 0; sq < 64; sq++) {
+        const piece = this.board.board[sq];
+        if (!piece) continue;
+        const value = this.PIECE_VALUES[piece.tipo];
+        const attackers = this.getAttackers(sq, this.opponent(piece.cor));
+        const defenders = this.getAttackers(sq, piece.cor);
+        if (attackers.length === 0) continue;
+
+        const see = this.staticExchangeEval(sq, piece.cor);
+        if (piece.cor === myColor) {
+            if (see < 0) score += see;
+            else if (value >= 900 && attackers.length > 0) score -= 80;
+        } else {
+            if (see > 0) score += see * 0.5;
         }
-        return score;
     }
+    return score;
+}
+
     // =====================================================
     // STATIC EXCHANGE EVALUATION (SEE)
     // Calcula resultado de sequência de trocas
     // =====================================================
-	staticExchangeEval(square, defendingColor) {
-		const board = this.board.board;
-		const attackedPiece = board[square];
-		if (!attackedPiece) return 0;
-		const attackerColor = this.opponent(defendingColor);
-		// ===== COLETAR ATACANTES INICIAIS =====
-		let attackers = {
-			[attackerColor]: this.getAttackers(square, attackerColor).slice(),
-			[defendingColor]: this.getAttackers(square, defendingColor).slice()
-		};
-		// Remover a peça que está sendo capturada da lista defensora
-		attackers[defendingColor] = attackers[defendingColor]
-			.filter(sq => sq !== square);
-		// ===== GANHOS =====
-		let gain = [];
-		gain[0] = this.PIECE_VALUES[attackedPiece.tipo];
-		let side = attackerColor;
-		let depth = 0;
-		while (true) {
-			// Menor atacante disponível
-			const from = this.getLeastValuableAttacker(
-				attackers[side]
-			);
-			if (from === null) break;
-			depth++;
-			const piece = board[from];
-			gain[depth] =
-				this.PIECE_VALUES[piece.tipo] - gain[depth - 1];
-			// Remover atacante usado
-			attackers[side] = attackers[side].filter(sq => sq !== from);
-			// Alternar lado
-			side = this.opponent(side);
-		}
-		// ===== MINIMAX REVERSO =====
-		for (let i = gain.length - 1; i > 0; i--) {
-			gain[i - 1] = -Math.max(-gain[i - 1], gain[i]);
-		}
-		return gain[0];
-	}
-	getLeastValuableAttacker(attackerSquares) {
-		if (attackerSquares.length === 0) return null;
-		let bestSq = null;
-		let bestValue = Infinity;
-		for (const sq of attackerSquares) {
-			const piece = this.board.board[sq];
-			if (!piece) continue;
-			const value = this.PIECE_VALUES[piece.tipo];
-			if (value < bestValue) {
-				bestValue = value;
-				bestSq = sq;
-			}
-		}
-		return bestSq;
-	}
+staticExchangeEval(square, defendingColor) {
+    const board = this.board.board;
+    const attackedPiece = board[square];
+    if (!attackedPiece) return 0;
+    const attackerColor = this.opponent(defendingColor);
+
+    let attackers = {
+        [attackerColor]: this.getAttackers(square, attackerColor).slice(),
+        [defendingColor]: this.getAttackers(square, defendingColor).slice()
+    };
+    attackers[defendingColor] = attackers[defendingColor].filter(sq => sq !== square);
+
+    let gain = [];
+    gain[0] = this.PIECE_VALUES[attackedPiece.tipo];
+    let side = attackerColor, depth = 0;
+
+    while (true) {
+        const from = this.getLeastValuableAttacker(attackers[side]);
+        if (from === null) break;
+        depth++;
+        const piece = board[from];
+        gain[depth] = this.PIECE_VALUES[piece.tipo] - gain[depth - 1];
+        attackers[side] = attackers[side].filter(sq => sq !== from);
+        side = this.opponent(side);
+    }
+
+    for (let i = gain.length - 1; i > 0; i--) {
+        gain[i - 1] = -Math.max(-gain[i - 1], gain[i]);
+    }
+    return gain[0];
+}
+getLeastValuableAttacker(attackerSquares) {
+    if (attackerSquares.length === 0) return null;
+    let bestSq = null, bestValue = Infinity;
+    for (const sq of attackerSquares) {
+        const piece = this.board.board[sq];
+        if (!piece) continue;
+        const value = this.PIECE_VALUES[piece.tipo];
+        if (value < bestValue) {
+            bestValue = value;
+            bestSq = sq;
+        }
+    }
+    return bestSq;
+}
+
     // =====================================================
     // ENCONTRAR MENOR ATACANTE
     // =====================================================
@@ -705,75 +686,73 @@ export class AI_Medium {
     // =====================================================
     // AVALIAÇÕES AUXILIARES
     // =====================================================
-    evaluatePawnStructure(color) {
-        let score = 0;
-        const pawns = this.getPieces(color, ["♙", "♟"]);
-        // Peões dobrados
-        const files = Array(8).fill(0);
-        for (const sq of pawns) {
-            files[sq % 8]++;
+evaluatePawnStructure(color) {
+    let score = 0;
+    const pawns = this.getPieces(color, ["♙", "♟"]);
+    const files = Array(8).fill(0);
+    for (const sq of pawns) files[sq % 8]++;
+    score -= files.filter(c => c > 1).length * 15;
+
+    for (const sq of pawns) {
+        const file = sq % 8;
+        if (file > 0 && files[file - 1] === 0 && file < 7 && files[file + 1] === 0) {
+            score -= 20;
         }
-        score -= files.filter(c => c > 1).length * 15;
-        // Peões isolados
-        for (const sq of pawns) {
-            const file = sq % 8;
-            if (file > 0 && files[file - 1] === 0 && file < 7 && files[file + 1] === 0) {
-                score -= 20;
+    }
+
+    for (const sq of pawns) {
+        if (this.isPassedPawn(sq, color)) {
+            const rank = Math.floor(sq / 8);
+            const bonus = color === "brancas" ? (7 - rank) * 10 : rank * 10;
+            score += bonus;
+        }
+    }
+    return score;
+}
+
+evaluateKingSafety(color, phase) {
+    if (phase === 2) return 0;
+    const kingSquare = this.findKing(color);
+    if (kingSquare === null) return -1000;
+    let safety = 0;
+    const rank = Math.floor(kingSquare / 8);
+    const file = kingSquare % 8;
+    if (this.EXTENDED_CENTER.has(kingSquare)) safety -= 50;
+    const direction = color === "brancas" ? -8 : 8;
+    for (let f = Math.max(0, file - 1); f <= Math.min(7, file + 1); f++) {
+        const pawnSq = kingSquare + direction + (f - file);
+        if (pawnSq >= 0 && pawnSq < 64) {
+            const piece = this.board.board[pawnSq];
+            if (piece && (piece.tipo === "♙" || piece.tipo === "♟") && piece.cor === color) {
+                safety += 10;
             }
         }
-        // Peões passados
-        for (const sq of pawns) {
-            if (this.isPassedPawn(sq, color)) {
-                const rank = Math.floor(sq / 8);
-                const bonus = color === "brancas" ? (7 - rank) * 10 : rank * 10;
-                score += bonus;
-            }
-        }
-        return score;
     }
-    evaluateKingSafety(color, phase) {
-        if (phase === 2) return 0; // Não importa no endgame
-        const kingSquare = this.findKing(color);
-        if (kingSquare === null) return -1000;
-        let safety = 0;
-        const rank = Math.floor(kingSquare / 8);
-        const file = kingSquare % 8;
-        // Rei no centro = perigo
-        if (this.EXTENDED_CENTER.has(kingSquare)) safety -= 50;
-        // Peões na frente do rei
-        const direction = color === "brancas" ? -8 : 8;
-        for (let f = Math.max(0, file - 1); f <= Math.min(7, file + 1); f++) {
-            const pawnSq = kingSquare + direction + (f - file);
-            if (pawnSq >= 0 && pawnSq < 64) {
-                const piece = this.board.board[pawnSq];
-                if (piece && (piece.tipo === "♙" || piece.tipo === "♟") && piece.cor === color) {
-                    safety += 10;
-                }
-            }
-        }
-        return safety;
+    return safety;
+}
+
+evaluateCenterControl(color) {
+    let control = 0;
+    for (const sq of this.CENTER_SQUARES) {
+        const attackers = this.getAttackers(sq, color);
+        control += attackers.length;
     }
-    evaluateCenterControl(color) {
-        let control = 0;
-        for (const sq of this.CENTER_SQUARES) {
-            const attackers = this.getAttackers(sq, color);
-            control += attackers.length;
+    return control;
+}
+
+evaluateDevelopment(color) {
+    let developed = 0;
+    const backRank = color === "brancas" ? this.BACK_RANK_WHITE : this.BACK_RANK_BLACK;
+    for (const sq of backRank) {
+        const piece = this.board.board[sq];
+        if (!piece) continue;
+        if (piece.tipo === "♘" || piece.tipo === "♞" || piece.tipo === "♗" || piece.tipo === "♝") {
+            developed--; // Penalidade por não desenvolver
         }
-        return control;
     }
-    evaluateDevelopment(color) {
-        let developed = 0;
-        const backRank = color === "brancas" ? this.BACK_RANK_WHITE : this.BACK_RANK_BLACK;
-        for (const sq of backRank) {
-            const piece = this.board.board[sq];
-            if (!piece) continue;
-            if (piece.tipo === "♘" || piece.tipo === "♞" || 
-                piece.tipo === "♗" || piece.tipo === "♝") {
-                developed--; // Penalidade por não desenvolver
-            }
-        }
-        return developed;
-    }
+    return developed;
+}
+
     hasBishopPair(color) {
         const bishops = this.getPieces(color, ["♗", "♝"]);
         if (bishops.length < 2) return false;
@@ -823,7 +802,7 @@ export class AI_Medium {
 					reasons.push(`💎 Captura LUCRATIVA ${this.board.board[move.to]?.tipo} | Ganho: +${see}`);
 				} else if (see === 0) {
 					// Troca justa
-					score += 100 + victim;
+					score += 10000 + victim;
 					reasons.push(`⚖️ Troca justa ${this.board.board[move.to]?.tipo}(${victim})`);
 				} else {
 					// Captura perdedora
@@ -1146,8 +1125,5 @@ export class AI_Medium {
         console.log(`⚔️ Agressividade ajustada para nível ${level}`);
     }
 }
-
-
-
 
 
