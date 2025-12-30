@@ -12,7 +12,7 @@ export class AI_Medium {
         this.enPassant = enPassant;
         // ===== CONFIGURAÇÃO DO MOTOR =====
         this.config = {
-            maxDepth: 0,              // Profundidade de busca (ajustar conforme CPU)
+            maxDepth: 1,              // Profundidade de busca (ajustar conforme CPU)
             aspirationWindow: 50,     // Janela para aspiration search
             checkExtension: 1,        // Estender busca em xeques
             captureExtension: 0,      // Estender capturas críticas
@@ -1146,6 +1146,7 @@ export class AI_Medium {
         console.log(`⚔️ Agressividade ajustada para nível ${level}`);
     }
 }
+
 
 
 
