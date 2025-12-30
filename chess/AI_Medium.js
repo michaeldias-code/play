@@ -823,7 +823,7 @@ export class AI_Medium {
 					reasons.push(`💎 Captura LUCRATIVA ${this.board.board[move.to]?.tipo} | Ganho: +${see}`);
 				} else if (see === 0) {
 					// Troca justa
-					score += 10000 + victim;
+					score += 100 + victim;
 					reasons.push(`⚖️ Troca justa ${this.board.board[move.to]?.tipo}(${victim})`);
 				} else {
 					// Captura perdedora
@@ -1146,6 +1146,7 @@ export class AI_Medium {
         console.log(`⚔️ Agressividade ajustada para nível ${level}`);
     }
 }
+
 
 
 
