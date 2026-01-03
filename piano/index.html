@@ -599,7 +599,23 @@ window.addEventListener("blur", () => {
     pressedKeys.clear();
     Object.keys(active).forEach(code => stopNote(code));
 });
+
+	/* ================= DETECTAR MUDANÇA DE ORIENTAÇÃO ================= */
+
+let lastOrientation = window.matchMedia("(orientation: portrait)").matches ? "portrait" : "landscape";
+
+window.addEventListener("resize", () => {
+    const currentOrientation = window.matchMedia("(orientation: portrait)").matches ? "portrait" : "landscape";
+    
+    // Se mudou de portrait para landscape (usuário virou o celular)
+    if (lastOrientation === "portrait" && currentOrientation === "landscape") {
+        location.reload();
+    }
+    
+    lastOrientation = currentOrientation;
+});
 </script>
 
 </body>
 </html>
+
