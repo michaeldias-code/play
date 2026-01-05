@@ -215,6 +215,7 @@
         /* Utilitários */
         .flex-row { display: flex; gap: 8px; align-items: center; }
         .flex-grow { flex: 1; }
+        .mobile-only { display: none; }
 
         /* Estilos originais preservados/adaptados */
         .upload-area {
@@ -247,14 +248,82 @@
             justify-content: center;
         }
         .modal.active { display: flex; }
-        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 350px; }
+        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 400px; max-width: 90vw; }
         .modal-buttons { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
 
         #staff-indicator { font-size: 12px; font-weight: bold; color: #1a73e8; }
 
         @media (max-width: 768px) {
-            .app-container { flex-direction: column; }
-            .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid #e0e0e0; }
+            .app-container { flex-direction: column; height: 100vh; }
+            .sidebar { 
+                width: 100%; 
+                height: auto; 
+                max-height: 180px;
+                border-right: none; 
+                border-bottom: 1px solid #e0e0e0; 
+                padding: 10px;
+                flex-direction: row;
+                overflow-x: auto;
+                overflow-y: hidden;
+                white-space: nowrap;
+                gap: 15px;
+                display: flex;
+            }
+            .sidebar-section {
+                min-width: auto;
+                flex-shrink: 0;
+            }
+            .sidebar-section h3 {
+                font-size: 9px;
+                margin-bottom: 5px;
+            }
+            .button-list {
+                flex-direction: row;
+                gap: 5px;
+            }
+            .button-grid {
+                display: flex;
+                flex-direction: row;
+                gap: 5px;
+            }
+            .top-bar {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 10px;
+                gap: 10px;
+                height: auto;
+                overflow-y: auto;
+            }
+            .meta-inputs {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .meta-inputs .flex-row {
+                justify-content: space-between;
+            }
+            .meta-inputs input {
+                width: 60% !important;
+            }
+            .header-title h1 {
+                font-size: 16px;
+            }
+            /* Esconder texto longo nos botões em telas pequenas */
+            .btn-text { display: none; }
+            
+            button, .file-upload-label {
+                padding: 8px;
+                min-width: 40px;
+                width: auto !important;
+                justify-content: center;
+                display: inline-flex;
+                align-items: center;
+                margin: 0 !important;
+            }
+            
+            .score-viewport {
+                flex: 1;
+                overflow: auto;
+            }
         }
     </style>
 </head>
@@ -265,15 +334,15 @@
             <div class="sidebar-section">
                 <h3>Modo de Edição</h3>
                 <div class="button-list">
-                    <button id="note-mode-btn" class="selected">🎵 Melodia (Nota)</button>
-                    <button id="rest-mode-btn">𝄽 Pausa</button>
-                    <button id="harmony-btn">🎹 Harmonia</button>
+                    <button id="note-mode-btn" class="selected">🎵 <span class="btn-text">Melodia</span></button>
+                    <button id="rest-mode-btn">𝄽 <span class="btn-text">Pausa</span></button>
+                    <button id="harmony-btn">🎹 <span class="btn-text">Harmonia</span></button>
                     <div class="flex-row" style="margin-top: 5px;">
-                        <button id="play-btn" class="btn-primary flex-grow" title="Tocar Partitura (Atalho: Espaço)">▶ Tocar</button>
+                        <button id="play-btn" class="btn-primary flex-grow" title="Tocar Partitura (Atalho: Espaço)">▶ <span class="btn-text">Tocar</span></button>
                         <button id="undo-btn" class="btn-warning" title="Desfazer (Atalho: Ctrl+Z)">↶</button>
                         <button id="clear-btn" class="btn-danger" title="Limpar Tudo">✕</button>
                     </div>
-                    <button id="how-to-edit-btn" style="margin-top: 8px; width: 100%; background: #e8f0fe; color: #1a73e8; border-color: #1a73e8; font-weight: bold;">📝 Como Editar</button>
+                    <button id="how-to-edit-btn" style="margin-top: 8px; width: 100%; background: #e8f0fe; color: #1a73e8; border-color: #1a73e8; font-weight: bold;">📝 <span class="btn-text">Ajuda</span></button>
                 </div>
             </div>
 
@@ -287,7 +356,7 @@
             </div>
 
             <div class="sidebar-section">
-                <h3>Armadura de Clave</h3>
+                <h3>Armadura</h3>
                 <div class="button-grid">
                     <button id="key-sharp-up" title="Mais Sustenidos">♯+</button>
                     <button id="key-sharp-down" title="Menos Sustenidos">♯-</button>
@@ -300,25 +369,18 @@
             <div class="sidebar-section">
                 <h3>Estrutura</h3>
                 <div class="button-list">
-                    <button id="add-system-btn">➕ Novo Sistema</button>
-                    <button id="add-staff-btn">➕ Nova Pauta</button>
-                    <button id="finish-edit-btn" class="btn-success">✅ Finalizar Edição</button>
+                    <button id="add-system-btn">➕ <span class="btn-text">Sistema</span></button>
+                    <button id="add-staff-btn">➕ <span class="btn-text">Pauta</span></button>
+                    <button id="finish-edit-btn" class="btn-success">✅ <span class="btn-text">Finalizar</span></button>
                 </div>
             </div>
 
             <div class="sidebar-section">
-                <h3>Ações de Arquivo</h3>
+                <h3>Arquivos</h3>
                 <div class="button-list">
-                    <label for="import-file" class="file-upload-label" style="width: 100%; border-color: #dadce0;">📥 Abrir JSON</label>
+                    <label for="import-file" class="file-upload-label" style="width: 100%; border-color: #dadce0;">📥 <span class="btn-text">Abrir</span></label>
                     <input type="file" id="import-file" accept=".json" style="display: none;">
-                    <button id="download-btn" class="btn-primary">💾 Exportar...</button>
-                </div>
-            </div>
-
-            <div class="sidebar-section">
-                <h3>Suporte</h3>
-                <div class="button-list">
-                    <button id="help-btn" class="btn-warning">❓ Como Funciona?</button>
+                    <button id="download-btn" class="btn-primary">💾 <span class="btn-text">Exportar</span></button>
                 </div>
             </div>
 
@@ -338,21 +400,21 @@
                 
                 <div class="meta-inputs">
                     <div class="flex-row">
-                        <label>Título:</label>
+                        <label title="Título"><span class="btn-text">Título:</span><span class="mobile-only">🏷️</span></label>
                         <input type="text" id="title-input" placeholder="Título" value="Minha Composição" style="width: 180px;">
                     </div>
                     <div class="flex-row">
-                        <label>Autor:</label>
+                        <label title="Autor"><span class="btn-text">Autor:</span><span class="mobile-only">👤</span></label>
                         <input type="text" id="composer-input" placeholder="Compositor" style="width: 140px;">
                     </div>
                     <div class="flex-row">
-                        <label>Fórmula:</label>
+                        <label title="Fórmula"><span class="btn-text">Fórmula:</span><span class="mobile-only">⏱️</span></label>
                         <input type="number" id="time-top" min="1" max="16" value="4" style="width: 45px;">
                         <span>/</span>
                         <input type="number" id="time-bottom" min="1" max="16" value="4" style="width: 45px;">
                     </div>
                     <div class="flex-row">
-                        <label>BPM:</label>
+                        <label title="BPM"><span class="btn-text">BPM:</span><span class="mobile-only">⏲️</span></label>
                         <input type="number" id="tempo-input" min="40" max="240" value="120" style="width: 60px;">
                     </div>
                 </div>
@@ -503,9 +565,9 @@ const canvas = document.getElementById("score");
 const ctx = canvas.getContext("2d");
 
 const SPACING = 50;
-const MIN_SCORE_WIDTH = 900;
-let CLEF_MARGIN = 160;
-let timeSignatureX = 140; // Posição horizontal do compasso (4/4)
+const MIN_SCORE_WIDTH = window.innerWidth < 768 ? 600 : 900;
+let CLEF_MARGIN = 130;
+let timeSignatureX = 110; // Posição horizontal do compasso (4/4)
 const SYSTEM_SPACING = 400; // Espaçamento entre sistemas
 const STAFF_HEIGHT = 80;    // Altura das 5 linhas
 const STAFF_GAP = 100;      // Espaço entre pautas de um mesmo sistema
@@ -1407,8 +1469,8 @@ function updateDynamicMargins() {
     const keySignatureWidth = keyAccidentals > 0 ? (keyAccidentals * 12) : 0;
     
     // Posições base originais
-    const baseTimeSignatureX = 140;
-    const baseClefMargin = 160;
+    const baseTimeSignatureX = 110;
+    const baseClefMargin = 130;
     
     // Se a armadura avançar muito, empurramos o compasso
     // A armadura termina em 80 + keySignatureWidth
@@ -1612,6 +1674,8 @@ function redraw() {
                 
                 chord.forEach(note => {
                     if (note.type.startsWith('pausa-')) {
+                        // Não mostrar pausas na clave de fá durante a edição (pedido do usuário)
+                        if (isEditing && staff.clef === 'bass') return;
                         drawRest(note.type, drawX, staffYBase);
                     } else {
                         const noteYPos = noteYMapByClef(staff.clef)[note.pitch] + staffYBase;
@@ -2187,10 +2251,6 @@ document.getElementById('export-modal').addEventListener('click', (e) => {
 });
 
 // Help Modal Events
-document.getElementById('help-btn').addEventListener('click', () => {
-    document.getElementById('help-modal').classList.add('active');
-});
-
 document.getElementById('help-close').addEventListener('click', () => {
     document.getElementById('help-modal').classList.remove('active');
 });
@@ -2262,6 +2322,8 @@ canvas.addEventListener('mousedown', async (e) => {
         if (distX < 20) {
             // Verificar Y se não for pausa
             if (chord[0].type.startsWith('pausa-')) {
+                // Durante a edição, não interagimos com pausas na clave de fá (estão ocultas)
+                if (isEditing && staff.clef === 'bass') return;
                 clickedChord = chord;
             } else {
                 // Verificar se clicou em qualquer nota do acorde com sensibilidade ajustada
@@ -2346,32 +2408,72 @@ canvas.addEventListener('mousedown', async (e) => {
     };
     
     if (isHarmonyMode) {
-        // Encontrar o acorde mais próximo no eixo X
+        // Encontrar o acorde mais próximo no eixo X em QUALQUER pauta do sistema
         let nearestChord = null;
         let minXDist = Infinity;
+        let targetIndex = -1;
+        let referenceStaff = null;
         
-        staff.notes.forEach(chord => {
-            const chordX = isEditing ? (chord[0].x || 0) : (CLEF_MARGIN + staff.notes.indexOf(chord) * SPACING);
-            const dist = Math.abs(chordX - clickX);
-            if (dist < minXDist) {
-                minXDist = dist;
-                nearestChord = chord;
-            }
+        system.staves.forEach(s => {
+            s.notes.forEach((chord, idx) => {
+                const chordX = isEditing ? (chord[0].x || 0) : (CLEF_MARGIN + idx * SPACING);
+                const dist = Math.abs(chordX - clickX);
+                if (dist < minXDist) {
+                    minXDist = dist;
+                    nearestChord = chord;
+                    targetIndex = idx;
+                    referenceStaff = s;
+                }
+            });
         });
 
         if (nearestChord && minXDist < 30) {
-            const isPitchPresent = nearestChord.some(n =>
-                n.pitch === bestPitch && n.accidental === selectedAccidental
-            );
-            if (!isPitchPresent) {
-                newNote.x = nearestChord[0].x;
-                newNote.type = nearestChord[0].type;
+            // Se já existe um acorde na pauta ATUAL nesse índice
+            let currentStaffChord = staff.notes[targetIndex];
+
+            if (currentStaffChord) {
+                const isRest = currentStaffChord[0].type.startsWith('pausa-');
+                if (isRest) {
+                    // Substituir pausa pela nota
+                    newNote.x = currentStaffChord[0].x;
+                    newNote.type = currentStaffChord[0].type.replace('pausa-', '');
+                    newNote.dot = currentStaffChord[0].dot;
+                    staff.notes[targetIndex] = [newNote];
+                    undoStack.push({ type: 'add-chord', staff: staff });
+                } else {
+                    // Adicionar ao acorde existente
+                    const isPitchPresent = currentStaffChord.some(n =>
+                        n.pitch === bestPitch && n.accidental === selectedAccidental
+                    );
+                    if (!isPitchPresent) {
+                        newNote.x = currentStaffChord[0].x;
+                        newNote.type = currentStaffChord[0].type;
+                        newNote.dot = currentStaffChord[0].dot;
+                        currentStaffChord.push(newNote);
+                        undoStack.push({ type: 'add-note', chord: currentStaffChord, note: newNote });
+                    }
+                }
+            } else {
+                // Se não houver nada nesse índice na pauta atual, preenchemos com pausas até chegar lá
+                while (staff.notes.length < targetIndex) {
+                    staff.notes.push([{
+                        type: "pausa-seminima",
+                        dot: false,
+                        pitch: null,
+                        accidental: null,
+                        x: CLEF_MARGIN + staff.notes.length * SPACING
+                    }]);
+                }
+                // Adiciona a nota no índice alvo, herdando a duração da referência
+                newNote.x = isEditing ? (nearestChord[0].x || 0) : (CLEF_MARGIN + targetIndex * SPACING);
+                const refType = nearestChord[0].type;
+                newNote.type = refType.startsWith('pausa-') ? refType.replace('pausa-', '') : refType;
                 newNote.dot = nearestChord[0].dot;
-                nearestChord.push(newNote);
-                undoStack.push({ type: 'add-note', chord: nearestChord, note: newNote });
+                staff.notes[targetIndex] = [newNote];
+                undoStack.push({ type: 'add-chord', staff: staff });
             }
         } else {
-            // Se não houver nota próxima, cria um novo acorde (permite iniciar harmonia em pauta vazia)
+            // Se não houver nota próxima em nenhuma pauta, cria um novo acorde no final da pauta atual
             newNote.x = CLEF_MARGIN + staff.notes.length * SPACING;
             staff.notes.push([newNote]);
             undoStack.push({ type: 'add-chord', staff: staff });
