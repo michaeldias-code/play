@@ -290,23 +290,44 @@
                 flex-direction: column;
                 align-items: stretch;
                 padding: 10px;
-                gap: 10px;
+                gap: 12px;
                 height: auto;
-                overflow-y: auto;
+                overflow-y: visible;
             }
             .meta-inputs {
                 flex-direction: column;
                 gap: 8px;
+                background: #f8f9fa;
+                padding: 12px;
+                border-radius: 8px;
+                border: 1px solid #e0e0e0;
             }
             .meta-inputs .flex-row {
-                justify-content: space-between;
+                justify-content: flex-start;
+                width: 100%;
+                gap: 10px;
+            }
+            .meta-inputs label {
+                width: 30px;
+                text-align: center;
+                flex-shrink: 0;
             }
             .meta-inputs input {
-                width: 60% !important;
+                flex: 1;
+                width: auto !important;
+                min-width: 0;
+            }
+            .header-title {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0 5px;
             }
             .header-title h1 {
-                font-size: 16px;
+                font-size: 18px;
+                margin: 0;
             }
+            .mobile-only { display: inline-block; }
             /* Esconder texto longo nos botões em telas pequenas */
             .btn-text { display: none; }
             
@@ -323,6 +344,17 @@
             .score-viewport {
                 flex: 1;
                 overflow: auto;
+            }
+            .audio-import-content > div {
+                grid-template-columns: 1fr !important;
+                gap: 15px !important;
+            }
+            .settings {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .audio-import-compact {
+                margin: 10px 10px 0;
             }
         }
     </style>
