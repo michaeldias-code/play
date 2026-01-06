@@ -250,6 +250,21 @@
         .modal.active { display: flex; }
         .modal-content { background: white; padding: 25px; border-radius: 8px; width: 400px; max-width: 90vw; }
         .modal-buttons { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .hymn-item {
+            padding: 12px;
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        .hymn-item:hover {
+            background: #e8f0fe;
+            border-color: #1a73e8;
+            color: #1a73e8;
+        }
 
         #staff-indicator { font-size: 12px; font-weight: bold; color: #1a73e8; }
 
@@ -395,6 +410,14 @@
             </div>
 
             <div class="sidebar-section">
+                <h3>Elementos</h3>
+                <div class="button-grid">
+                    <button id="firmata-mode-btn" title="Fermata">𝄐</button>
+                    <button id="ligadura-mode-btn" title="Ligadura">⁀</button>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
                 <h3>Armadura</h3>
                 <div class="button-grid">
                     <button id="key-sharp-up" title="Mais Sustenidos">♯+</button>
@@ -417,6 +440,7 @@
             <div class="sidebar-section">
                 <h3>Arquivos</h3>
                 <div class="button-list">
+                    <button id="hymns-btn" class="btn-secondary" style="width: 100%; margin-bottom: 5px;">📖 <span class="btn-text">Hinos</span></button>
                     <label for="import-file" class="file-upload-label" style="width: 100%; border-color: #dadce0;">📥 <span class="btn-text">Abrir</span></label>
                     <input type="file" id="import-file" accept=".json" style="display: none;">
                     <button id="download-btn" class="btn-primary">💾 <span class="btn-text">Exportar</span></button>
@@ -546,6 +570,8 @@
 
                 <p style="margin-top: 10px;"><strong>🎹 Harmonia:</strong> Ative este modo para sobrepor notas na mesma posição horizontal, criando acordes.</p>
 
+                <p style="margin-top: 10px;"><strong>𝄐 Elementos (Firmata e Ligadura):</strong> Ative o modo correspondente e clique em uma nota existente para adicionar/remover o elemento. A Ligadura conecta a nota clicada à próxima nota.</p>
+
                 <p style="margin-top: 10px;"><strong>⬜ Apagar:</strong> Ative este modo para remover notas ou pausas clicando nelas. Em acordes (harmonia), você pode remover notas individuais.</p>
 
                 <p style="margin-top: 10px;"><strong>♯/♭ Acidentes:</strong> Selecione o acidente antes de clicar na pauta. Ele será aplicado à próxima nota que você inserir.</p>
@@ -556,6 +582,19 @@
             </div>
             <div class="modal-buttons" style="margin-top: 20px;">
                 <button id="help-close" class="btn-primary" style="width: 100%;">Entendi!</button>
+            </div>
+        </div>
+    </div>
+    <div id="hymns-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 15px; color: #1a73e8;">📖 Selecionar Hino</h2>
+            <div class="modal-buttons" id="hymns-list">
+                <div class="hymn-item" onclick="loadHymn('src/hymns/1/hino1.json')">
+                    <strong>Hino 1</strong> - Cristo, meu Mestre...
+                </div>
+            </div>
+            <div class="modal-buttons" style="margin-top: 20px;">
+                <button id="hymns-close" style="background: #ccc; width: 100%;">Fechar</button>
             </div>
         </div>
     </div>
@@ -573,6 +612,8 @@ let currentStaffIndex = 0; // Index da pauta dentro do sistema
 let currentClef = 'treble';
 let isNoteMode = true;
 let isEraseMode = false;
+let isFirmataMode = false;
+let isLigaduraMode = false;
 let isEditing = true;
 const durationSequence = [
     { type: 'semicolcheia', dot: false },
@@ -627,17 +668,13 @@ const noteYBass = {
     "G2": 80, "F2": 90, "E2": 100, "D2": 110, "C2": 120, "B1": 130, "A1": 140, "G1": 150, "F1": 160, "E1": 170, "D1": 180
 };
 const freqs = {
-    "A0": 27.50, "B0": 30.87, "C1": 32.70, "D1": 36.71, "E1": 41.20, "F1": 43.65, "G1": 49.00,
-    "A1": 55.00, "B1": 61.74, "C2": 65.41, "D2": 73.42, "E2": 82.41, "F2": 87.31, "G2": 98.00,
-    "A2": 110.00, "B2": 123.47, "C3": 130.81, "D3": 146.83, "E3": 164.81, "F3": 174.61, "G3": 196.00,
-    "A3": 220.00, "B3": 246.94, "C4": 261.63, "D4": 293.66, "E4": 329.63, "F4": 349.23, "G4": 392.00,
-    "A4": 440.00, "B4": 493.88, "C5": 523.25, "D5": 587.33, "E5": 659.25,
-    "F5": 698.46, "G5": 783.99, "A5": 880.00, "B5": 987.77, "C6": 1046.50
-};
-const noteDurations = {
-    "semibreve": 2.0, "minima": 1.0, "seminima": 0.5, "colcheia": 0.25, "semicolcheia": 0.125,
-    "pausa-semibreve": 2.0, "pausa-minima": 1.0, "pausa-seminima": 0.5, 
-    "pausa-colcheia": 0.25, "pausa-semicolcheia": 0.125
+    "A0": 27.50, "A#0": 29.14, "B0": 30.87,
+    "C1": 32.70, "C#1": 34.65, "D1": 36.71, "D#1": 38.89, "E1": 41.20, "F1": 43.65, "F#1": 46.25, "G1": 49.00, "G#1": 51.91,
+    "A1": 55.00, "A#1": 58.27, "B1": 61.74, "C2": 65.41, "C#2": 69.30, "D2": 73.42, "D#2": 77.78, "E2": 82.41, "F2": 87.31, "F#2": 92.50, "G2": 98.00, "G#2": 103.83,
+    "A2": 110.00, "A#2": 116.54, "B2": 123.47, "C3": 130.81, "C#3": 138.59, "D3": 146.83, "D#3": 155.56, "E3": 164.81, "F3": 174.61, "F#3": 185.00, "G3": 196.00, "G#3": 207.65,
+    "A3": 220.00, "A#3": 233.08, "B3": 246.94, "C4": 261.63, "C#4": 277.18, "D4": 293.66, "D#4": 311.13, "E4": 329.63, "F4": 349.23, "F#4": 369.99, "G4": 392.00, "G#4": 415.30,
+    "A4": 440.00, "A#4": 466.16, "B4": 493.88, "C5": 523.25, "C#5": 554.37, "D5": 587.33, "D#5": 622.25, "E5": 659.25, "F5": 698.46, "F#5": 739.99, "G5": 783.99, "G#5": 830.61,
+    "A5": 880.00, "A#5": 932.33, "B5": 987.77, "C6": 1046.50
 };
 const SHARP_FACTOR = 1.059463;
 const FLAT_FACTOR = 1 / SHARP_FACTOR;
@@ -654,7 +691,15 @@ function calculateSystemBeats(system) {
     system.staves.forEach(staff => {
         let beats = 0;
         staff.notes.forEach(chord => {
-            beats += getDurationInBeats(chord[0].type, chord[0].dot, timeSignature.bottom);
+            // Para suportar durações independentes no mesmo acorde (arranjos),
+            // usamos a menor duração do acorde para o cálculo do tempo total.
+            let minDuration = Infinity;
+            chord.forEach(n => {
+                const d = getDurationInBeats(n.type, n.dot, timeSignature.bottom);
+                if (d < minDuration) minDuration = d;
+            });
+            if (minDuration === Infinity) minDuration = 1; // Fallback
+            beats += minDuration;
         });
         if (beats > maxBeats) maxBeats = beats;
     });
@@ -692,18 +737,16 @@ function updateStaffIndicator() {
 
 // Converte tempo em segundos para tipo de nota musical com lógica matemática
 function calculateNoteType(seconds, bpm = 30) {
-    // BPM = batidas por minuto
-    // Uma batida = 60/BPM segundos para colcheia (quarter note)
-    const quarterNoteDuration = 60 / bpm; // duração de uma colcheia em segundos
+    // BPM = batidas por minuto. Em 4/4, uma batida = 1 seminima.
+    const beatDuration = 60 / bpm;
+    const beats = seconds / beatDuration;
 
-    // Calcular quantas colcheias cabem no tempo
-    const quarterNotes = seconds / quarterNoteDuration;
-
-    // Lógica matemática: usar potências de 2 para durações
-    // minima (4 colcheias), seminima (2 colcheias), colcheia (1 colcheia)
-    if (quarterNotes >= 3.5) return 'minima';      // >= 3.5 colcheias = minima
-    if (quarterNotes >= 1.5) return 'seminima';    // >= 1.5 colcheias = seminima
-    return 'colcheia';                             // < 1.5 colcheias = colcheia
+    // Lógica para determinar o tipo de nota baseado na duração em batidas
+    if (beats >= 3.0) return 'semibreve';      // ~4 batidas
+    if (beats >= 1.5) return 'minima';         // ~2 batidas
+    if (beats >= 0.75) return 'seminima';      // ~1 batida
+    if (beats >= 0.35) return 'colcheia';       // ~0.5 batidas
+    return 'semicolcheia';                     // ~0.25 batidas
 }
 
 function hideError() {
@@ -740,9 +783,9 @@ function getNoteName(freq) {
     const A4 = 440;
     const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
-    const halfSteps = 12 * Math.log2(freq / A4) + 69; // 69 semitons = A4 (correto)
-    const octave = Math.floor(halfSteps / 12);
-    const note = Math.round(halfSteps % 12);
+    const halfSteps = Math.round(12 * Math.log2(freq / A4) + 69);
+    const octave = Math.floor(halfSteps / 12) - 1;
+    const note = halfSteps % 12;
 
     return noteNames[note] + octave;
 }
@@ -821,7 +864,7 @@ function detectPitch(buffer, sampleRate) {
     // Autocorrelação usando YIN algorithm (mais preciso)
     const threshold = 0.1;
     const minLag = Math.floor(sampleRate / 1000); // 1000 Hz max
-    const maxLag = Math.floor(sampleRate / 80);   // 80 Hz min
+    const maxLag = Math.floor(sampleRate / 40);   // 40 Hz min (para notas graves)
 
     // Difference function
     const diff = new Float32Array(maxLag);
@@ -864,7 +907,7 @@ function detectPitch(buffer, sampleRate) {
 
     if (bestLag > 0) {
         const pitch = sampleRate / bestLag;
-        if (pitch >= 80 && pitch <= 1000) {
+        if (pitch >= 40 && pitch <= 1000) {
             return pitch;
         }
     }
@@ -1228,13 +1271,30 @@ function importMusicalNotesToScore() {
     currentStaffIndex = 0;
     isEditing = false; // Áudio processado já vem formatado
 
-    // Organizar notas sequencialmente na primeira pauta do primeiro sistema
-    let targetStaff = staffs[0].staves[0];
-
     // Converter cada nota detectada para o formato da partitura
     musicalNotes.forEach(note => {
         const convertedNote = convertNoteForScore(note);
-        targetStaff.notes.push([convertedNote]);
+        
+        // Decidir em qual pauta colocar a nota baseada na oitava
+        // Se a nota for menor que C4 (oitava < 4), vai para a pauta de Fá
+        const pitch = note.pitch; // Ex: "C4", "A#3"
+        const octaveMatch = pitch.match(/\d+/);
+        const octave = octaveMatch ? parseInt(octaveMatch[0]) : 4;
+        const targetIdx = octave < 4 ? 1 : 0;
+        const otherIdx = 1 - targetIdx;
+        
+        // Adicionar a nota na pauta alvo
+        staffs[currentSystemIndex].staves[targetIdx].notes.push([convertedNote]);
+        
+        // Adicionar uma pausa correspondente na outra pauta para manter sincronia
+        const restType = note.type.startsWith('pausa-') ? note.type : 'pausa-' + note.type;
+        staffs[currentSystemIndex].staves[otherIdx].notes.push([{
+            pitch: otherIdx === 0 ? "B4" : "D3", // Posições padrão para pausas nas claves
+            type: restType,
+            dot: note.dot || false,
+            accidental: null,
+            _skipPlayback: true
+        }]);
         
         // Verificar se precisa de novo sistema durante a importação
         const totalBeats = calculateSystemBeats(staffs[currentSystemIndex]);
@@ -1252,7 +1312,6 @@ function importMusicalNotesToScore() {
                     staves: newStaves
                 });
             }
-            targetStaff = staffs[currentSystemIndex].staves[0];
         }
     });
 
@@ -1426,6 +1485,35 @@ function drawRest(type, x, staffY) {
     ctx.textAlign = "left";
     ctx.textBaseline = "alphabetic";
 }
+function drawFirmata(x, y, isAbove = true) {
+    ctx.font = "30px 'Segoe UI Symbol', 'Noto Sans Symbols', Arial, sans-serif";
+    ctx.fillStyle = "#333";
+    ctx.textAlign = "center";
+    if (isAbove) {
+        ctx.fillText("𝄐", x, y - 25);
+    } else {
+        ctx.save();
+        ctx.translate(x, y + 25);
+        ctx.scale(1, -1);
+        ctx.fillText("𝄐", 0, 0);
+        ctx.restore();
+    }
+}
+
+function drawSlur(x1, y1, x2, y2, isAbove = true) {
+    ctx.beginPath();
+    ctx.strokeStyle = "#333";
+    ctx.lineWidth = 1.5;
+    const midX = (x1 + x2) / 2;
+    const dist = x2 - x1;
+    const curveHeight = Math.min(dist * 0.3, 30);
+    const offset = isAbove ? -curveHeight : curveHeight;
+    
+    ctx.moveTo(x1, y1);
+    ctx.quadraticCurveTo(midX, y1 + offset, x2, y2);
+    ctx.stroke();
+}
+
 function drawNote(note, x, y) {
     if (note.type.startsWith('pausa-')) {
         drawRest(note.type, x, y);
@@ -1534,7 +1622,7 @@ function drawTimeSignature(x, staffY) {
     ctx.textAlign = "left";
 }
 
-function drawSingleStaff(staffY, clef, isActive = false, label = "") {
+function drawSingleStaff(staffY, clef, isActive = false, label = "", showFinalBarline = true) {
     ctx.strokeStyle = "#333";
     ctx.lineWidth = 1.5;
     
@@ -1579,13 +1667,15 @@ function drawSingleStaff(staffY, clef, isActive = false, label = "") {
     drawTimeSignature(timeSignatureX, staffY);
     
     // Fim da pauta
-    ctx.beginPath();
-    ctx.moveTo(canvas.width - 20, staffY);
-    ctx.lineTo(canvas.width - 20, staffY + STAFF_HEIGHT);
-    ctx.stroke();
+    if (showFinalBarline) {
+        ctx.beginPath();
+        ctx.moveTo(canvas.width - 20, staffY);
+        ctx.lineTo(canvas.width - 20, staffY + STAFF_HEIGHT);
+        ctx.stroke();
+    }
 }
 
-function drawSystem(systemIndex) {
+function drawSystem(systemIndex, showInitialBarline = true, showFinalBarline = true) {
     const system = staffs[systemIndex];
     const systemY = systemIndex * SYSTEM_SPACING;
     const isCurrentSystem = systemIndex === currentSystemIndex;
@@ -1593,33 +1683,35 @@ function drawSystem(systemIndex) {
     system.staves.forEach((staff, i) => {
         const staffY = systemY + 80 + i * (STAFF_HEIGHT + STAFF_GAP);
         const isActive = isCurrentSystem && i === currentStaffIndex;
-        drawSingleStaff(staffY, staff.clef, isActive, staff.label);
+        drawSingleStaff(staffY, staff.clef, isActive, staff.label, showFinalBarline);
     });
     
-    // Colchete inicial do sistema
-    const firstStaffY = systemY + 80;
-    const lastStaffY = systemY + 80 + (system.staves.length - 1) * (STAFF_HEIGHT + STAFF_GAP) + STAFF_HEIGHT;
-    
-    ctx.strokeStyle = "#333";
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(15, firstStaffY);
-    ctx.lineTo(15, lastStaffY);
-    ctx.stroke();
-    
-    // Pequenos traços horizontais no início
-    ctx.lineWidth = 2;
-    system.staves.forEach((_, i) => {
-        const staffY = systemY + 80 + i * (STAFF_HEIGHT + STAFF_GAP);
+    if (showInitialBarline) {
+        // Colchete inicial do sistema
+        const firstStaffY = systemY + 80;
+        const lastStaffY = systemY + 80 + (system.staves.length - 1) * (STAFF_HEIGHT + STAFF_GAP) + STAFF_HEIGHT;
+        
+        ctx.strokeStyle = "#333";
+        ctx.lineWidth = 4;
         ctx.beginPath();
-        ctx.moveTo(15, staffY);
-        ctx.lineTo(20, staffY);
+        ctx.moveTo(15, firstStaffY);
+        ctx.lineTo(15, lastStaffY);
         ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(15, staffY + STAFF_HEIGHT);
-        ctx.lineTo(20, staffY + STAFF_HEIGHT);
-        ctx.stroke();
-    });
+        
+        // Pequenos traços horizontais no início
+        ctx.lineWidth = 2;
+        system.staves.forEach((_, i) => {
+            const staffY = systemY + 80 + i * (STAFF_HEIGHT + STAFF_GAP);
+            ctx.beginPath();
+            ctx.moveTo(15, staffY);
+            ctx.lineTo(20, staffY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(15, staffY + STAFF_HEIGHT);
+            ctx.lineTo(20, staffY + STAFF_HEIGHT);
+            ctx.stroke();
+        });
+    }
 }
 
 function redraw() {
@@ -1646,9 +1738,26 @@ function redraw() {
     if (isEditing) {
         canvas.width = Math.max(MIN_SCORE_WIDTH, maxX + 100);
     } else {
+        // Modo Finalizado: Cálculo mais generoso de largura para evitar sobreposição
         const maxMeasures = Math.ceil(maxBeatsCount / timeSignature.top) || 1;
-        const mWidth = Math.max(160, timeSignature.top * 40);
-        canvas.width = Math.max(MIN_SCORE_WIDTH, CLEF_MARGIN + maxMeasures * mWidth + 60);
+        
+        // Calculamos a densidade máxima de notas por compasso (estimada) para ajustar a largura
+        let maxDensity = 0;
+        staffs.forEach(sys => {
+            const sysMeasures = Math.ceil(calculateSystemBeats(sys) / timeSignature.top) || 1;
+            sys.staves.forEach(s => {
+                const density = s.notes.length / sysMeasures;
+                if (density > maxDensity) maxDensity = density;
+            });
+        });
+
+        // mWidthBase: Largura mínima base por compasso
+        // densityWidth: Garante espaço suficiente mesmo em compassos muito cheios
+        const mWidthBase = Math.max(300, timeSignature.top * 75);
+        const densityWidth = maxDensity * 65; 
+        const mWidth = Math.max(mWidthBase, densityWidth);
+        
+        canvas.width = Math.max(MIN_SCORE_WIDTH, CLEF_MARGIN + maxMeasures * mWidth + 150);
     }
     
     const requiredHeight = staffs.length * SYSTEM_SPACING + 100;
@@ -1662,26 +1771,58 @@ function redraw() {
     const currentStaff = staffs[currentSystemIndex].staves[currentStaffIndex];
     ctx.fillText(`📝 Sistema: ${currentSystemIndex + 1}/${staffs.length} | Pauta: ${currentStaffIndex + 1} (${currentStaff.clef === 'treble' ? 'Sol' : 'Fá'}) | ${isEditing ? 'MODO EDIÇÃO LIVRE' : 'MODO FINALIZADO'}`, 20, 25);
     
-    let globalMeasureCounter = 1;
+    let totalBeatsAccumulated = 0;
     staffs.forEach((system, systemIndex) => {
-        drawSystem(systemIndex);
+        const systemBeats = calculateSystemBeats(system);
+        
+        system.showInitial = true;
+        system.showFinal = true;
+        
+        if (!isEditing) {
+            // Regra para anacruse no primeiro sistema: se o primeiro sistema não fecha um compasso inteiro
+            // (geralmente indicando uma anacruse), não desenhamos a barra inicial.
+            if (systemIndex === 0 && systemBeats < timeSignature.top) {
+                system.showInitial = false;
+            }
+            // Regra para fim de sistema: se o sistema termina no meio de um compasso, não desenhamos a barra final.
+            // Usamos uma pequena tolerância para evitar problemas de arredondamento
+            const endBeat = totalBeatsAccumulated + systemBeats;
+            const measurePos = endBeat % timeSignature.top;
+            if (measurePos > 0.001 && measurePos < timeSignature.top - 0.001) {
+                system.showFinal = false;
+            }
+        }
+
+        drawSystem(systemIndex, system.showInitial, system.showFinal);
         const systemY = systemIndex * SYSTEM_SPACING;
         
         // --- CÁLCULO DE ALINHAMENTO VERTICAL (Modo Finalizado) ---
+        let firstMeasureIdx = Math.floor(totalBeatsAccumulated / timeSignature.top);
         let currentSystemMeasures = 0;
+
         if (!isEditing) {
             const systemTiming = system.staves.map(staff => {
-                let beat = 0;
+                let beat = totalBeatsAccumulated;
                 return staff.notes.map(chord => {
                     const startBeat = beat;
-                    const duration = getDurationInBeats(chord[0].type, chord[0].dot, timeSignature.bottom);
-                    beat += duration;
-                    return { startBeat, duration };
+                    // Para suporte a durações independentes (arranjos), usamos a menor duração
+                    let minDuration = Infinity;
+                    chord.forEach(n => {
+                        const d = getDurationInBeats(n.type, n.dot, timeSignature.bottom);
+                        if (d < minDuration) minDuration = d;
+                    });
+                    if (minDuration === Infinity) minDuration = 1;
+                    
+                    beat += minDuration;
+                    return { startBeat, duration: minDuration };
                 });
             });
 
             const maxSystemBeats = calculateSystemBeats(system);
-            const numMeasures = Math.ceil(maxSystemBeats / timeSignature.top) || 1;
+            const systemEndBeat = totalBeatsAccumulated + maxSystemBeats;
+            const lastMeasureIdx = Math.max(firstMeasureIdx, Math.ceil(systemEndBeat / timeSignature.top) - 1);
+            const numMeasures = lastMeasureIdx - firstMeasureIdx + 1;
+            
             currentSystemMeasures = numMeasures;
             const measureWidth = (canvas.width - CLEF_MARGIN - 60) / numMeasures;
 
@@ -1689,9 +1830,10 @@ function redraw() {
                 const staffT = systemTiming[sIdx];
                 staff.notes.forEach((chord, cIdx) => {
                     const tInfo = staffT[cIdx];
-                    const mIdx = Math.floor(tInfo.startBeat / timeSignature.top);
-                    const mStartBeat = mIdx * timeSignature.top;
-                    const mX = CLEF_MARGIN + mIdx * measureWidth;
+                    const absMIdx = Math.floor(tInfo.startBeat / timeSignature.top);
+                    const relMIdx = absMIdx - firstMeasureIdx;
+                    const mStartBeat = absMIdx * timeSignature.top;
+                    const mX = CLEF_MARGIN + relMIdx * measureWidth;
 
                     const notesInM = staffT.filter(nt => nt.startBeat >= mStartBeat && nt.startBeat < mStartBeat + timeSignature.top);
                     
@@ -1699,8 +1841,12 @@ function redraw() {
                         chord[0].renderX = mX + measureWidth / 2;
                     } else {
                         const beatInM = tInfo.startBeat - mStartBeat;
-                        const innerWidth = measureWidth - 40;
-                        chord[0].renderX = mX + 20 + (beatInM / timeSignature.top) * innerWidth;
+                        // Aumentamos as margens internas do compasso (padding) para distribuir melhor as notas
+                        // e evitar que a última nota sobreponha a barra de compasso.
+                        const startPadding = 45;
+                        const endPadding = 60; 
+                        const innerWidth = measureWidth - (startPadding + endPadding);
+                        chord[0].renderX = mX + startPadding + (beatInM / timeSignature.top) * innerWidth;
                     }
                 });
             });
@@ -1719,6 +1865,23 @@ function redraw() {
             staff.notes.forEach((chord, chordIndex) => {
                 const drawX = isEditing ? (chord[0].x || x) : (chord[0].renderX || x);
                 
+                // Desenhar Firmata (no topo do acorde)
+                if (chord.some(n => n.firmata)) {
+                    const minNoteY = Math.min(...chord.map(n => n.type.startsWith('pausa-') ? staffYBase + 40 : noteYMapByClef(staff.clef)[n.pitch] + staffYBase));
+                    drawFirmata(drawX, minNoteY, true);
+                }
+
+                // Desenhar Ligadura (Slur) para a próxima nota
+                if (chord.some(n => n.ligadura) && chordIndex < staff.notes.length - 1) {
+                    const nextChord = staff.notes[chordIndex + 1];
+                    const nextX = isEditing ? (nextChord[0].x || (drawX + SPACING)) : (nextChord[0].renderX || (drawX + SPACING));
+                    
+                    const startY = Math.min(...chord.map(n => n.type.startsWith('pausa-') ? staffYBase + 40 : noteYMapByClef(staff.clef)[n.pitch] + staffYBase));
+                    const endY = Math.min(...nextChord.map(n => n.type.startsWith('pausa-') ? staffYBase + 40 : noteYMapByClef(staff.clef)[n.pitch] + staffYBase));
+                    
+                    drawSlur(drawX + 10, startY - 10, nextX - 10, endY - 10, true);
+                }
+
                 chord.forEach(note => {
                     if (note.type.startsWith('pausa-')) {
                         // Não mostrar pausas na clave de fá durante a edição (pedido do usuário)
@@ -1738,18 +1901,21 @@ function redraw() {
             // Desenhar barlines alinhadas se estiver finalizado
             if (!isEditing && system.barlinesX) {
                 system.barlinesX.forEach((barX, idx) => {
+                    // Se o sistema não termina em um limite de compasso, não desenhamos a última barra
+                    if (idx === system.barlinesX.length - 1 && !system.showFinal) return;
+                    
                     drawBarline(barX, staffYBase);
                     // Número do compasso acima da primeira pauta do sistema
                     if (staffIndex === 0) {
                         ctx.font = "bold 12px Arial";
                         ctx.fillStyle = "#1a73e8";
-                        const mNum = globalMeasureCounter + idx;
+                        const mNum = firstMeasureIdx + 1 + idx;
                         ctx.fillText(mNum, barX - system.measureWidth + 5, staffYBase - 10);
                     }
                 });
             }
         });
-        if (!isEditing) globalMeasureCounter += currentSystemMeasures;
+        totalBeatsAccumulated += calculateSystemBeats(system);
     });
     updateStaffIndicator();
 }
@@ -1762,10 +1928,28 @@ async function initPiano() {
     if (piano) return;
     piano = new Tone.Sampler({
         urls: {
+            "A0": "A0.mp3",
+            "C1": "C1.mp3",
+            "D#1": "Ds1.mp3",
+            "F#1": "Fs1.mp3",
+            "A1": "A1.mp3",
+            "C2": "C2.mp3",
+            "D#2": "Ds2.mp3",
+            "F#2": "Fs2.mp3",
+            "A2": "A2.mp3",
+            "C3": "C3.mp3",
+            "D#3": "Ds3.mp3",
+            "F#3": "Fs3.mp3",
+            "A3": "A3.mp3",
             "C4": "C4.mp3",
             "D#4": "Ds4.mp3",
             "F#4": "Fs4.mp3",
             "A4": "A4.mp3",
+            "C5": "C5.mp3",
+            "D#5": "Ds5.mp3",
+            "F#5": "Fs5.mp3",
+            "A5": "A5.mp3",
+            "C6": "C6.mp3"
         },
         release: 1,
         baseUrl: "https://tonejs.github.io/audio/salamander/"
@@ -1789,71 +1973,129 @@ async function playScore() {
     await initPiano();
     await Tone.start();
     
-    let allChords = [];
-    
-    // Aplanar todos os sistemas para uma sequência de acordes (combinando todas as pautas)
+    const beatDuration = 60 / tempo;
+    let systemStartTime = 0;
+
+    // Primeiro, limpamos flags de reprodução e preparamos referências para ligaduras
     staffs.forEach(system => {
-        let maxNotes = 0;
-        system.staves.forEach(s => {
-            if (s.notes.length > maxNotes) maxNotes = s.notes.length;
-        });
-        
-        for (let i = 0; i < maxNotes; i++) {
-            let combinedChord = [];
-            system.staves.forEach(s => {
-                if (i < s.notes.length) {
-                    combinedChord.push(...s.notes[i]);
-                }
+        system.staves.forEach(staff => {
+            staff.notes.forEach((chord, chordIdx) => {
+                chord.forEach(n => {
+                    n._skipPlayback = false;
+                    n._staffRef = staff;
+                    n._noteIdxInStaff = chordIdx;
+                });
             });
-            allChords.push(combinedChord);
-        }
+        });
     });
 
-    if (allChords.length === 0) {
+    if (staffs.length === 0 || staffs.every(s => s.staves.every(st => st.notes.length === 0))) {
         alert("Adicione notas primeiro!");
         return;
     }
-    
-    let t = 0;
-    const beatDuration = 60 / tempo;
-    
-    for (const chord of allChords) {
-        if (chord.length === 0) continue;
-        
-        // Usamos a duração da primeira nota do acorde como referência para o tempo
-        const baseNote = chord[0];
-        let duration = getDurationInBeats(baseNote.type, baseNote.dot, timeSignature.bottom) * beatDuration;
-        
-        for (const note of chord) {
-            if (note.type.startsWith('pausa-')) continue;
-            
-            let freq = freqs[note.pitch];
-            if (!freq) continue;
 
-            // Aplica acidentes da armadura de clave
-            if (!note.accidental) {
-                const sharpOrder = ['F', 'C', 'G', 'D', 'A', 'E', 'B'];
-                const flatOrder = ['B', 'E', 'A', 'D', 'G', 'C', 'F'];
-                const noteLetter = note.pitch[0];
-                
-                if (keySharps > 0) {
-                    if (sharpOrder.slice(0, keySharps).includes(noteLetter)) {
-                        freq *= SHARP_FACTOR;
+    for (const system of staffs) {
+        let maxSystemDuration = 0;
+
+        for (const staff of system.staves) {
+            let currentStaffTime = systemStartTime;
+            
+            for (let i = 0; i < staff.notes.length; i++) {
+                const chord = staff.notes[i];
+                if (!chord || chord.length === 0) continue;
+
+                // Duração para o avanço do tempo nesta pauta
+                let duration = Infinity;
+                chord.forEach(n => {
+                    const d = getDurationInBeats(n.type, n.dot, timeSignature.bottom) * beatDuration;
+                    if (d < duration) duration = d;
+                });
+                if (duration === Infinity) duration = beatDuration;
+
+                let hasFirmata = chord.some(n => n.firmata);
+                if (hasFirmata) duration *= 2.5;
+
+                for (const note of chord) {
+                    if (note._skipPlayback) continue;
+                    if (note.type.startsWith('pausa-')) continue;
+                    
+                    let freq = freqs[note.pitch];
+                    if (!freq) continue;
+
+                    // Aplica acidentes da armadura de clave
+                    if (!note.accidental) {
+                        const sharpOrder = ['F', 'C', 'G', 'D', 'A', 'E', 'B'];
+                        const flatOrder = ['B', 'E', 'A', 'D', 'G', 'C', 'F'];
+                        const noteLetter = note.pitch[0];
+                        
+                        if (keySharps > 0) {
+                            if (sharpOrder.slice(0, keySharps).includes(noteLetter)) {
+                                freq *= SHARP_FACTOR;
+                            }
+                        } else if (keyFlats > 0) {
+                            if (flatOrder.slice(0, keyFlats).includes(noteLetter)) {
+                                freq *= FLAT_FACTOR;
+                            }
+                        }
                     }
-                } else if (keyFlats > 0) {
-                    if (flatOrder.slice(0, keyFlats).includes(noteLetter)) {
-                        freq *= FLAT_FACTOR;
+
+                    if (note.accidental === 'sharp') freq *= SHARP_FACTOR;
+                    else if (note.accidental === 'flat') freq *= FLAT_FACTOR;
+                    
+                    let noteDuration = getDurationInBeats(note.type, note.dot, timeSignature.bottom) * beatDuration;
+                    if (hasFirmata) noteDuration *= 2.5;
+
+                    // Lógica de Ligadura (Tie/Slur)
+                    if (note.ligadura) {
+                        let currentNote = note;
+                        while (currentNote.ligadura) {
+                            const s = currentNote._staffRef;
+                            const nextNoteIdx = currentNote._noteIdxInStaff + 1;
+                            if (s && nextNoteIdx < s.notes.length) {
+                                const nextChordInStaff = s.notes[nextNoteIdx];
+                                const tiedNote = nextChordInStaff.find(nn => nn.pitch === note.pitch);
+                                if (tiedNote) {
+                                    const extraDuration = getDurationInBeats(tiedNote.type, tiedNote.dot, timeSignature.bottom) * beatDuration;
+                                    noteDuration += extraDuration;
+                                    tiedNote._skipPlayback = true;
+                                    tiedNote._staffRef = s;
+                                    tiedNote._noteIdxInStaff = nextNoteIdx;
+                                    currentNote = tiedNote;
+                                } else {
+                                    noteDuration += (beatDuration * 0.1); 
+                                    break;
+                                }
+                            } else {
+                                break;
+                            }
+                        }
                     }
+
+                    await playFreq(freq, noteDuration, currentStaffTime);
                 }
+                currentStaffTime += duration;
             }
-
-            if (note.accidental === 'sharp') freq *= SHARP_FACTOR;
-            else if (note.accidental === 'flat') freq *= FLAT_FACTOR;
             
-            await playFreq(freq, duration, t);
+            const staffDuration = currentStaffTime - systemStartTime;
+            if (staffDuration > maxSystemDuration) {
+                maxSystemDuration = staffDuration;
+            }
         }
-        t += duration;
+        systemStartTime += maxSystemDuration;
     }
+
+    // Limpar as referências temporárias
+    staffs.forEach(system => {
+        system.staves.forEach(staff => {
+            staff.notes.forEach(chord => {
+                chord.forEach(n => {
+                    delete n._staffRef;
+                    delete n._noteIdxInStaff;
+                    delete n._skipPlayback;
+                });
+            });
+        });
+    });
 }
 function exportToJSON() {
     const data = {
@@ -1865,7 +2107,7 @@ function exportToJSON() {
         keySignature: { sharps: keySharps, flats: keyFlats },
         staffs: staffs
     };
-    const json = JSON.stringify(data);
+    const json = JSON.stringify(data, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1875,6 +2117,41 @@ function exportToJSON() {
     URL.revokeObjectURL(url);
 }
 
+function loadScoreData(data) {
+    if (data.version !== "1.0" && data.version !== "1.1") {
+        alert("Versão incompatível");
+        return false;
+    }
+    tempo = data.tempo || 120;
+    timeSignature.top = data.timeSignature.top || 4;
+    timeSignature.bottom = data.timeSignature.bottom || 4;
+    keySharps = data.keySignature.sharps || 0;
+    keyFlats = data.keySignature.flats || 0;
+    
+    // Migrar do formato antigo se necessário
+    if (data.version === "1.0") {
+        staffs = data.staffs.map(grandStaff => ({
+            id: Date.now() + Math.random(),
+            staves: [
+                { clef: 'treble', notes: grandStaff[0].notes, label: 'P1' },
+                { clef: 'bass', notes: grandStaff[1].notes, label: '' }
+            ]
+        }));
+    } else {
+        staffs = data.staffs;
+    }
+    
+    currentSystemIndex = 0;
+    currentStaffIndex = 0;
+    document.getElementById('title-input').value = data.title || '';
+    document.getElementById('composer-input').value = data.composer || '';
+    document.getElementById('tempo-input').value = tempo;
+    document.getElementById('time-top').value = timeSignature.top;
+    document.getElementById('time-bottom').value = timeSignature.bottom;
+    redraw();
+    return true;
+}
+
 function importFromJSON(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -1882,44 +2159,34 @@ function importFromJSON(event) {
     reader.onload = function(e) {
         try {
             const data = JSON.parse(e.target.result);
-            if (data.version !== "1.0" && data.version !== "1.1") {
-                alert("Versão incompatível");
-                return;
+            if (loadScoreData(data)) {
+                alert("Importado com sucesso!");
             }
-            tempo = data.tempo || 120;
-            timeSignature.top = data.timeSignature.top || 4;
-            timeSignature.bottom = data.timeSignature.bottom || 4;
-            keySharps = data.keySignature.sharps || 0;
-            keyFlats = data.keySignature.flats || 0;
-            
-            // Migrar do formato antigo se necessário
-            if (data.version === "1.0") {
-                staffs = data.staffs.map(grandStaff => ({
-                    id: Date.now() + Math.random(),
-                    staves: [
-                        { clef: 'treble', notes: grandStaff[0].notes, label: 'P1' },
-                        { clef: 'bass', notes: grandStaff[1].notes, label: '' }
-                    ]
-                }));
-            } else {
-                staffs = data.staffs;
-            }
-            
-            currentSystemIndex = 0;
-            currentStaffIndex = 0;
-            document.getElementById('title-input').value = data.title || '';
-            document.getElementById('composer-input').value = data.composer || '';
-            document.getElementById('tempo-input').value = tempo;
-            document.getElementById('time-top').value = timeSignature.top;
-            document.getElementById('time-bottom').value = timeSignature.bottom;
-            redraw();
-            alert("Importado com sucesso!");
         } catch (error) {
             console.error(error);
             alert("Erro ao carregar arquivo");
         }
     };
     reader.readAsText(file);
+}
+
+async function loadHymn(path) {
+    try {
+        const response = await fetch(path);
+        if (!response.ok) throw new Error('Falha ao carregar o hino (status: ' + response.status + ')');
+        const data = await response.json();
+        if (loadScoreData(data)) {
+            document.getElementById('hymns-modal').classList.remove('active');
+            alert("Hino carregado com sucesso!");
+        }
+    } catch (error) {
+        console.error(error);
+        let msg = "Erro ao carregar hino: " + error.message;
+        if (window.location.protocol === 'file:') {
+            msg += "\n\nNota: Parece que você está abrindo o arquivo diretamente. Para carregar hinos, use um servidor local ou faça o upload pelo botão 'Importar JSON'.";
+        }
+        alert(msg);
+    }
 }
 function exportToMusicXML() {
     const title = document.getElementById('title-input').value;
@@ -2040,6 +2307,12 @@ document.addEventListener('keydown', (e) => {
         case 'h':
             document.getElementById('harmony-btn').click();
             break;
+        case 'f':
+            document.getElementById('firmata-mode-btn').click();
+            break;
+        case 'l':
+            document.getElementById('ligadura-mode-btn').click();
+            break;
         case 'z':
             if (e.ctrlKey || e.metaKey) {
                 e.preventDefault();
@@ -2071,47 +2344,117 @@ document.getElementById('note-mode-btn').addEventListener('click', () => {
     isNoteMode = true;
     isHarmonyMode = false;
     isEraseMode = false;
+    isFirmataMode = false;
+    isLigaduraMode = false;
     document.getElementById('note-mode-btn').classList.add('selected');
     document.getElementById('rest-mode-btn').classList.remove('selected');
     document.getElementById('harmony-btn').classList.remove('active');
     document.getElementById('erase-mode-btn').classList.remove('selected');
+    document.getElementById('firmata-mode-btn').classList.remove('selected');
+    document.getElementById('ligadura-mode-btn').classList.remove('selected');
     redraw();
 });
 document.getElementById('rest-mode-btn').addEventListener('click', () => {
     isNoteMode = false;
     isHarmonyMode = false;
     isEraseMode = false;
+    isFirmataMode = false;
+    isLigaduraMode = false;
     document.getElementById('rest-mode-btn').classList.add('selected');
     document.getElementById('note-mode-btn').classList.remove('selected');
     document.getElementById('harmony-btn').classList.remove('active');
     document.getElementById('erase-mode-btn').classList.remove('selected');
+    document.getElementById('firmata-mode-btn').classList.remove('selected');
+    document.getElementById('ligadura-mode-btn').classList.remove('selected');
     redraw();
 });
 document.getElementById('erase-mode-btn').addEventListener('click', () => {
-    isEraseMode = true;
-    isNoteMode = false;
-    isHarmonyMode = false;
-    document.getElementById('erase-mode-btn').classList.add('selected');
-    document.getElementById('note-mode-btn').classList.remove('selected');
-    document.getElementById('rest-mode-btn').classList.remove('selected');
-    document.getElementById('harmony-btn').classList.remove('active');
+    isEraseMode = !isEraseMode;
+    if (isEraseMode) {
+        isNoteMode = false;
+        isHarmonyMode = false;
+        isFirmataMode = false;
+        isLigaduraMode = false;
+        document.getElementById('erase-mode-btn').classList.add('selected');
+        document.getElementById('note-mode-btn').classList.remove('selected');
+        document.getElementById('rest-mode-btn').classList.remove('selected');
+        document.getElementById('harmony-btn').classList.remove('active');
+        document.getElementById('firmata-mode-btn').classList.remove('selected');
+        document.getElementById('ligadura-mode-btn').classList.remove('selected');
+    } else {
+        isNoteMode = true;
+        document.getElementById('erase-mode-btn').classList.remove('selected');
+        document.getElementById('note-mode-btn').classList.add('selected');
+    }
+    redraw();
+});
+document.getElementById('firmata-mode-btn').addEventListener('click', () => {
+    isFirmataMode = !isFirmataMode;
+    if (isFirmataMode) {
+        isNoteMode = false;
+        isHarmonyMode = false;
+        isEraseMode = false;
+        isLigaduraMode = false;
+        document.getElementById('firmata-mode-btn').classList.add('selected');
+        document.getElementById('note-mode-btn').classList.remove('selected');
+        document.getElementById('rest-mode-btn').classList.remove('selected');
+        document.getElementById('harmony-btn').classList.remove('active');
+        document.getElementById('erase-mode-btn').classList.remove('selected');
+        document.getElementById('ligadura-mode-btn').classList.remove('selected');
+    } else {
+        isNoteMode = true;
+        document.getElementById('firmata-mode-btn').classList.remove('selected');
+        document.getElementById('note-mode-btn').classList.add('selected');
+    }
+    redraw();
+});
+document.getElementById('ligadura-mode-btn').addEventListener('click', () => {
+    isLigaduraMode = !isLigaduraMode;
+    if (isLigaduraMode) {
+        isNoteMode = false;
+        isHarmonyMode = false;
+        isEraseMode = false;
+        isFirmataMode = false;
+        document.getElementById('ligadura-mode-btn').classList.add('selected');
+        document.getElementById('note-mode-btn').classList.remove('selected');
+        document.getElementById('rest-mode-btn').classList.remove('selected');
+        document.getElementById('harmony-btn').classList.remove('active');
+        document.getElementById('erase-mode-btn').classList.remove('selected');
+        document.getElementById('firmata-mode-btn').classList.remove('selected');
+    } else {
+        isNoteMode = true;
+        document.getElementById('ligadura-mode-btn').classList.remove('selected');
+        document.getElementById('note-mode-btn').classList.add('selected');
+    }
     redraw();
 });
 document.getElementById('finish-edit-btn').addEventListener('click', () => {
     if (!isEditing) return;
     
     // Formatação: ordenar notas por X e organizar em compassos
-    isEditing = false;
-    
     staffs.forEach(system => {
         system.staves.forEach(staff => {
             // Ordenar por X
             staff.notes.sort((a, b) => (a[0].x || 0) - (b[0].x || 0));
         });
     });
+
+    isEditing = false;
+    redraw();
+
+    // Sincronizar posições X para que a transição de volta para edição seja suave
+    staffs.forEach(system => {
+        system.staves.forEach(staff => {
+            staff.notes.forEach(chord => {
+                if (chord[0].renderX) {
+                    chord.forEach(n => n.x = chord[0].renderX);
+                }
+            });
+        });
+    });
     
     document.getElementById('finish-edit-btn').style.display = 'none';
-    redraw();
+    redraw(); // Redesenhar para garantir que tudo use isEditing=false
 });
 document.querySelectorAll('.accidental-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -2166,7 +2509,11 @@ document.getElementById('key-reset').addEventListener('click', () => {
 document.getElementById('harmony-btn').addEventListener('click', () => {
     isHarmonyMode = !isHarmonyMode;
     isEraseMode = false;
+    isFirmataMode = false;
+    isLigaduraMode = false;
     document.getElementById('erase-mode-btn').classList.remove('selected');
+    document.getElementById('firmata-mode-btn').classList.remove('selected');
+    document.getElementById('ligadura-mode-btn').classList.remove('selected');
     if (isHarmonyMode) {
         isNoteMode = true;
         document.getElementById('harmony-btn').classList.add('active');
@@ -2254,6 +2601,10 @@ document.getElementById('undo-btn').addEventListener('click', () => {
             action.staff.notes.splice(action.index, 0, action.chord);
         } else if (action.type === 'delete-note') {
             action.chord.splice(action.index, 0, action.note);
+        } else if (action.type === 'toggle-firmata') {
+            action.chord.forEach(n => n.firmata = !n.firmata);
+        } else if (action.type === 'toggle-ligadura') {
+            action.chord.forEach(n => n.ligadura = !n.ligadura);
         }
         redraw();
     } else {
@@ -2283,6 +2634,8 @@ document.getElementById('clear-btn').addEventListener('click', () => {
         keyFlats = 0;
         isEditing = true;
         isEraseMode = false;
+        isFirmataMode = false;
+        isLigaduraMode = false;
         isNoteMode = true;
         isHarmonyMode = false;
         document.querySelectorAll('.sidebar button').forEach(b => b.classList.remove('selected', 'active'));
@@ -2296,6 +2649,20 @@ document.getElementById('play-btn').addEventListener('click', playScore);
 
 document.getElementById('download-btn').addEventListener('click', () => {
     document.getElementById('export-modal').classList.add('active');
+});
+
+document.getElementById('hymns-btn').addEventListener('click', () => {
+    document.getElementById('hymns-modal').classList.add('active');
+});
+
+document.getElementById('hymns-close').addEventListener('click', () => {
+    document.getElementById('hymns-modal').classList.remove('active');
+});
+
+document.getElementById('hymns-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'hymns-modal') {
+        e.target.classList.remove('active');
+    }
 });
 
 document.getElementById('export-json').addEventListener('click', () => {
@@ -2346,6 +2713,13 @@ canvas.addEventListener('mousedown', async (e) => {
     // Iniciar áudio se necessário (exigência do navegador)
     if (Tone.context.state !== 'running') {
         await Tone.start();
+    }
+
+    // Se estiver no modo finalizado, volta para o modo de edição ao interagir
+    if (!isEditing) {
+        isEditing = true;
+        document.getElementById('finish-edit-btn').style.display = 'flex';
+        redraw();
     }
 
     const rect = canvas.getBoundingClientRect();
@@ -2419,6 +2793,22 @@ canvas.addEventListener('mousedown', async (e) => {
     });
 
     if (clickedChord) {
+        if (isFirmataMode) {
+            // Alternar firmata no acorde clicado
+            const hasFirmata = clickedChord.some(n => n.firmata);
+            clickedChord.forEach(n => n.firmata = !hasFirmata);
+            undoStack.push({ type: 'toggle-firmata', chord: clickedChord });
+            redraw();
+            return;
+        }
+        if (isLigaduraMode) {
+            // Alternar ligadura no acorde clicado (para o próximo)
+            const hasLigadura = clickedChord.some(n => n.ligadura);
+            clickedChord.forEach(n => n.ligadura = !hasLigadura);
+            undoStack.push({ type: 'toggle-ligadura', chord: clickedChord });
+            redraw();
+            return;
+        }
         if (isEraseMode) {
             const chordIndex = staff.notes.indexOf(clickedChord);
             if (clickedNote && clickedChord.length > 1) {
@@ -2439,7 +2829,7 @@ canvas.addEventListener('mousedown', async (e) => {
             return;
         }
         // Mudar duração
-        const currentNote = clickedChord[0];
+        const currentNote = clickedNote;
         const isRest = currentNote.type.startsWith('pausa-');
         const baseType = isRest ? currentNote.type.replace('pausa-', '') : currentNote.type;
         
@@ -2452,10 +2842,10 @@ canvas.addEventListener('mousedown', async (e) => {
         }
         
         const nextDuration = durationSequence[currentIndex];
-        clickedChord.forEach(n => {
-            n.type = isRest ? `pausa-${nextDuration.type}` : nextDuration.type;
-            n.dot = nextDuration.dot;
-        });
+        
+        // Alterar apenas a nota clicada para permitir durações independentes (arranjos)
+        clickedNote.type = isRest ? `pausa-${nextDuration.type}` : nextDuration.type;
+        clickedNote.dot = nextDuration.dot;
         
         redraw();
         return;
@@ -2463,7 +2853,7 @@ canvas.addEventListener('mousedown', async (e) => {
 
     if (e.button !== 0) return; // Só permite adicionar novas notas com clique esquerdo
 
-    if (isEraseMode) return; // Se estiver no modo apagar e não clicou em nada, não faz nada
+    if (isEraseMode || isFirmataMode || isLigaduraMode) return; // Se estiver em um modo de edição de nota existente e não clicou em nada, não faz nada
 
     if (!isNoteMode) {
         const newNote = {
@@ -2553,14 +2943,21 @@ canvas.addEventListener('mousedown', async (e) => {
                     }
                 }
             } else {
-                // Se não houver nada nesse índice na pauta atual, preenchemos com pausas até chegar lá
+                // Se não houver nada nesse índice na pauta atual, preenchemos com pausas 
+                // seguindo a estrutura rítmica da pauta de referência para manter o alinhamento
                 while (staff.notes.length < targetIndex) {
+                    const refChord = referenceStaff.notes[staff.notes.length];
+                    const refType = refChord[0].type;
+                    // Se a nota de referência for uma pausa, usamos o mesmo tipo. 
+                    // Se for nota, criamos a pausa correspondente.
+                    const pauseType = refType.startsWith('pausa-') ? refType : `pausa-${refType}`;
+                    
                     staff.notes.push([{
-                        type: "pausa-seminima",
-                        dot: false,
+                        type: pauseType,
+                        dot: refChord[0].dot,
                         pitch: null,
                         accidental: null,
-                        x: CLEF_MARGIN + staff.notes.length * SPACING
+                        x: refChord[0].x || (CLEF_MARGIN + staff.notes.length * SPACING)
                     }]);
                 }
                 // Adiciona a nota no índice alvo, herdando a duração da referência
