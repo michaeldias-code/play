@@ -415,10 +415,12 @@
 
             <div class="sidebar-section">
                 <h3>Elementos</h3>
-                <div class="button-grid">
-                    <button id="firmata-mode-btn" title="Fermata">𝄐</button>
-                    <button id="ligadura-mode-btn" title="Ligadura">⁀</button>
-                </div>
+                    <div class="button-grid">
+                        <button id="firmata-mode-btn" title="Fermata">𝄐</button>
+                        <button id="ligadura-mode-btn" title="Ligadura">⁀</button>
+                        <button id="repeat-start-btn" title="Início de Repetição">𝄆</button>
+                        <button id="repeat-end-btn" title="Fim de Repetição">𝄇</button>
+                    </div>
             </div>
 
             <div class="sidebar-section">
@@ -624,7 +626,8 @@ let staffs = Array.from({ length: 4 }, (_, i) => ({
         { clef: 'treble', notes: [], label: i === 0 ? 'P1' : '' },
         { clef: 'bass', notes: [], label: '' }
     ],
-    manualBarlines: []
+    manualBarlines: [],
+    repeats: []
 }));
 let currentSystemIndex = 0;
 let currentStaffIndex = 0; // Index da pauta dentro do sistema
@@ -634,6 +637,8 @@ let isEraseMode = false;
 let isFirmataMode = false;
 let isLigaduraMode = false;
 let isBarlineMode = false;
+let isRepeatStartMode = false;
+let isRepeatEndMode = false;
 let isEditing = true;
 const durationSequence = [
     { type: 'semicolcheia', dot: false },
@@ -742,7 +747,8 @@ function checkAndCreateNewStaff() {
         staffs.push({
             id: Date.now(),
             staves: newStaves,
-            manualBarlines: []
+            manualBarlines: [],
+            repeats: []
         });
         currentSystemIndex = staffs.length - 1;
         updateStaffIndicator();
@@ -1289,7 +1295,8 @@ function importMusicalNotesToScore() {
             { clef: 'treble', notes: [], label: i === 0 ? 'P1' : '' },
             { clef: 'bass', notes: [], label: '' }
         ],
-        manualBarlines: []
+        manualBarlines: [],
+        repeats: []
     }));
     currentSystemIndex = 0;
     currentStaffIndex = 0;
@@ -1590,6 +1597,65 @@ function drawBarline(x, y) {
     ctx.stroke();
 }
 
+function drawRepeatBarline(x, y, times, type = 'end') {
+    // Desenha barra dupla (uma fina e uma grossa)
+    ctx.strokeStyle = "#333";
+    ctx.fillStyle = "#333";
+    const centerY = y + STAFF_HEIGHT / 2;
+
+    if (type === 'end') {
+        // Barra grossa (direita)
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(x + 2, y);
+        ctx.lineTo(x + 2, y + STAFF_HEIGHT);
+        ctx.stroke();
+
+        // Barra fina (esquerda)
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(x - 3, y);
+        ctx.lineTo(x - 3, y + STAFF_HEIGHT);
+        ctx.stroke();
+
+        // Desenha os dois pontos : (antes da barra)
+        const dotX = x - 10;
+        ctx.beginPath();
+        ctx.arc(dotX, centerY - 6, 2.5, 0, Math.PI * 2);
+        ctx.arc(dotX, centerY + 6, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Texto de vezes (acima da pauta)
+        if (times > 1) {
+            ctx.font = "bold 14px Arial";
+            ctx.fillStyle = "#d32f2f";
+            ctx.textAlign = "center";
+            ctx.fillText(`${times}x`, x, y - 10);
+        }
+    } else {
+        // Barra grossa (esquerda)
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(x - 2, y);
+        ctx.lineTo(x - 2, y + STAFF_HEIGHT);
+        ctx.stroke();
+
+        // Barra fina (direita)
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(x + 3, y);
+        ctx.lineTo(x + 3, y + STAFF_HEIGHT);
+        ctx.stroke();
+
+        // Desenha os dois pontos : (depois da barra)
+        const dotX = x + 10;
+        ctx.beginPath();
+        ctx.arc(dotX, centerY - 6, 2.5, 0, Math.PI * 2);
+        ctx.arc(dotX, centerY + 6, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
 function ensureManualBarlines(system) {
     if (!Array.isArray(system.manualBarlines)) {
         system.manualBarlines = [];
@@ -1597,12 +1663,22 @@ function ensureManualBarlines(system) {
     return system.manualBarlines;
 }
 
+function ensureRepeats(system) {
+    if (!Array.isArray(system.repeats)) {
+        system.repeats = [];
+    }
+    return system.repeats;
+}
+
 function drawManualBarlines(system, staffYBase) {
     const manualLines = ensureManualBarlines(system);
-    if (manualLines.length === 0) return;
-
     manualLines.forEach(barX => {
         drawBarline(barX, staffYBase);
+    });
+
+    const repeats = ensureRepeats(system);
+    repeats.forEach(repeat => {
+        drawRepeatBarline(repeat.x, staffYBase, repeat.times, repeat.type || 'end');
     });
 }
 
@@ -2104,121 +2180,153 @@ async function playScore() {
 
     for (const system of staffs) {
         if (!isPlaying) break;
-        let maxSystemDuration = 0;
-
-        for (const staff of system.staves) {
-            if (!isPlaying) break;
-            let currentStaffTime = systemStartTime;
-            let beatsInMeasure = 0;
-            let measureAccidentals = {}; // { pitch: 'sharp' | 'flat' | 'natural' }
-            
-            for (let i = 0; i < staff.notes.length; i++) {
-                if (!isPlaying) break;
-                const chord = staff.notes[i];
-                if (!chord || chord.length === 0) continue;
-
-                // Reset de acidentes se ultrapassar o limite do compasso
-                if (beatsInMeasure >= timeSignature.top - 0.001) {
-                    beatsInMeasure %= timeSignature.top;
-                    measureAccidentals = {};
-                }
-
-                // Duração para o avanço do tempo nesta pauta
-                let duration = Infinity;
-                let chordBeats = 0;
-                chord.forEach(n => {
-                    const beats = getDurationInBeats(n.type, n.dot, timeSignature.bottom);
-                    const d = beats * unitDuration;
-                    if (d < duration) {
-                        duration = d;
-                        chordBeats = beats;
+        
+        const systemRepeats = ensureRepeats(system);
+        let sections = [];
+        if (systemRepeats.length === 0) {
+            sections.push({ startX: -1, endX: Infinity, times: 1 });
+        } else {
+            let lastX = -1;
+            systemRepeats.forEach(r => {
+                if (r.type === 'start') {
+                    // Se houver algo antes do símbolo de início, cria seção de 1x
+                    if (r.x > lastX + 1) { 
+                        sections.push({ startX: lastX, endX: r.x, times: 1 });
                     }
+                    lastX = r.x;
+                } else {
+                    sections.push({ startX: lastX, endX: r.x, times: r.times || 2 });
+                    lastX = r.x;
+                }
+            });
+            // Adicionar o resto do sistema após a última repetição
+            sections.push({ startX: lastX, endX: Infinity, times: 1 });
+        }
+
+        let systemDurationAccumulated = 0;
+
+        for (const section of sections) {
+            for (let t = 0; t < section.times; t++) {
+                // Resetar flags de playback para cada iteração da repetição
+                system.staves.forEach(staff => {
+                    staff.notes.forEach(chord => {
+                        chord.forEach(n => n._skipPlayback = false);
+                    });
                 });
-                if (duration === Infinity) {
-                    duration = unitDuration;
-                    chordBeats = 1;
-                }
 
-                let hasFirmata = chord.some(n => n.firmata);
-                if (hasFirmata) duration *= 2.5;
+                let maxSectionDuration = 0;
 
-                for (const note of chord) {
-                    if (note._skipPlayback) continue;
-                    if (note.type.startsWith('pausa-')) continue;
-                    
-                    let freq = freqs[note.pitch];
-                    if (!freq) continue;
+                for (const staff of system.staves) {
+                    if (!isPlaying) break;
+                    let currentStaffTime = systemStartTime + systemDurationAccumulated;
+                    let beatsInMeasure = 0;
+                    let measureAccidentals = {};
 
-                    // Determina o acidente efetivo (explícito na nota ou herdado do compasso)
-                    let effectiveAccidental = note.accidental || measureAccidentals[note.pitch];
+                    for (let i = 0; i < staff.notes.length; i++) {
+                        if (!isPlaying) break;
+                        const chord = staff.notes[i];
+                        if (!chord || chord.length === 0) continue;
 
-                    if (effectiveAccidental) {
-                        if (effectiveAccidental === 'sharp') freq *= SHARP_FACTOR;
-                        else if (effectiveAccidental === 'flat') freq *= FLAT_FACTOR;
-                        // se for 'natural', freq permanece a original (ignora armadura)
-                    } else {
-                        // Aplica acidentes da armadura de clave se não houver acidente no compasso
-                        const sharpOrder = ['F', 'C', 'G', 'D', 'A', 'E', 'B'];
-                        const flatOrder = ['B', 'E', 'A', 'D', 'G', 'C', 'F'];
-                        const noteLetter = note.pitch[0];
+                        const chordX = isEditing ? (chord[0].x || (CLEF_MARGIN + i * SPACING)) : (chord[0].renderX || (CLEF_MARGIN + i * SPACING));
                         
-                        if (keySharps > 0) {
-                            if (sharpOrder.slice(0, keySharps).includes(noteLetter)) {
-                                freq *= SHARP_FACTOR;
-                            }
-                        } else if (keyFlats > 0) {
-                            if (flatOrder.slice(0, keyFlats).includes(noteLetter)) {
-                                freq *= FLAT_FACTOR;
-                            }
-                        }
-                    }
+                        // Filtrar notas que não pertencem a esta seção
+                        if (chordX <= section.startX || chordX > section.endX) continue;
 
-                    // Se a nota tem um acidente explícito, ela define o acidente para o resto do compasso
-                    if (note.accidental) {
-                        measureAccidentals[note.pitch] = note.accidental;
+                        // Reset de acidentes se ultrapassar o limite do compasso
+                        if (beatsInMeasure >= timeSignature.top - 0.001) {
+                            beatsInMeasure %= timeSignature.top;
+                            measureAccidentals = {};
+                        }
+
+                        // Duração para o avanço do tempo nesta pauta
+                        let duration = Infinity;
+                        let chordBeats = 0;
+                        chord.forEach(n => {
+                            const beats = getDurationInBeats(n.type, n.dot, timeSignature.bottom);
+                            const d = beats * unitDuration;
+                            if (d < duration) {
+                                duration = d;
+                                chordBeats = beats;
+                            }
+                        });
+                        if (duration === Infinity) {
+                            duration = unitDuration;
+                            chordBeats = 1;
+                        }
+
+                        let hasFirmata = chord.some(n => n.firmata);
+                        if (hasFirmata) duration *= 2.5;
+
+                        for (const note of chord) {
+                            if (note._skipPlayback) continue;
+                            if (note.type.startsWith('pausa-')) continue;
+                            
+                            let freq = freqs[note.pitch];
+                            if (!freq) continue;
+
+                            let effectiveAccidental = note.accidental || measureAccidentals[note.pitch];
+                            if (effectiveAccidental) {
+                                if (effectiveAccidental === 'sharp') freq *= SHARP_FACTOR;
+                                else if (effectiveAccidental === 'flat') freq *= FLAT_FACTOR;
+                            } else {
+                                const sharpOrder = ['F', 'C', 'G', 'D', 'A', 'E', 'B'];
+                                const flatOrder = ['B', 'E', 'A', 'D', 'G', 'C', 'F'];
+                                const noteLetter = note.pitch[0];
+                                
+                                if (keySharps > 0) {
+                                    if (sharpOrder.slice(0, keySharps).includes(noteLetter)) freq *= SHARP_FACTOR;
+                                } else if (keyFlats > 0) {
+                                    if (flatOrder.slice(0, keyFlats).includes(noteLetter)) freq *= FLAT_FACTOR;
+                                }
+                            }
+
+                            if (note.accidental) {
+                                measureAccidentals[note.pitch] = note.accidental;
+                            }
+                            
+                            let noteDuration = getDurationInBeats(note.type, note.dot, timeSignature.bottom) * unitDuration;
+                            if (hasFirmata) noteDuration *= 2.5;
+
+                            if (note.ligadura) {
+                                let currentNote = note;
+                                while (currentNote.ligadura) {
+                                    const s = currentNote._staffRef;
+                                    const nextNoteIdx = currentNote._noteIdxInStaff + 1;
+                                    if (s && nextNoteIdx < s.notes.length) {
+                                        const nextChordInStaff = s.notes[nextNoteIdx];
+                                        const tiedNote = nextChordInStaff.find(nn => nn.pitch === note.pitch);
+                                        if (tiedNote) {
+                                            const extraDuration = getDurationInBeats(tiedNote.type, tiedNote.dot, timeSignature.bottom) * unitDuration;
+                                            noteDuration += extraDuration;
+                                            tiedNote._skipPlayback = true;
+                                            tiedNote._staffRef = s;
+                                            tiedNote._noteIdxInStaff = nextNoteIdx;
+                                            currentNote = tiedNote;
+                                        } else {
+                                            noteDuration += (unitDuration * 0.1); 
+                                            break;
+                                        }
+                                    } else {
+                                        break;
+                                    }
+                                }
+                            }
+
+                            await playFreq(freq, noteDuration, currentStaffTime);
+                        }
+                        currentStaffTime += duration;
+                        beatsInMeasure += chordBeats;
                     }
                     
-                    let noteDuration = getDurationInBeats(note.type, note.dot, timeSignature.bottom) * unitDuration;
-                    if (hasFirmata) noteDuration *= 2.5;
-
-                    // Lógica de Ligadura (Tie/Slur)
-                    if (note.ligadura) {
-                        let currentNote = note;
-                        while (currentNote.ligadura) {
-                            const s = currentNote._staffRef;
-                            const nextNoteIdx = currentNote._noteIdxInStaff + 1;
-                            if (s && nextNoteIdx < s.notes.length) {
-                                const nextChordInStaff = s.notes[nextNoteIdx];
-                                const tiedNote = nextChordInStaff.find(nn => nn.pitch === note.pitch);
-                                if (tiedNote) {
-                                    const extraDuration = getDurationInBeats(tiedNote.type, tiedNote.dot, timeSignature.bottom) * unitDuration;
-                                    noteDuration += extraDuration;
-                                    tiedNote._skipPlayback = true;
-                                    tiedNote._staffRef = s;
-                                    tiedNote._noteIdxInStaff = nextNoteIdx;
-                                    currentNote = tiedNote;
-                                } else {
-                                    noteDuration += (unitDuration * 0.1); 
-                                    break;
-                                }
-                            } else {
-                                break;
-                            }
-                        }
+                    const staffDuration = currentStaffTime - (systemStartTime + systemDurationAccumulated);
+                    if (staffDuration > maxSectionDuration) {
+                        maxSectionDuration = staffDuration;
                     }
-
-                    await playFreq(freq, noteDuration, currentStaffTime);
                 }
-                currentStaffTime += duration;
-                beatsInMeasure += chordBeats;
-            }
-            
-            const staffDuration = currentStaffTime - systemStartTime;
-            if (staffDuration > maxSystemDuration) {
-                maxSystemDuration = staffDuration;
+                systemDurationAccumulated += maxSectionDuration;
             }
         }
-        systemStartTime += maxSystemDuration;
+        systemStartTime += systemDurationAccumulated;
     }
 
     Tone.Transport.start();
@@ -2283,15 +2391,20 @@ function loadScoreData(data) {
                 { clef: 'treble', notes: grandStaff[0].notes, label: 'P1' },
                 { clef: 'bass', notes: grandStaff[1].notes, label: '' }
             ],
-            manualBarlines: []
+            manualBarlines: [],
+            repeats: []
         }));
     } else {
         staffs = data.staffs.map(system => ({
             ...system,
-            manualBarlines: Array.isArray(system.manualBarlines) ? system.manualBarlines : []
+            manualBarlines: Array.isArray(system.manualBarlines) ? system.manualBarlines : [],
+            repeats: Array.isArray(system.repeats) ? system.repeats : []
         }));
     }
-    staffs.forEach(ensureManualBarlines);
+    staffs.forEach(s => {
+        ensureManualBarlines(s);
+        ensureRepeats(s);
+    });
     
     currentSystemIndex = 0;
     currentStaffIndex = 0;
@@ -2498,104 +2611,64 @@ document.getElementById('time-bottom').addEventListener('change', (e) => {
     timeSignature.bottom = parseInt(e.target.value);
     redraw();
 });
-document.getElementById('note-mode-btn').addEventListener('click', () => {
-    isNoteMode = true;
-    isHarmonyMode = false;
-    isEraseMode = false;
-    isFirmataMode = false;
-    isLigaduraMode = false;
-    isBarlineMode = false;
-    document.getElementById('note-mode-btn').classList.add('selected');
-    document.getElementById('rest-mode-btn').classList.remove('selected');
-    document.getElementById('harmony-btn').classList.remove('active');
-    document.getElementById('erase-mode-btn').classList.remove('selected');
-    document.getElementById('firmata-mode-btn').classList.remove('selected');
-    document.getElementById('ligadura-mode-btn').classList.remove('selected');
-    document.getElementById('barline-mode-btn').classList.remove('selected');
-    redraw();
-});
-document.getElementById('rest-mode-btn').addEventListener('click', () => {
-    isNoteMode = false;
-    isHarmonyMode = false;
-    isEraseMode = false;
-    isFirmataMode = false;
-    isLigaduraMode = false;
-    isBarlineMode = false;
-    document.getElementById('rest-mode-btn').classList.add('selected');
-    document.getElementById('note-mode-btn').classList.remove('selected');
-    document.getElementById('harmony-btn').classList.remove('active');
-    document.getElementById('erase-mode-btn').classList.remove('selected');
-    document.getElementById('firmata-mode-btn').classList.remove('selected');
-    document.getElementById('ligadura-mode-btn').classList.remove('selected');
-    document.getElementById('barline-mode-btn').classList.remove('selected');
-    redraw();
-});
-document.getElementById('erase-mode-btn').addEventListener('click', () => {
-    isEraseMode = !isEraseMode;
-    if (isEraseMode) {
-        isNoteMode = false;
-        isHarmonyMode = false;
-        isFirmataMode = false;
-        isLigaduraMode = false;
-        isBarlineMode = false;
-        document.getElementById('erase-mode-btn').classList.add('selected');
-        document.getElementById('note-mode-btn').classList.remove('selected');
-        document.getElementById('rest-mode-btn').classList.remove('selected');
-        document.getElementById('harmony-btn').classList.remove('active');
-        document.getElementById('firmata-mode-btn').classList.remove('selected');
-        document.getElementById('ligadura-mode-btn').classList.remove('selected');
-        document.getElementById('barline-mode-btn').classList.remove('selected');
-    } else {
-        isNoteMode = true;
-        document.getElementById('erase-mode-btn').classList.remove('selected');
-        document.getElementById('note-mode-btn').classList.add('selected');
+function setEditMode(mode) {
+    // Se o modo clicado já estiver ativo (e for um modo alternável), desativa e volta para Melodia
+    const isToggleable = ['erase', 'firmata', 'ligadura', 'barline', 'repeat-start', 'repeat-end', 'harmony'].includes(mode);
+    const currentActive = 
+        isEraseMode ? 'erase' :
+        isFirmataMode ? 'firmata' :
+        isLigaduraMode ? 'ligadura' :
+        isBarlineMode ? 'barline' :
+        isRepeatStartMode ? 'repeat-start' :
+        isRepeatEndMode ? 'repeat-end' :
+        isHarmonyMode ? 'harmony' :
+        isNoteMode ? (document.getElementById('rest-mode-btn').classList.contains('selected') ? 'rest' : 'note') : 'note';
+
+    if (isToggleable && mode === currentActive) {
+        mode = 'note';
     }
-    redraw();
-});
-document.getElementById('firmata-mode-btn').addEventListener('click', () => {
-    isFirmataMode = !isFirmataMode;
-    if (isFirmataMode) {
-        isNoteMode = false;
-        isHarmonyMode = false;
-        isEraseMode = false;
-        isLigaduraMode = false;
-        isBarlineMode = false;
-        document.getElementById('firmata-mode-btn').classList.add('selected');
-        document.getElementById('note-mode-btn').classList.remove('selected');
-        document.getElementById('rest-mode-btn').classList.remove('selected');
-        document.getElementById('harmony-btn').classList.remove('active');
-        document.getElementById('erase-mode-btn').classList.remove('selected');
-        document.getElementById('ligadura-mode-btn').classList.remove('selected');
-        document.getElementById('barline-mode-btn').classList.remove('selected');
-    } else {
-        isNoteMode = true;
-        document.getElementById('firmata-mode-btn').classList.remove('selected');
-        document.getElementById('note-mode-btn').classList.add('selected');
+
+    isNoteMode = mode === 'note' || mode === 'rest' || mode === 'harmony';
+    isHarmonyMode = mode === 'harmony';
+    isEraseMode = mode === 'erase';
+    isFirmataMode = mode === 'firmata';
+    isLigaduraMode = mode === 'ligadura';
+    isBarlineMode = mode === 'barline';
+    isRepeatStartMode = mode === 'repeat-start';
+    isRepeatEndMode = mode === 'repeat-end';
+
+    // UI Updates
+    document.getElementById('note-mode-btn').classList.toggle('selected', mode === 'note');
+    document.getElementById('rest-mode-btn').classList.toggle('selected', mode === 'rest');
+    document.getElementById('harmony-btn').classList.toggle('active', mode === 'harmony');
+    document.getElementById('erase-mode-btn').classList.toggle('selected', mode === 'erase');
+    document.getElementById('firmata-mode-btn').classList.toggle('selected', mode === 'firmata');
+    document.getElementById('ligadura-mode-btn').classList.toggle('selected', mode === 'ligadura');
+    document.getElementById('barline-mode-btn').classList.toggle('selected', mode === 'barline');
+    document.getElementById('repeat-start-btn').classList.toggle('selected', mode === 'repeat-start');
+    document.getElementById('repeat-end-btn').classList.toggle('selected', mode === 'repeat-end');
+    
+    // Atualiza o tipo de nota se for modo Melodia ou Pausa
+    if (mode === 'rest') {
+        const currentType = durationSequence[currentDurationIndex].type;
+        if (!currentType.startsWith('pausa-')) {
+            // Find corresponding pause
+        }
     }
+
     redraw();
-});
-document.getElementById('ligadura-mode-btn').addEventListener('click', () => {
-    isLigaduraMode = !isLigaduraMode;
-    if (isLigaduraMode) {
-        isNoteMode = false;
-        isHarmonyMode = false;
-        isEraseMode = false;
-        isFirmataMode = false;
-        isBarlineMode = false;
-        document.getElementById('ligadura-mode-btn').classList.add('selected');
-        document.getElementById('note-mode-btn').classList.remove('selected');
-        document.getElementById('rest-mode-btn').classList.remove('selected');
-        document.getElementById('harmony-btn').classList.remove('active');
-        document.getElementById('erase-mode-btn').classList.remove('selected');
-        document.getElementById('firmata-mode-btn').classList.remove('selected');
-        document.getElementById('barline-mode-btn').classList.remove('selected');
-    } else {
-        isNoteMode = true;
-        document.getElementById('ligadura-mode-btn').classList.remove('selected');
-        document.getElementById('note-mode-btn').classList.add('selected');
-    }
-    redraw();
-});
+}
+
+document.getElementById('note-mode-btn').addEventListener('click', () => setEditMode('note'));
+document.getElementById('rest-mode-btn').addEventListener('click', () => setEditMode('rest'));
+document.getElementById('harmony-btn').addEventListener('click', () => setEditMode('harmony'));
+document.getElementById('erase-mode-btn').addEventListener('click', () => setEditMode('erase'));
+document.getElementById('firmata-mode-btn').addEventListener('click', () => setEditMode('firmata'));
+document.getElementById('ligadura-mode-btn').addEventListener('click', () => setEditMode('ligadura'));
+document.getElementById('barline-mode-btn').addEventListener('click', () => setEditMode('barline'));
+document.getElementById('repeat-start-btn').addEventListener('click', () => setEditMode('repeat-start'));
+document.getElementById('repeat-end-btn').addEventListener('click', () => setEditMode('repeat-end'));
+
 document.getElementById('finish-edit-btn').addEventListener('click', () => {
     if (!isEditing) return;
     
@@ -2609,7 +2682,11 @@ document.getElementById('finish-edit-btn').addEventListener('click', () => {
 
     isEditing = false;
     isBarlineMode = false;
+    isRepeatStartMode = false;
+    isRepeatEndMode = false;
     document.getElementById('barline-mode-btn').classList.remove('selected');
+    document.getElementById('repeat-start-btn').classList.remove('selected');
+    document.getElementById('repeat-end-btn').classList.remove('selected');
     redraw();
 
     // Sincronizar posições X para que a transição de volta para edição seja suave
@@ -2676,29 +2753,6 @@ document.getElementById('key-reset').addEventListener('click', () => {
     keyFlats = 0;
     redraw();
 });
-document.getElementById('harmony-btn').addEventListener('click', () => {
-    isHarmonyMode = !isHarmonyMode;
-    isEraseMode = false;
-    isFirmataMode = false;
-    isLigaduraMode = false;
-    isBarlineMode = false;
-    document.getElementById('erase-mode-btn').classList.remove('selected');
-    document.getElementById('firmata-mode-btn').classList.remove('selected');
-    document.getElementById('ligadura-mode-btn').classList.remove('selected');
-    document.getElementById('barline-mode-btn').classList.remove('selected');
-    if (isHarmonyMode) {
-        isNoteMode = true;
-        document.getElementById('harmony-btn').classList.add('active');
-        document.getElementById('note-mode-btn').classList.remove('selected');
-        document.getElementById('rest-mode-btn').classList.remove('selected');
-    } else {
-        // Se desativar harmonia, volta para o modo melodia (nota)
-        isNoteMode = true;
-        document.getElementById('harmony-btn').classList.remove('active');
-        document.getElementById('note-mode-btn').classList.add('selected');
-    }
-    redraw();
-});
 document.getElementById('add-system-btn').addEventListener('click', () => {
     // Adicionar novo sistema (quebra de página/sistema)
     const lastSystem = staffs[staffs.length - 1];
@@ -2709,7 +2763,9 @@ document.getElementById('add-system-btn').addEventListener('click', () => {
     }));
     staffs.push({
         id: Date.now(),
-        staves: newStaves
+        staves: newStaves,
+        manualBarlines: [],
+        repeats: []
     });
     currentSystemIndex = staffs.length - 1;
     currentStaffIndex = 0;
@@ -2726,29 +2782,6 @@ document.getElementById('add-staff-btn').addEventListener('click', () => {
         label: ''
     });
     currentStaffIndex = system.staves.length - 1;
-    redraw();
-});
-
-document.getElementById('barline-mode-btn').addEventListener('click', () => {
-    isBarlineMode = !isBarlineMode;
-    document.getElementById('barline-mode-btn').classList.toggle('selected', isBarlineMode);
-    if (isBarlineMode) {
-        isNoteMode = false;
-        isEraseMode = false;
-        isFirmataMode = false;
-        isLigaduraMode = false;
-        isHarmonyMode = false;
-        document.getElementById('note-mode-btn').classList.remove('selected');
-        document.getElementById('rest-mode-btn').classList.remove('selected');
-        document.getElementById('erase-mode-btn').classList.remove('selected');
-        document.getElementById('firmata-mode-btn').classList.remove('selected');
-        document.getElementById('ligadura-mode-btn').classList.remove('selected');
-        document.getElementById('harmony-btn').classList.remove('active');
-    } else {
-        isNoteMode = true;
-        document.getElementById('barline-mode-btn').classList.remove('selected');
-        document.getElementById('note-mode-btn').classList.add('selected');
-    }
     redraw();
 });
 
@@ -2809,6 +2842,15 @@ document.getElementById('undo-btn').addEventListener('click', () => {
                 manualLines.push(action.x);
                 manualLines.sort((a, b) => a - b);
             }
+        } else if (action.type === 'repeat') {
+            const repeats = ensureRepeats(action.system);
+            if (action.added) {
+                const index = repeats.findIndex(r => r.x === action.repeat.x);
+                if (index > -1) repeats.splice(index, 1);
+            } else {
+                repeats.push(action.repeat);
+                repeats.sort((a, b) => a.x - b.x);
+            }
         }
         redraw();
     } else {
@@ -2831,7 +2873,8 @@ document.getElementById('clear-btn').addEventListener('click', () => {
                 { clef: 'treble', notes: [], label: i === 0 ? 'P1' : '' },
                 { clef: 'bass', notes: [], label: '' }
             ],
-            manualBarlines: []
+            manualBarlines: [],
+            repeats: []
         }));
         currentSystemIndex = 0;
         currentStaffIndex = 0;
@@ -2970,6 +3013,34 @@ canvas.addEventListener('mousedown', async (e) => {
             manualLines.push(clickX);
             manualLines.sort((a, b) => a - b);
             undoStack.push({ type: 'manual-barline', system: system, x: clickX, added: true });
+        }
+        redraw();
+        return;
+    }
+
+    if (isRepeatStartMode || isRepeatEndMode) {
+        const repeats = ensureRepeats(system);
+        const existingIndex = repeats.findIndex(r => Math.abs(r.x - clickX) < MANUAL_BARLINE_TOLERANCE);
+        
+        if (existingIndex > -1) {
+            const removedRepeat = repeats.splice(existingIndex, 1)[0];
+            undoStack.push({ type: 'repeat', system: system, repeat: removedRepeat, added: false });
+        } else {
+            if (isRepeatStartMode) {
+                const newRepeat = { x: clickX, type: 'start' };
+                repeats.push(newRepeat);
+                repeats.sort((a, b) => a.x - b.x);
+                undoStack.push({ type: 'repeat', system: system, repeat: newRepeat, added: true });
+            } else {
+                const times = prompt("Quantas vezes tocar esta parte?", "2");
+                if (times !== null) {
+                    const numTimes = parseInt(times) || 2;
+                    const newRepeat = { x: clickX, type: 'end', times: numTimes };
+                    repeats.push(newRepeat);
+                    repeats.sort((a, b) => a.x - b.x);
+                    undoStack.push({ type: 'repeat', system: system, repeat: newRepeat, added: true });
+                }
+            }
         }
         redraw();
         return;
