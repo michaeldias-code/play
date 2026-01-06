@@ -1,0 +1,2688 @@
+{
+  "version": "1.1",
+  "title": "Faz-nos ouvir Tua voz",
+  "composer": "",
+  "tempo": 68,
+  "timeSignature": {
+    "top": 4,
+    "bottom": 4
+  },
+  "keySignature": {
+    "sharps": 1,
+    "flats": 0
+  },
+  "staffs": [
+    {
+      "id": 1767716061842,
+      "staves": [
+        {
+          "clef": "treble",
+          "notes": [
+            [
+              {
+                "pitch": "G4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 130
+              },
+              {
+                "pitch": "D4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 130
+              }
+            ],
+            [
+              {
+                "pitch": "G4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 180
+              },
+              {
+                "pitch": "B3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 180
+              }
+            ],
+            [
+              {
+                "pitch": "B4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 230
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 230
+              }
+            ],
+            [
+              {
+                "pitch": "G4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 280,
+                "ligadura": true
+              },
+              {
+                "pitch": "B3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 280
+              }
+            ],
+            [
+              {
+                "pitch": "G4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 330
+              },
+              {
+                "pitch": "C4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 330
+              }
+            ],
+            [
+              {
+                "pitch": "G4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 380
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 380
+              }
+            ],
+            [
+              {
+                "pitch": "G4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 430
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 430
+              }
+            ],
+            [
+              {
+                "pitch": "A4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 480
+              },
+              {
+                "pitch": "E4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 480
+              }
+            ],
+            [
+              {
+                "pitch": "A4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 530
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 530
+              }
+            ],
+            [
+              {
+                "pitch": "A4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 580
+              },
+              {
+                "pitch": "C4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 580
+              }
+            ],
+            [
+              {
+                "pitch": "B4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 630
+              },
+              {
+                "pitch": "D4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 630
+              }
+            ],
+            [
+              {
+                "pitch": "G4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 680,
+                "ligadura": true
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 680
+              }
+            ],
+            [
+              {
+                "pitch": "G4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 730
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 730
+              }
+            ],
+            [
+              {
+                "pitch": "C5",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 780
+              },
+              {
+                "pitch": "C4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 780
+              }
+            ],
+            [
+              {
+                "pitch": "C5",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 830
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 830
+              }
+            ],
+            [
+              {
+                "pitch": "C5",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 880
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 880
+              }
+            ]
+          ],
+          "label": "P1"
+        },
+        {
+          "clef": "bass",
+          "notes": [
+            [
+              {
+                "pitch": "B3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 130
+              },
+              {
+                "pitch": "G3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 130
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 180,
+                "ligadura": true
+              },
+              {
+                "pitch": "D3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 180,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 230
+              },
+              {
+                "pitch": "D3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 230
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 280,
+                "ligadura": true
+              },
+              {
+                "pitch": "E3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 280,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 330
+              },
+              {
+                "pitch": "E3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 330
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 380,
+                "ligadura": true
+              },
+              {
+                "pitch": "B2",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 380,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 430
+              },
+              {
+                "pitch": "B2",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 430
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 480
+              },
+              {
+                "pitch": "C3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 480
+              }
+            ],
+            [
+              {
+                "pitch": "F3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 530,
+                "ligadura": true
+              },
+              {
+                "pitch": "D3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 530,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "F3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 580
+              },
+              {
+                "pitch": "D3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 580
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 630
+              },
+              {
+                "pitch": "G2",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 630
+              }
+            ],
+            [
+              {
+                "pitch": "B3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 680,
+                "ligadura": true
+              },
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 680,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "B3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 730
+              },
+              {
+                "pitch": "F3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 730
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 780
+              },
+              {
+                "pitch": "E3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 780
+              }
+            ],
+            [
+              {
+                "pitch": "A3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 830,
+                "ligadura": true
+              },
+              {
+                "pitch": "F3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 830,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "A3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 880
+              },
+              {
+                "pitch": "F3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 880
+              }
+            ]
+          ],
+          "label": ""
+        }
+      ],
+      "manualBarlines": [
+        478.6000061035156,
+        779.6000061035156
+      ],
+      "showInitial": true,
+      "showFinal": true
+    },
+    {
+      "id": 1767716061844,
+      "staves": [
+        {
+          "clef": "treble",
+          "notes": [
+            [
+              {
+                "pitch": "B4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 137
+              },
+              {
+                "pitch": "D4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 137
+              }
+            ],
+            [
+              {
+                "pitch": "B4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 187
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 187
+              }
+            ],
+            [
+              {
+                "pitch": "B4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 237
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 237
+              }
+            ],
+            [
+              {
+                "pitch": "A4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 287
+              },
+              {
+                "pitch": "E4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 287
+              }
+            ],
+            [
+              {
+                "pitch": "A4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 337
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 337
+              }
+            ],
+            [
+              {
+                "pitch": "A4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 387
+              },
+              {
+                "pitch": "C4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 387
+              }
+            ],
+            [
+              {
+                "pitch": "G4",
+                "type": "minima",
+                "dot": false,
+                "accidental": null,
+                "x": 437
+              },
+              {
+                "pitch": "B3",
+                "type": "minima",
+                "dot": false,
+                "accidental": null,
+                "x": 437
+              }
+            ],
+            [
+              {
+                "pitch": "G4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 487
+              },
+              {
+                "pitch": "D4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 487
+              }
+            ],
+            [
+              {
+                "pitch": "G4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 537
+              },
+              {
+                "pitch": "B3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 537
+              }
+            ],
+            [
+              {
+                "pitch": "B4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 587
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 587
+              }
+            ],
+            [
+              {
+                "pitch": "G4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 637,
+                "ligadura": true
+              },
+              {
+                "pitch": "B3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 637
+              }
+            ],
+            [
+              {
+                "pitch": "G4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 687
+              },
+              {
+                "pitch": "C4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 687
+              }
+            ],
+            [
+              {
+                "pitch": "G4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 737
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 737
+              }
+            ],
+            [
+              {
+                "pitch": "G4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 787
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 787
+              }
+            ]
+          ],
+          "label": ""
+        },
+        {
+          "clef": "bass",
+          "notes": [
+            [
+              {
+                "pitch": "G3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 137
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 187,
+                "ligadura": true
+              },
+              {
+                "pitch": "B2",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 187,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 237
+              },
+              {
+                "pitch": "B2",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 237
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 287
+              },
+              {
+                "pitch": "C3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 287
+              }
+            ],
+            [
+              {
+                "pitch": "F3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 337,
+                "ligadura": true
+              },
+              {
+                "pitch": "D3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 337,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "F3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 387
+              },
+              {
+                "pitch": "D3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 387
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "minima",
+                "dot": false,
+                "accidental": null,
+                "x": 437
+              },
+              {
+                "pitch": "G2",
+                "type": "minima",
+                "dot": false,
+                "accidental": null,
+                "x": 437
+              }
+            ],
+            [
+              {
+                "pitch": "B3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 487
+              },
+              {
+                "pitch": "G3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 487
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 537,
+                "ligadura": true
+              },
+              {
+                "pitch": "D3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 537,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 587
+              },
+              {
+                "pitch": "D3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 587
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 637,
+                "ligadura": true
+              },
+              {
+                "pitch": "E3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 637,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 687
+              },
+              {
+                "pitch": "E3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 687
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 737,
+                "ligadura": true
+              },
+              {
+                "pitch": "B2",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 737,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 787
+              },
+              {
+                "pitch": "B2",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 787
+              }
+            ]
+          ],
+          "label": ""
+        }
+      ],
+      "manualBarlines": [
+        259.6000061035156,
+        475.6000061035156,
+        843.6000061035156
+      ],
+      "showInitial": true,
+      "showFinal": true
+    },
+    {
+      "id": 1767716061845,
+      "staves": [
+        {
+          "clef": "treble",
+          "notes": [
+            [
+              {
+                "pitch": "A4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 137
+              },
+              {
+                "pitch": "E4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 137
+              }
+            ],
+            [
+              {
+                "pitch": "A4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 187
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 187
+              }
+            ],
+            [
+              {
+                "pitch": "A4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 237
+              },
+              {
+                "pitch": "C4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 237
+              }
+            ],
+            [
+              {
+                "pitch": "B4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 287
+              },
+              {
+                "pitch": "D4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 287
+              }
+            ],
+            [
+              {
+                "pitch": "G4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 337,
+                "ligadura": true
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 337
+              }
+            ],
+            [
+              {
+                "pitch": "G4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 387
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 387
+              }
+            ],
+            [
+              {
+                "pitch": "C5",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 437
+              },
+              {
+                "pitch": "C4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 437
+              }
+            ],
+            [
+              {
+                "pitch": "C5",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 487
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 487
+              }
+            ],
+            [
+              {
+                "pitch": "C5",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 537
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 537
+              }
+            ],
+            [
+              {
+                "pitch": "B4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 587
+              },
+              {
+                "pitch": "D4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 587
+              }
+            ],
+            [
+              {
+                "pitch": "B4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 637
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 637
+              }
+            ],
+            [
+              {
+                "pitch": "B4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 687
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 687
+              }
+            ],
+            [
+              {
+                "pitch": "A4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 737
+              },
+              {
+                "pitch": "E4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 737
+              }
+            ],
+            [
+              {
+                "pitch": "A4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 787
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 787
+              }
+            ],
+            [
+              {
+                "pitch": "A4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 837
+              },
+              {
+                "pitch": "C4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 837
+              }
+            ],
+            [
+              {
+                "pitch": "G4",
+                "type": "minima",
+                "dot": false,
+                "accidental": null,
+                "x": 887
+              },
+              {
+                "pitch": "B3",
+                "type": "minima",
+                "dot": false,
+                "accidental": null,
+                "x": 887
+              }
+            ]
+          ],
+          "label": ""
+        },
+        {
+          "clef": "bass",
+          "notes": [
+            [
+              {
+                "pitch": "G3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 137
+              },
+              {
+                "pitch": "C3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 137
+              }
+            ],
+            [
+              {
+                "pitch": "F3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 187,
+                "ligadura": true
+              },
+              {
+                "pitch": "D3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 187,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "F3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 237
+              },
+              {
+                "pitch": "D3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 237
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 287
+              },
+              {
+                "pitch": "G2",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 287
+              }
+            ],
+            [
+              {
+                "pitch": "B3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 337,
+                "ligadura": true
+              },
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 337
+              }
+            ],
+            [
+              {
+                "pitch": "B3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 387
+              },
+              {
+                "pitch": "F3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 387
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 437
+              },
+              {
+                "pitch": "E3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 437
+              }
+            ],
+            [
+              {
+                "pitch": "A3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 487,
+                "ligadura": true
+              },
+              {
+                "pitch": "F3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 487,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "A3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 537
+              },
+              {
+                "pitch": "F3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 537
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 587
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 637,
+                "ligadura": true
+              },
+              {
+                "pitch": "B2",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 637,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 687
+              },
+              {
+                "pitch": "B2",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 687
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 737
+              },
+              {
+                "pitch": "C3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 737
+              }
+            ],
+            [
+              {
+                "pitch": "F3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 787,
+                "ligadura": true
+              },
+              {
+                "pitch": "D3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 787,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "F3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 837
+              },
+              {
+                "pitch": "D3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 837
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "minima",
+                "dot": false,
+                "accidental": null,
+                "x": 887
+              },
+              {
+                "pitch": "G2",
+                "type": "minima",
+                "dot": false,
+                "accidental": null,
+                "x": 887
+              }
+            ]
+          ],
+          "label": ""
+        }
+      ],
+      "manualBarlines": [
+        419.6000061035156,
+        712.6000061035156
+      ],
+      "showInitial": true,
+      "showFinal": true
+    },
+    {
+      "id": 1767716061846,
+      "staves": [
+        {
+          "clef": "treble",
+          "notes": [
+            [
+              {
+                "pitch": "A4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 137
+              },
+              {
+                "pitch": "D4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 137
+              }
+            ],
+            [
+              {
+                "pitch": "B4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 187
+              },
+              {
+                "pitch": "F4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 187
+              }
+            ],
+            [
+              {
+                "pitch": "A4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 237
+              },
+              {
+                "pitch": "F4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 237
+              }
+            ],
+            [
+              {
+                "pitch": "G4",
+                "type": "colcheia",
+                "dot": true,
+                "accidental": null,
+                "x": 287
+              }
+            ],
+            [
+              {
+                "pitch": "B4",
+                "type": "semicolcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 337
+              },
+              {
+                "pitch": "G4",
+                "type": "semicolcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 337
+              }
+            ],
+            [
+              {
+                "pitch": "D5",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 387
+              },
+              {
+                "pitch": "G4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 387
+              }
+            ],
+            [
+              {
+                "pitch": "A4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 437
+              },
+              {
+                "pitch": "E4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 437
+              }
+            ],
+            [
+              {
+                "pitch": "B4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 487
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 487
+              }
+            ],
+            [
+              {
+                "pitch": "A4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 537
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 537
+              }
+            ],
+            [
+              {
+                "pitch": "G4",
+                "type": "colcheia",
+                "dot": true,
+                "accidental": null,
+                "x": 587
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": true,
+                "accidental": null,
+                "x": 587
+              }
+            ],
+            [
+              {
+                "pitch": "B4",
+                "type": "semicolcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 637
+              },
+              {
+                "pitch": "D4",
+                "type": "semicolcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 637
+              }
+            ],
+            [
+              {
+                "pitch": "D5",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 687
+              },
+              {
+                "pitch": "G4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 687
+              }
+            ],
+            [
+              {
+                "pitch": "C5",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 737
+              },
+              {
+                "pitch": "E4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 737
+              }
+            ],
+            [
+              {
+                "pitch": "C5",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 787
+              },
+              {
+                "pitch": "C4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 787
+              }
+            ],
+            [
+              {
+                "pitch": "C5",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 837
+              },
+              {
+                "pitch": "C4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 837
+              }
+            ],
+            [
+              {
+                "pitch": "B4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 887
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 887
+              }
+            ],
+            [
+              {
+                "pitch": "G4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 937
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 937
+              }
+            ],
+            [
+              {
+                "pitch": "B4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 987,
+                "ligadura": true
+              },
+              {
+                "pitch": "E4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 987
+              }
+            ],
+            [
+              {
+                "pitch": "B4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 1037
+              },
+              {
+                "pitch": "E4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 1037
+              }
+            ]
+          ],
+          "label": ""
+        },
+        {
+          "clef": "bass",
+          "notes": [
+            [
+              {
+                "pitch": "F3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 137
+              },
+              {
+                "pitch": "D3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 137
+              }
+            ],
+            [
+              {
+                "pitch": "C3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 187,
+                "ligadura": true
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 187,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 237
+              },
+              {
+                "pitch": "C3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 237
+              }
+            ],
+            [
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": true,
+                "accidental": null,
+                "x": 287,
+                "ligadura": true
+              },
+              {
+                "pitch": "B2",
+                "type": "colcheia",
+                "dot": true,
+                "accidental": null,
+                "x": 287,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "D4",
+                "type": "semicolcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 337
+              },
+              {
+                "pitch": "B2",
+                "type": "semicolcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 337
+              }
+            ],
+            [
+              {
+                "pitch": "B3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 387
+              },
+              {
+                "pitch": "G2",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 387
+              }
+            ],
+            [
+              {
+                "pitch": "C4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 437
+              },
+              {
+                "pitch": "G3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 437
+              }
+            ],
+            [
+              {
+                "pitch": "C4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 487,
+                "ligadura": true
+              },
+              {
+                "pitch": "F3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 487,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "C4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 537
+              },
+              {
+                "pitch": "F3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 537
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": true,
+                "accidental": null,
+                "x": 587,
+                "ligadura": true
+              },
+              {
+                "pitch": "B3",
+                "type": "colcheia",
+                "dot": true,
+                "accidental": null,
+                "x": 587,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "B3",
+                "type": "semicolcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 637
+              },
+              {
+                "pitch": "G3",
+                "type": "semicolcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 637
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 687
+              },
+              {
+                "pitch": "B2",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 687
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 737
+              },
+              {
+                "pitch": "C3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 737
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 787,
+                "ligadura": true
+              },
+              {
+                "pitch": "E3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 787,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 837
+              },
+              {
+                "pitch": "E3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 837
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 887,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 937
+              },
+              {
+                "pitch": "F3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 937
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 987,
+                "ligadura": true
+              },
+              {
+                "pitch": "E3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 987
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 1037
+              },
+              {
+                "pitch": "D3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 1037
+              }
+            ]
+          ],
+          "label": ""
+        }
+      ],
+      "manualBarlines": [
+        433.6000061035156,
+        715.6000061035156
+      ],
+      "showInitial": true,
+      "showFinal": true
+    },
+    {
+      "id": 1767717205329,
+      "staves": [
+        {
+          "clef": "treble",
+          "notes": [
+            [
+              {
+                "pitch": "A4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 137
+              },
+              {
+                "pitch": "E4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 137
+              }
+            ],
+            [
+              {
+                "pitch": "A4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 187
+              },
+              {
+                "pitch": "E4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 187
+              }
+            ],
+            [
+              {
+                "pitch": "A4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 237
+              },
+              {
+                "pitch": "E4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 237
+              }
+            ],
+            [
+              {
+                "pitch": "B4",
+                "type": "minima",
+                "dot": false,
+                "accidental": null,
+                "x": 287,
+                "firmata": true
+              },
+              {
+                "pitch": "D4",
+                "type": "minima",
+                "dot": false,
+                "accidental": "sharp",
+                "x": 287
+              }
+            ],
+            [
+              {
+                "pitch": "C5",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 337
+              },
+              {
+                "pitch": "E4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 337
+              }
+            ],
+            [
+              {
+                "pitch": "C5",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 387
+              },
+              {
+                "pitch": "E4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 387
+              }
+            ],
+            [
+              {
+                "pitch": "E5",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 437
+              },
+              {
+                "pitch": "E4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 437
+              }
+            ],
+            [
+              {
+                "pitch": "B4",
+                "type": "colcheia",
+                "dot": true,
+                "accidental": null,
+                "x": 487
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": true,
+                "accidental": null,
+                "x": 487
+              }
+            ],
+            [
+              {
+                "pitch": "G4",
+                "type": "semicolcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 537
+              },
+              {
+                "pitch": "D4",
+                "type": "semicolcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 537
+              }
+            ],
+            [
+              {
+                "pitch": "B4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 587
+              },
+              {
+                "pitch": "D4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 587
+              }
+            ],
+            [
+              {
+                "pitch": "A4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 637
+              },
+              {
+                "pitch": "E4",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 637
+              }
+            ],
+            [
+              {
+                "pitch": "A4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 687
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 687
+              }
+            ],
+            [
+              {
+                "pitch": "A4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 737
+              },
+              {
+                "pitch": "C4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 737
+              }
+            ],
+            [
+              {
+                "pitch": "G4",
+                "type": "minima",
+                "dot": false,
+                "accidental": null,
+                "x": 787,
+                "firmata": true
+              },
+              {
+                "pitch": "B3",
+                "type": "minima",
+                "dot": false,
+                "accidental": null,
+                "x": 787,
+                "firmata": true
+              }
+            ]
+          ],
+          "label": ""
+        },
+        {
+          "clef": "bass",
+          "notes": [
+            [
+              {
+                "pitch": "G3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 137
+              },
+              {
+                "pitch": "C3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 137
+              }
+            ],
+            [
+              {
+                "pitch": "F3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 187,
+                "ligadura": true
+              },
+              {
+                "pitch": "C3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 187,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "F3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 237
+              },
+              {
+                "pitch": "C3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 237
+              }
+            ],
+            [
+              {
+                "pitch": "F3",
+                "type": "minima",
+                "dot": false,
+                "accidental": null,
+                "x": 287,
+                "firmata": true
+              },
+              {
+                "pitch": "B2",
+                "type": "minima",
+                "dot": false,
+                "accidental": null,
+                "x": 287,
+                "firmata": true
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 337
+              },
+              {
+                "pitch": "E3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 337
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 387,
+                "ligadura": true
+              },
+              {
+                "pitch": "C3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 387,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 437
+              },
+              {
+                "pitch": "C3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 437
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "colcheia",
+                "dot": true,
+                "accidental": null,
+                "x": 487,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "semicolcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 537
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 587
+              },
+              {
+                "pitch": "G2",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 587
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 637
+              },
+              {
+                "pitch": "C3",
+                "type": "seminima",
+                "dot": false,
+                "accidental": null,
+                "x": 637
+              }
+            ],
+            [
+              {
+                "pitch": "F3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 687,
+                "ligadura": true
+              },
+              {
+                "pitch": "D3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 687,
+                "ligadura": true
+              }
+            ],
+            [
+              {
+                "pitch": "F3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 737
+              },
+              {
+                "pitch": "D3",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 737
+              }
+            ],
+            [
+              {
+                "pitch": "G3",
+                "type": "minima",
+                "dot": false,
+                "accidental": null,
+                "x": 787,
+                "firmata": true
+              },
+              {
+                "pitch": "D3",
+                "type": "minima",
+                "dot": false,
+                "accidental": null,
+                "x": 787,
+                "firmata": true
+              },
+              {
+                "pitch": "G2",
+                "type": "minima",
+                "dot": false,
+                "accidental": null,
+                "x": 787,
+                "firmata": true
+              }
+            ]
+          ],
+          "label": ""
+        }
+      ],
+      "showInitial": true,
+      "showFinal": true,
+      "manualBarlines": [
+        312.1000061035156,
+        624.1000061035156
+      ]
+    }
+  ]
+}
