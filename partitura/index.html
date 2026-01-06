@@ -385,6 +385,7 @@
                     <button id="note-mode-btn" class="selected">🎵 <span class="btn-text">Melodia</span></button>
                     <button id="rest-mode-btn">𝄽 <span class="btn-text">Pausa</span></button>
                     <button id="harmony-btn">🎹 <span class="btn-text">Harmonia</span></button>
+                    <button id="barline-mode-btn" title="Adicionar/remover linha de compasso manualmente">║ <span class="btn-text">Compasso</span></button>
                     <div class="flex-row" style="margin-top: 5px;">
                         <button id="play-btn" class="btn-primary flex-grow" title="Tocar Partitura (Atalho: Espaço)">▶</button>
                         <button id="erase-mode-btn" title="Apagar">
@@ -433,7 +434,7 @@
                 <div class="button-list">
                     <button id="add-system-btn">➕ <span class="btn-text">Sistema</span></button>
                     <button id="add-staff-btn">➕ <span class="btn-text">Pauta</span></button>
-                    <button id="finish-edit-btn" class="btn-success">✅ <span class="btn-text">Finalizar</span></button>
+                    <button id="finish-edit-btn" class="btn-success" title="Preencher linhas de compasso automaticamente">🪄 <span class="btn-text">Auto-Comp.</span></button>
                 </div>
             </div>
 
@@ -566,7 +567,8 @@
                     <li>Clique com o <strong>botão direito</strong> para <strong>diminuir</strong> seu valor.</li>
                 </ul>
 
-                <p style="margin-top: 10px;"><strong>✅ Finalizar Edição:</strong> Este botão é fundamental! Ele organiza todas as notas que você inseriu livremente, alinhando-as e criando as <strong>linhas de compasso</strong> automaticamente com base na fórmula de compasso escolhida.</p>
+                <p style="margin-top: 10px;"><strong>✅ Auto Compassos:</strong> Use esse botão para ordenar as notas livres e alinhar as <strong>linhas de compasso</strong> automaticamente de acordo com a fórmula escolhida.</p>
+                <p style="margin-top: 10px;"><strong>║ Linha de Compasso:</strong> Ative o botão "Linha" na seção Estrutura e clique sobre a pauta para posicionar ou remover manualmente as linhas de compasso onde achar que devem aparecer.</p>
 
                 <p style="margin-top: 10px;"><strong>🎹 Harmonia:</strong> Ative este modo para sobrepor notas na mesma posição horizontal, criando acordes.</p>
 
@@ -605,7 +607,8 @@ let staffs = Array.from({ length: 4 }, (_, i) => ({
     staves: [
         { clef: 'treble', notes: [], label: i === 0 ? 'P1' : '' },
         { clef: 'bass', notes: [], label: '' }
-    ]
+    ],
+    manualBarlines: []
 }));
 let currentSystemIndex = 0;
 let currentStaffIndex = 0; // Index da pauta dentro do sistema
@@ -614,6 +617,7 @@ let isNoteMode = true;
 let isEraseMode = false;
 let isFirmataMode = false;
 let isLigaduraMode = false;
+let isBarlineMode = false;
 let isEditing = true;
 const durationSequence = [
     { type: 'semicolcheia', dot: false },
@@ -651,6 +655,7 @@ const SPACING = 50;
 const MIN_SCORE_WIDTH = window.innerWidth < 768 ? 600 : 900;
 let CLEF_MARGIN = 130;
 let timeSignatureX = 110; // Posição horizontal do compasso (4/4)
+const MANUAL_BARLINE_TOLERANCE = 12;
 const SYSTEM_SPACING = 400; // Espaçamento entre sistemas
 const STAFF_HEIGHT = 80;    // Altura das 5 linhas
 const STAFF_GAP = 100;      // Espaço entre pautas de um mesmo sistema
@@ -719,7 +724,8 @@ function checkAndCreateNewStaff() {
         }));
         staffs.push({
             id: Date.now(),
-            staves: newStaves
+            staves: newStaves,
+            manualBarlines: []
         });
         currentSystemIndex = staffs.length - 1;
         updateStaffIndicator();
@@ -1265,7 +1271,8 @@ function importMusicalNotesToScore() {
         staves: [
             { clef: 'treble', notes: [], label: i === 0 ? 'P1' : '' },
             { clef: 'bass', notes: [], label: '' }
-        ]
+        ],
+        manualBarlines: []
     }));
     currentSystemIndex = 0;
     currentStaffIndex = 0;
@@ -1557,6 +1564,22 @@ function drawBarline(x, y) {
     ctx.moveTo(x, y);
     ctx.lineTo(x, y + STAFF_HEIGHT);
     ctx.stroke();
+}
+
+function ensureManualBarlines(system) {
+    if (!Array.isArray(system.manualBarlines)) {
+        system.manualBarlines = [];
+    }
+    return system.manualBarlines;
+}
+
+function drawManualBarlines(system, staffYBase) {
+    const manualLines = ensureManualBarlines(system);
+    if (manualLines.length === 0) return;
+
+    manualLines.forEach(barX => {
+        drawBarline(barX, staffYBase);
+    });
 }
 
 function drawKeySharps(staffY, clef) {
@@ -1914,6 +1937,9 @@ function redraw() {
                     }
                 });
             }
+
+            // Desenhar barlines manuais sempre que existirem
+            drawManualBarlines(system, staffYBase);
         });
         totalBeatsAccumulated += calculateSystemBeats(system);
     });
@@ -2135,11 +2161,16 @@ function loadScoreData(data) {
             staves: [
                 { clef: 'treble', notes: grandStaff[0].notes, label: 'P1' },
                 { clef: 'bass', notes: grandStaff[1].notes, label: '' }
-            ]
+            ],
+            manualBarlines: []
         }));
     } else {
-        staffs = data.staffs;
+        staffs = data.staffs.map(system => ({
+            ...system,
+            manualBarlines: Array.isArray(system.manualBarlines) ? system.manualBarlines : []
+        }));
     }
+    staffs.forEach(ensureManualBarlines);
     
     currentSystemIndex = 0;
     currentStaffIndex = 0;
@@ -2346,12 +2377,14 @@ document.getElementById('note-mode-btn').addEventListener('click', () => {
     isEraseMode = false;
     isFirmataMode = false;
     isLigaduraMode = false;
+    isBarlineMode = false;
     document.getElementById('note-mode-btn').classList.add('selected');
     document.getElementById('rest-mode-btn').classList.remove('selected');
     document.getElementById('harmony-btn').classList.remove('active');
     document.getElementById('erase-mode-btn').classList.remove('selected');
     document.getElementById('firmata-mode-btn').classList.remove('selected');
     document.getElementById('ligadura-mode-btn').classList.remove('selected');
+    document.getElementById('barline-mode-btn').classList.remove('selected');
     redraw();
 });
 document.getElementById('rest-mode-btn').addEventListener('click', () => {
@@ -2360,12 +2393,14 @@ document.getElementById('rest-mode-btn').addEventListener('click', () => {
     isEraseMode = false;
     isFirmataMode = false;
     isLigaduraMode = false;
+    isBarlineMode = false;
     document.getElementById('rest-mode-btn').classList.add('selected');
     document.getElementById('note-mode-btn').classList.remove('selected');
     document.getElementById('harmony-btn').classList.remove('active');
     document.getElementById('erase-mode-btn').classList.remove('selected');
     document.getElementById('firmata-mode-btn').classList.remove('selected');
     document.getElementById('ligadura-mode-btn').classList.remove('selected');
+    document.getElementById('barline-mode-btn').classList.remove('selected');
     redraw();
 });
 document.getElementById('erase-mode-btn').addEventListener('click', () => {
@@ -2375,12 +2410,14 @@ document.getElementById('erase-mode-btn').addEventListener('click', () => {
         isHarmonyMode = false;
         isFirmataMode = false;
         isLigaduraMode = false;
+        isBarlineMode = false;
         document.getElementById('erase-mode-btn').classList.add('selected');
         document.getElementById('note-mode-btn').classList.remove('selected');
         document.getElementById('rest-mode-btn').classList.remove('selected');
         document.getElementById('harmony-btn').classList.remove('active');
         document.getElementById('firmata-mode-btn').classList.remove('selected');
         document.getElementById('ligadura-mode-btn').classList.remove('selected');
+        document.getElementById('barline-mode-btn').classList.remove('selected');
     } else {
         isNoteMode = true;
         document.getElementById('erase-mode-btn').classList.remove('selected');
@@ -2395,12 +2432,14 @@ document.getElementById('firmata-mode-btn').addEventListener('click', () => {
         isHarmonyMode = false;
         isEraseMode = false;
         isLigaduraMode = false;
+        isBarlineMode = false;
         document.getElementById('firmata-mode-btn').classList.add('selected');
         document.getElementById('note-mode-btn').classList.remove('selected');
         document.getElementById('rest-mode-btn').classList.remove('selected');
         document.getElementById('harmony-btn').classList.remove('active');
         document.getElementById('erase-mode-btn').classList.remove('selected');
         document.getElementById('ligadura-mode-btn').classList.remove('selected');
+        document.getElementById('barline-mode-btn').classList.remove('selected');
     } else {
         isNoteMode = true;
         document.getElementById('firmata-mode-btn').classList.remove('selected');
@@ -2415,12 +2454,14 @@ document.getElementById('ligadura-mode-btn').addEventListener('click', () => {
         isHarmonyMode = false;
         isEraseMode = false;
         isFirmataMode = false;
+        isBarlineMode = false;
         document.getElementById('ligadura-mode-btn').classList.add('selected');
         document.getElementById('note-mode-btn').classList.remove('selected');
         document.getElementById('rest-mode-btn').classList.remove('selected');
         document.getElementById('harmony-btn').classList.remove('active');
         document.getElementById('erase-mode-btn').classList.remove('selected');
         document.getElementById('firmata-mode-btn').classList.remove('selected');
+        document.getElementById('barline-mode-btn').classList.remove('selected');
     } else {
         isNoteMode = true;
         document.getElementById('ligadura-mode-btn').classList.remove('selected');
@@ -2440,6 +2481,8 @@ document.getElementById('finish-edit-btn').addEventListener('click', () => {
     });
 
     isEditing = false;
+    isBarlineMode = false;
+    document.getElementById('barline-mode-btn').classList.remove('selected');
     redraw();
 
     // Sincronizar posições X para que a transição de volta para edição seja suave
@@ -2511,9 +2554,11 @@ document.getElementById('harmony-btn').addEventListener('click', () => {
     isEraseMode = false;
     isFirmataMode = false;
     isLigaduraMode = false;
+    isBarlineMode = false;
     document.getElementById('erase-mode-btn').classList.remove('selected');
     document.getElementById('firmata-mode-btn').classList.remove('selected');
     document.getElementById('ligadura-mode-btn').classList.remove('selected');
+    document.getElementById('barline-mode-btn').classList.remove('selected');
     if (isHarmonyMode) {
         isNoteMode = true;
         document.getElementById('harmony-btn').classList.add('active');
@@ -2554,6 +2599,29 @@ document.getElementById('add-staff-btn').addEventListener('click', () => {
         label: ''
     });
     currentStaffIndex = system.staves.length - 1;
+    redraw();
+});
+
+document.getElementById('barline-mode-btn').addEventListener('click', () => {
+    isBarlineMode = !isBarlineMode;
+    document.getElementById('barline-mode-btn').classList.toggle('selected', isBarlineMode);
+    if (isBarlineMode) {
+        isNoteMode = false;
+        isEraseMode = false;
+        isFirmataMode = false;
+        isLigaduraMode = false;
+        isHarmonyMode = false;
+        document.getElementById('note-mode-btn').classList.remove('selected');
+        document.getElementById('rest-mode-btn').classList.remove('selected');
+        document.getElementById('erase-mode-btn').classList.remove('selected');
+        document.getElementById('firmata-mode-btn').classList.remove('selected');
+        document.getElementById('ligadura-mode-btn').classList.remove('selected');
+        document.getElementById('harmony-btn').classList.remove('active');
+    } else {
+        isNoteMode = true;
+        document.getElementById('barline-mode-btn').classList.remove('selected');
+        document.getElementById('note-mode-btn').classList.add('selected');
+    }
     redraw();
 });
 
@@ -2605,6 +2673,15 @@ document.getElementById('undo-btn').addEventListener('click', () => {
             action.chord.forEach(n => n.firmata = !n.firmata);
         } else if (action.type === 'toggle-ligadura') {
             action.chord.forEach(n => n.ligadura = !n.ligadura);
+        } else if (action.type === 'manual-barline') {
+            const manualLines = ensureManualBarlines(action.system);
+            if (action.added) {
+                const index = manualLines.indexOf(action.x);
+                if (index > -1) manualLines.splice(index, 1);
+            } else {
+                manualLines.push(action.x);
+                manualLines.sort((a, b) => a - b);
+            }
         }
         redraw();
     } else {
@@ -2626,7 +2703,8 @@ document.getElementById('clear-btn').addEventListener('click', () => {
             staves: [
                 { clef: 'treble', notes: [], label: i === 0 ? 'P1' : '' },
                 { clef: 'bass', notes: [], label: '' }
-            ]
+            ],
+            manualBarlines: []
         }));
         currentSystemIndex = 0;
         currentStaffIndex = 0;
@@ -2753,9 +2831,25 @@ canvas.addEventListener('mousedown', async (e) => {
     
     if (targetStaffIndex === -1) return;
     
+    const system = staffs[targetSystemIndex];
+    if (isBarlineMode) {
+        const manualLines = ensureManualBarlines(system);
+        const existingIndex = manualLines.findIndex(x => Math.abs(x - clickX) < MANUAL_BARLINE_TOLERANCE);
+        
+        if (existingIndex > -1) {
+            const removedLine = manualLines.splice(existingIndex, 1)[0];
+            undoStack.push({ type: 'manual-barline', system: system, x: removedLine, added: false });
+        } else {
+            manualLines.push(clickX);
+            manualLines.sort((a, b) => a - b);
+            undoStack.push({ type: 'manual-barline', system: system, x: clickX, added: true });
+        }
+        redraw();
+        return;
+    }
+
     currentSystemIndex = targetSystemIndex;
     currentStaffIndex = targetStaffIndex;
-    const system = staffs[currentSystemIndex];
     const systemY = currentSystemIndex * SYSTEM_SPACING;
     const staff = system.staves[currentStaffIndex];
     currentClef = staff.clef;
