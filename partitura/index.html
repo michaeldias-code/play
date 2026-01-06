@@ -317,6 +317,9 @@
                 border-radius: 8px;
                 border: 1px solid #e0e0e0;
             }
+            .meta-inputs.collapsed {
+                display: none;
+            }
             .meta-inputs .flex-row {
                 justify-content: flex-start;
                 width: 100%;
@@ -460,6 +463,7 @@
                 <div class="header-title">
                     <h1>🎵 Partitura</h1>
                     <span id="staff-indicator">Sistema 1/4</span>
+                    <button id="toggle-meta-btn" class="mobile-only" style="padding: 4px 8px; font-size: 11px; margin-left: 10px; border-radius: 4px; background: #f0f2f5; border: 1px solid #ddd;">🔼 Recolher</button>
                 </div>
                 
                 <div class="meta-inputs">
@@ -603,6 +607,9 @@
                 <div class="hymn-item" onclick="loadHymn('src/hymns/4/hino4.json')">
                     <strong>Hino 4</strong> - Ouve a nossa oração
                 </div>
+                <div class="hymn-item" onclick="loadHymn('src/hymns/5/hino5.json')">
+                    <strong>Hino 5</strong> - A Rocha celestial
+                </div>
             </div>
             <div class="modal-buttons" style="margin-top: 20px;">
                 <button id="hymns-close" style="background: #ccc; width: 100%;">Fechar</button>
@@ -647,6 +654,7 @@ let keySharps = 0;
 let keyFlats = 0;
 let timeSignature = { top: 4, bottom: 4 };
 let tempo = 120;
+let isPlaying = false;
 
 // Variáveis para processamento de áudio
 let audioBuffer = null;
@@ -1388,8 +1396,14 @@ function getDurationInBeats(noteType, dot, bottomNumber) {
         "pausa-colcheia": 0.5, "pausa-semicolcheia": 0.25
     };
     let duration = baseDurations[noteType] || 1;
-    if (bottomNumber === 8) duration *= 0.5;
-    else if (bottomNumber === 2) duration *= 2;
+    
+    // Converte a duração base (em semínimas) para a unidade do denominador do compasso
+    if (bottomNumber === 8) {
+        duration *= 2;
+    } else if (bottomNumber === 2) {
+        duration *= 0.5;
+    }
+    
     if (dot) duration *= 1.5;
     return duration;
 }
@@ -1478,7 +1492,7 @@ function drawSemicolcheia(x, y, dot = false) {
     ctx.stroke();
     if (dot) drawDot(x, y);
 }
-function drawRest(type, x, staffY) {
+function drawRest(type, x, staffY, dot = false) {
     ctx.font = "32px Arial";
     ctx.fillStyle = "#333";
     ctx.textAlign = "center";
@@ -1498,6 +1512,7 @@ function drawRest(type, x, staffY) {
     if (type === 'pausa-minima') y += 10;
     
     ctx.fillText(symbol, x, y);
+    if (dot) drawDot(x, staffY + 30); 
     ctx.textAlign = "left";
     ctx.textBaseline = "alphabetic";
 }
@@ -1532,7 +1547,7 @@ function drawSlur(x1, y1, x2, y2, isAbove = true) {
 
 function drawNote(note, x, y) {
     if (note.type.startsWith('pausa-')) {
-        drawRest(note.type, x, y);
+        drawRest(note.type, x, y, note.dot);
         return;
     }
     const dot = note.dot;
@@ -1918,7 +1933,7 @@ function redraw() {
                     if (note.type.startsWith('pausa-')) {
                         // Não mostrar pausas na clave de fá durante a edição (pedido do usuário)
                         if (isEditing && staff.clef === 'bass') return;
-                        drawRest(note.type, drawX, staffYBase);
+                        drawRest(note.type, drawX, staffYBase, note.dot);
                     } else {
                         const noteYPos = noteYMapByClef(staff.clef)[note.pitch] + staffYBase;
                         drawLedgerLines(drawX, noteYPos, staffYBase, staff.clef);
@@ -1999,16 +2014,68 @@ function freqToNoteName(freq) {
     const octave = Math.floor(halfSteps / 12);
     return notes[halfSteps % 12] + octave;
 }
+function updatePlayButtonUI() {
+    const btn = document.getElementById('play-btn');
+    if (!btn) return;
+    if (isPlaying) {
+        btn.innerHTML = '⏹';
+        btn.classList.add('btn-danger');
+        btn.classList.remove('btn-primary');
+        btn.title = "Parar Partitura (Atalho: Espaço)";
+    } else {
+        btn.innerHTML = '▶';
+        btn.classList.add('btn-primary');
+        btn.classList.remove('btn-danger');
+        btn.title = "Tocar Partitura (Atalho: Espaço)";
+    }
+}
+
+let playbackTimeout = null;
+
+function stopScore() {
+    isPlaying = false;
+    if (playbackTimeout) {
+        clearTimeout(playbackTimeout);
+        playbackTimeout = null;
+    }
+    Tone.Transport.stop();
+    Tone.Transport.cancel();
+    if (piano) piano.releaseAll();
+    updatePlayButtonUI();
+}
+
 async function playFreq(freq, duration, startTime = 0) {
     await initPiano();
     const note = freqToNoteName(freq);
-    piano.triggerAttackRelease(note, duration, Tone.now() + startTime, 0.6);
+    // Agendar no Transport para permitir parar
+    Tone.Transport.schedule((time) => {
+        if (isPlaying) {
+            piano.triggerAttackRelease(note, duration, time, 0.6);
+        }
+    }, startTime);
 }
+
 async function playScore() {
+    if (isPlaying) {
+        stopScore();
+        return;
+    }
+
     await initPiano();
     await Tone.start();
     
     const beatDuration = 60 / tempo;
+    let unitDuration = beatDuration;
+
+    // Lógica de ritmo: diferencia compassos simples de compostos
+    // Em 6/8, 9/8, 12/8 (compostos), o BPM geralmente se refere à semínima pontuada (3 colcheias).
+    if (timeSignature.bottom === 8 && timeSignature.top % 3 === 0 && timeSignature.top > 3) {
+        unitDuration = beatDuration / 3; // Unidade é a colcheia
+    } else {
+        // Nos demais casos (4/4, 2/4, 3/4, 3/8, 2/2), o BPM se refere à unidade do denominador
+        unitDuration = beatDuration;
+    }
+
     let systemStartTime = 0;
 
     // Primeiro, limpamos flags de reprodução e preparamos referências para ligaduras
@@ -2029,23 +2096,48 @@ async function playScore() {
         return;
     }
 
+    isPlaying = true;
+    updatePlayButtonUI();
+    
+    Tone.Transport.cancel();
+    Tone.Transport.seconds = 0;
+
     for (const system of staffs) {
+        if (!isPlaying) break;
         let maxSystemDuration = 0;
 
         for (const staff of system.staves) {
+            if (!isPlaying) break;
             let currentStaffTime = systemStartTime;
+            let beatsInMeasure = 0;
+            let measureAccidentals = {}; // { pitch: 'sharp' | 'flat' | 'natural' }
             
             for (let i = 0; i < staff.notes.length; i++) {
+                if (!isPlaying) break;
                 const chord = staff.notes[i];
                 if (!chord || chord.length === 0) continue;
 
+                // Reset de acidentes se ultrapassar o limite do compasso
+                if (beatsInMeasure >= timeSignature.top - 0.001) {
+                    beatsInMeasure %= timeSignature.top;
+                    measureAccidentals = {};
+                }
+
                 // Duração para o avanço do tempo nesta pauta
                 let duration = Infinity;
+                let chordBeats = 0;
                 chord.forEach(n => {
-                    const d = getDurationInBeats(n.type, n.dot, timeSignature.bottom) * beatDuration;
-                    if (d < duration) duration = d;
+                    const beats = getDurationInBeats(n.type, n.dot, timeSignature.bottom);
+                    const d = beats * unitDuration;
+                    if (d < duration) {
+                        duration = d;
+                        chordBeats = beats;
+                    }
                 });
-                if (duration === Infinity) duration = beatDuration;
+                if (duration === Infinity) {
+                    duration = unitDuration;
+                    chordBeats = 1;
+                }
 
                 let hasFirmata = chord.some(n => n.firmata);
                 if (hasFirmata) duration *= 2.5;
@@ -2057,8 +2149,15 @@ async function playScore() {
                     let freq = freqs[note.pitch];
                     if (!freq) continue;
 
-                    // Aplica acidentes da armadura de clave
-                    if (!note.accidental) {
+                    // Determina o acidente efetivo (explícito na nota ou herdado do compasso)
+                    let effectiveAccidental = note.accidental || measureAccidentals[note.pitch];
+
+                    if (effectiveAccidental) {
+                        if (effectiveAccidental === 'sharp') freq *= SHARP_FACTOR;
+                        else if (effectiveAccidental === 'flat') freq *= FLAT_FACTOR;
+                        // se for 'natural', freq permanece a original (ignora armadura)
+                    } else {
+                        // Aplica acidentes da armadura de clave se não houver acidente no compasso
                         const sharpOrder = ['F', 'C', 'G', 'D', 'A', 'E', 'B'];
                         const flatOrder = ['B', 'E', 'A', 'D', 'G', 'C', 'F'];
                         const noteLetter = note.pitch[0];
@@ -2074,10 +2173,12 @@ async function playScore() {
                         }
                     }
 
-                    if (note.accidental === 'sharp') freq *= SHARP_FACTOR;
-                    else if (note.accidental === 'flat') freq *= FLAT_FACTOR;
+                    // Se a nota tem um acidente explícito, ela define o acidente para o resto do compasso
+                    if (note.accidental) {
+                        measureAccidentals[note.pitch] = note.accidental;
+                    }
                     
-                    let noteDuration = getDurationInBeats(note.type, note.dot, timeSignature.bottom) * beatDuration;
+                    let noteDuration = getDurationInBeats(note.type, note.dot, timeSignature.bottom) * unitDuration;
                     if (hasFirmata) noteDuration *= 2.5;
 
                     // Lógica de Ligadura (Tie/Slur)
@@ -2090,14 +2191,14 @@ async function playScore() {
                                 const nextChordInStaff = s.notes[nextNoteIdx];
                                 const tiedNote = nextChordInStaff.find(nn => nn.pitch === note.pitch);
                                 if (tiedNote) {
-                                    const extraDuration = getDurationInBeats(tiedNote.type, tiedNote.dot, timeSignature.bottom) * beatDuration;
+                                    const extraDuration = getDurationInBeats(tiedNote.type, tiedNote.dot, timeSignature.bottom) * unitDuration;
                                     noteDuration += extraDuration;
                                     tiedNote._skipPlayback = true;
                                     tiedNote._staffRef = s;
                                     tiedNote._noteIdxInStaff = nextNoteIdx;
                                     currentNote = tiedNote;
                                 } else {
-                                    noteDuration += (beatDuration * 0.1); 
+                                    noteDuration += (unitDuration * 0.1); 
                                     break;
                                 }
                             } else {
@@ -2109,6 +2210,7 @@ async function playScore() {
                     await playFreq(freq, noteDuration, currentStaffTime);
                 }
                 currentStaffTime += duration;
+                beatsInMeasure += chordBeats;
             }
             
             const staffDuration = currentStaffTime - systemStartTime;
@@ -2118,6 +2220,8 @@ async function playScore() {
         }
         systemStartTime += maxSystemDuration;
     }
+
+    Tone.Transport.start();
 
     // Limpar as referências temporárias
     staffs.forEach(system => {
@@ -2131,6 +2235,14 @@ async function playScore() {
             });
         });
     });
+
+    playbackTimeout = setTimeout(() => {
+        if (isPlaying) {
+            isPlaying = false;
+            Tone.Transport.stop();
+            updatePlayButtonUI();
+        }
+    }, (systemStartTime * 1000) + 500);
 }
 function exportToJSON() {
     const data = {
@@ -2330,6 +2442,12 @@ document.getElementById('composer-input').addEventListener('input', (e) => {
 document.getElementById('tempo-input').addEventListener('change', (e) => {
     tempo = parseInt(e.target.value) || 120;
     redraw();
+});
+
+document.getElementById('toggle-meta-btn').addEventListener('click', function() {
+    const metaInputs = document.querySelector('.meta-inputs');
+    const isCollapsed = metaInputs.classList.toggle('collapsed');
+    this.innerHTML = isCollapsed ? '🔽 Info' : '🔼 Recolher';
 });
 
 // Atalhos de Teclado para Eficiência
