@@ -422,7 +422,11 @@
       ],
       "measureWidth": 387.3333333333333,
       "showInitial": true,
-      "showFinal": true
+      "showFinal": true,
+      "manualBarlines": [
+        468,
+        791
+      ]
     },
     {
       "id": 1767658561456,
@@ -878,7 +882,12 @@
       ],
       "measureWidth": 387.3333333333333,
       "showInitial": true,
-      "showFinal": true
+      "showFinal": true,
+      "manualBarlines": [
+        498,
+        925,
+        1257.3999938964844
+      ]
     },
     {
       "id": 1767658561457,
@@ -1253,7 +1262,11 @@
       ],
       "measureWidth": 581,
       "showInitial": true,
-      "showFinal": true
+      "showFinal": true,
+      "manualBarlines": [
+        636.3999938964844,
+        1250.3999938964844
+      ]
     },
     {
       "id": 1767658561458,
@@ -1759,7 +1772,11 @@
       ],
       "measureWidth": 387.3333333333333,
       "showInitial": true,
-      "showFinal": true
+      "showFinal": true,
+      "manualBarlines": [
+        408.3999938964844,
+        909.3999938964844
+      ]
     }
   ]
 }
