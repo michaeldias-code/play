@@ -2998,6 +2998,12 @@ document.getElementById('help-modal').addEventListener('click', (e) => {
 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
 canvas.addEventListener('mousedown', async (e) => {
+    // No celular, se foi um swipe, ignoramos o mousedown subsequente
+    if (hasSwiped) {
+        hasSwiped = false;
+        return;
+    }
+
     // Iniciar áudio se necessário (exigência do navegador)
     if (Tone.context.state !== 'running') {
         await Tone.start();
@@ -3199,6 +3205,7 @@ canvas.addEventListener('mousedown', async (e) => {
     if (isMobile() && selectedNoteForMobile) {
         selectedNoteForMobile = null;
         redraw();
+        return;
     }
 
     if (e.button !== 0) return; // Só permite adicionar novas notas com clique esquerdo
@@ -3356,6 +3363,7 @@ canvas.addEventListener('touchmove', (e) => {
     const distY = touch.clientY - touchStartY;
     
     if (Math.abs(distY) > 30) {
+        hasSwiped = true;
         const currentNote = selectedNoteForMobile;
         const isRest = currentNote.type.startsWith('pausa-');
         const baseType = isRest ? currentNote.type.replace('pausa-', '') : currentNote.type;
