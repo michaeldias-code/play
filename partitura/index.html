@@ -3341,13 +3341,16 @@ canvas.addEventListener('touchstart', (e) => {
     const touch = e.touches[0];
     touchStartY = touch.clientY;
     hasSwiped = false;
-}, { passive: true });
+}, { passive: false });
 
 canvas.addEventListener('touchmove', (e) => {
     if (!isMobile() || !selectedNoteForMobile) return;
     
     // Mudança de valor apenas se Melodia ou Harmonia estiverem selecionados
     if (!isNoteMode) return; 
+
+    // Bloquear scroll se estivermos alterando o valor da nota (congelar no compasso)
+    if (e.cancelable) e.preventDefault();
 
     const touch = e.touches[0];
     const distY = touch.clientY - touchStartY;
@@ -3381,7 +3384,7 @@ canvas.addEventListener('touchmove', (e) => {
         }
         touchStartY = touch.clientY;
     }
-}, { passive: true });
+}, { passive: false });
 </script>    
 </body>
 </html>
