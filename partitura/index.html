@@ -389,6 +389,16 @@
                     <button id="rest-mode-btn">𝄽 <span class="btn-text">Pausa</span></button>
                     <button id="harmony-btn">🎹 <span class="btn-text">Harmonia</span></button>
                     <button id="barline-mode-btn" title="Adicionar/remover linha de compasso manualmente">║ <span class="btn-text">Compasso</span></button>
+                    <div class="setting-group" style="margin-top: 8px; margin-bottom: 5px;">
+                        <label for="instrument-select" style="font-size: 11px; font-weight: bold; display: block; margin-bottom: 2px;">Instrumento:</label>
+                        <select id="instrument-select" style="width: 100%; padding: 4px; font-size: 12px; border-radius: 4px; border: 1px solid #ddd; background: white;">
+                            <option value="piano">🎹 Piano</option>
+                            <option value="guitar">🎸 Violão</option>
+                            <option value="violin">🎻 Violino</option>
+                            <option value="flute">🎶 Flauta</option>
+                            <option value="organ">🎹 Órgão</option>
+                        </select>
+                    </div>
                     <div class="flex-row" style="margin-top: 5px;">
                         <button id="play-btn" class="btn-primary flex-grow" title="Tocar Partitura (Atalho: Espaço)">▶</button>
                         <button id="erase-mode-btn" title="Apagar">
@@ -2049,37 +2059,54 @@ function redraw() {
 function noteYMapByClef(clef) {
     return clef === 'treble' ? noteYTreble : noteYBass;
 }
-let piano = null;
-async function initPiano() {
-    if (piano) return;
-    piano = new Tone.Sampler({
-        urls: {
-            "A0": "A0.mp3",
-            "C1": "C1.mp3",
-            "D#1": "Ds1.mp3",
-            "F#1": "Fs1.mp3",
-            "A1": "A1.mp3",
-            "C2": "C2.mp3",
-            "D#2": "Ds2.mp3",
-            "F#2": "Fs2.mp3",
-            "A2": "A2.mp3",
-            "C3": "C3.mp3",
-            "D#3": "Ds3.mp3",
-            "F#3": "Fs3.mp3",
-            "A3": "A3.mp3",
-            "C4": "C4.mp3",
-            "D#4": "Ds4.mp3",
-            "F#4": "Fs4.mp3",
-            "A4": "A4.mp3",
-            "C5": "C5.mp3",
-            "D#5": "Ds5.mp3",
-            "F#5": "Fs5.mp3",
-            "A5": "A5.mp3",
-            "C6": "C6.mp3"
-        },
+const instrumentConfigs = {
+    piano: {
+        baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/piano/",
+        urls: { "A0": "A0.mp3", "C1": "C1.mp3", "D#1": "Ds1.mp3", "F#1": "Fs1.mp3", "A1": "A1.mp3", "C2": "C2.mp3", "D#2": "Ds2.mp3", "F#2": "Fs2.mp3", "A2": "A2.mp3", "C3": "C3.mp3", "D#3": "Ds3.mp3", "F#3": "Fs3.mp3", "A3": "A3.mp3", "C4": "C4.mp3", "D#4": "Ds4.mp3", "F#4": "Fs4.mp3", "A4": "A4.mp3", "C5": "C5.mp3", "D#5": "Ds5.mp3", "F#5": "Fs5.mp3", "A5": "A5.mp3", "C6": "C6.mp3" }
+    },
+    guitar: {
+        baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-acoustic/",
+        urls: { "F#1": "Fs1.mp3", "A1": "A1.mp3", "C2": "C2.mp3", "D#2": "Ds2.mp3", "F#2": "Fs2.mp3", "A2": "A2.mp3", "C3": "C3.mp3", "D#3": "Ds3.mp3", "F#3": "Fs3.mp3", "A3": "A3.mp3", "C4": "C4.mp3", "D#4": "Ds4.mp3" }
+    },
+    violin: {
+        baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/violin/",
+        urls: { "A3": "A3.mp3", "C4": "C4.mp3", "E4": "E4.mp3", "G4": "G4.mp3", "A4": "A4.mp3", "C5": "C5.mp3", "E5": "E5.mp3", "G5": "G5.mp3", "A5": "A5.mp3", "C6": "C6.mp3", "E6": "E6.mp3", "G6": "G6.mp3", "A6": "A6.mp3" }
+    },
+    flute: {
+        baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/flute/",
+        urls: { "A4": "A4.mp3", "C5": "C5.mp3", "E5": "E5.mp3", "A5": "A5.mp3", "C6": "C6.mp3", "E6": "E6.mp3", "A6": "A6.mp3" }
+    },
+    organ: {
+        baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/organ/",
+        urls: { "C3": "C3.mp3", "D#3": "Ds3.mp3", "F#3": "Fs3.mp3", "A3": "A3.mp3", "C4": "C4.mp3", "D#4": "Ds4.mp3", "F#4": "Fs4.mp3", "A4": "A4.mp3", "C5": "C5.mp3", "D#5": "Ds5.mp3", "F#5": "Fs5.mp3", "A5": "A5.mp3", "C6": "C6.mp3" }
+    }
+};
+
+let currentSampler = null;
+let currentInstrumentName = null;
+
+async function initInstrument() {
+    const selected = document.getElementById('instrument-select').value;
+    if (currentSampler && currentInstrumentName === selected) {
+        if (currentSampler.loaded) return;
+        await Tone.loaded();
+        return;
+    }
+    
+    // Se mudar o instrumento, libera o anterior
+    if (currentSampler) {
+        currentSampler.dispose();
+    }
+    
+    currentInstrumentName = selected;
+    const config = instrumentConfigs[selected];
+    
+    currentSampler = new Tone.Sampler({
+        urls: config.urls,
         release: 1,
-        baseUrl: "https://tonejs.github.io/audio/salamander/"
+        baseUrl: config.baseUrl
     }).toDestination();
+    
     await Tone.loaded();
 }
 function freqToNoteName(freq) {
@@ -2116,17 +2143,17 @@ function stopScore() {
     }
     Tone.Transport.stop();
     Tone.Transport.cancel();
-    if (piano) piano.releaseAll();
+    if (currentSampler) currentSampler.releaseAll();
     updatePlayButtonUI();
 }
 
 async function playFreq(freq, duration, startTime = 0) {
-    await initPiano();
+    await initInstrument();
     const note = freqToNoteName(freq);
     // Agendar no Transport para permitir parar
     Tone.Transport.schedule((time) => {
         if (isPlaying) {
-            piano.triggerAttackRelease(note, duration, time, 0.6);
+            currentSampler.triggerAttackRelease(note, duration, time, 0.6);
         }
     }, startTime);
 }
@@ -2137,7 +2164,7 @@ async function playScore() {
         return;
     }
 
-    await initPiano();
+    await initInstrument();
     await Tone.start();
     
     const beatDuration = 60 / tempo;
