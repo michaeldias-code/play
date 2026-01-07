@@ -664,6 +664,10 @@ const durationSequence = [
 ];
 let selectedAccidental = null;
 let isHarmonyMode = false;
+let selectedNoteForMobile = null;
+let touchStartY = 0;
+let hasSwiped = false;
+const isMobile = () => window.innerWidth <= 768 || ('ontouchstart' in window);
 let undoStack = [];
 let keySharps = 0;
 let keyFlats = 0;
@@ -1424,29 +1428,29 @@ function getDurationInBeats(noteType, dot, bottomNumber) {
     if (dot) duration *= 1.5;
     return duration;
 }
-function drawAccidental(acc, x, y) {
+function drawAccidental(acc, x, y, color = "#333") {
     ctx.font = "24px Arial";
-    ctx.fillStyle = "#333";
+    ctx.fillStyle = color;
     const symbol = acc === 'sharp' ? '♯' : acc === 'flat' ? '♭' : '♮';
     ctx.fillText(symbol, x - 20, y + 8);
 }
-function drawDot(x, y) {
+function drawDot(x, y, color = "#333") {
     ctx.beginPath();
     ctx.arc(x + 18, y, 3, 0, Math.PI * 2);
-    ctx.fillStyle = "#333";
+    ctx.fillStyle = color;
     ctx.fill();
 }
-function drawSemibreve(x, y, dot = false) {
+function drawSemibreve(x, y, dot = false, color = "#333") {
     ctx.lineWidth = 2;
-    ctx.strokeStyle = "#333";
+    ctx.strokeStyle = color;
     ctx.beginPath();
     ctx.ellipse(x, y, 10, 7, -0.3, 0, Math.PI * 2);
     ctx.stroke();
-    if (dot) drawDot(x, y);
+    if (dot) drawDot(x, y, color);
 }
-function drawMinima(x, y, dot = false) {
+function drawMinima(x, y, dot = false, color = "#333") {
     ctx.lineWidth = 2;
-    ctx.strokeStyle = "#333";
+    ctx.strokeStyle = color;
     ctx.beginPath();
     ctx.ellipse(x, y, 10, 7, -0.3, 0, Math.PI * 2);
     ctx.stroke();
@@ -1454,12 +1458,12 @@ function drawMinima(x, y, dot = false) {
     ctx.moveTo(x + 10, y);
     ctx.lineTo(x + 10, y - 40);
     ctx.stroke();
-    if (dot) drawDot(x, y);
+    if (dot) drawDot(x, y, color);
 }
-function drawSeminima(x, y, dot = false) {
+function drawSeminima(x, y, dot = false, color = "#333") {
     ctx.lineWidth = 2;
-    ctx.strokeStyle = "#333";
-    ctx.fillStyle = "#333";
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
     ctx.beginPath();
     ctx.ellipse(x, y, 10, 7, -0.3, 0, Math.PI * 2);
     ctx.fill();
@@ -1467,12 +1471,12 @@ function drawSeminima(x, y, dot = false) {
     ctx.moveTo(x + 10, y);
     ctx.lineTo(x + 10, y - 40);
     ctx.stroke();
-    if (dot) drawDot(x, y);
+    if (dot) drawDot(x, y, color);
 }
-function drawColcheia(x, y, dot = false) {
+function drawColcheia(x, y, dot = false, color = "#333") {
     ctx.lineWidth = 2;
-    ctx.strokeStyle = "#333";
-    ctx.fillStyle = "#333";
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
     ctx.beginPath();
     ctx.ellipse(x, y, 10, 7, -0.3, 0, Math.PI * 2);
     ctx.fill();
@@ -1485,12 +1489,12 @@ function drawColcheia(x, y, dot = false) {
     ctx.moveTo(x + 10, y - 40);
     ctx.quadraticCurveTo(x + 26, y - 33, x + 10, y - 20);
     ctx.stroke();
-    if (dot) drawDot(x, y);
+    if (dot) drawDot(x, y, color);
 }
-function drawSemicolcheia(x, y, dot = false) {
+function drawSemicolcheia(x, y, dot = false, color = "#333") {
     ctx.lineWidth = 2;
-    ctx.strokeStyle = "#333";
-    ctx.fillStyle = "#333";
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
     ctx.beginPath();
     ctx.ellipse(x, y, 10, 7, -0.3, 0, Math.PI * 2);
     ctx.fill();
@@ -1507,11 +1511,11 @@ function drawSemicolcheia(x, y, dot = false) {
     ctx.moveTo(x + 10, y - 35);
     ctx.quadraticCurveTo(x + 26, y - 28, x + 10, y - 15);
     ctx.stroke();
-    if (dot) drawDot(x, y);
+    if (dot) drawDot(x, y, color);
 }
-function drawRest(type, x, staffY, dot = false) {
+function drawRest(type, x, staffY, dot = false, color = "#333") {
     ctx.font = "32px Arial";
-    ctx.fillStyle = "#333";
+    ctx.fillStyle = color;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     const symbols = {
@@ -1529,7 +1533,7 @@ function drawRest(type, x, staffY, dot = false) {
     if (type === 'pausa-minima') y += 10;
     
     ctx.fillText(symbol, x, y);
-    if (dot) drawDot(x, staffY + 30); 
+    if (dot) drawDot(x, staffY + 30, color); 
     ctx.textAlign = "left";
     ctx.textBaseline = "alphabetic";
 }
@@ -1563,19 +1567,22 @@ function drawSlur(x1, y1, x2, y2, isAbove = true) {
 }
 
 function drawNote(note, x, y) {
+    const isSelected = selectedNoteForMobile === note;
+    const color = isSelected ? "#f44336" : "#333";
+
     if (note.type.startsWith('pausa-')) {
-        drawRest(note.type, x, y, note.dot);
+        drawRest(note.type, x, y, note.dot, color);
         return;
     }
     const dot = note.dot;
-    if (note.type === "semibreve") drawSemibreve(x, y, dot);
-    else if (note.type === "minima") drawMinima(x, y, dot);
-    else if (note.type === "seminima") drawSeminima(x, y, dot);
-    else if (note.type === "colcheia") drawColcheia(x, y, dot);
-    else if (note.type === "semicolcheia") drawSemicolcheia(x, y, dot);
+    if (note.type === "semibreve") drawSemibreve(x, y, dot, color);
+    else if (note.type === "minima") drawMinima(x, y, dot, color);
+    else if (note.type === "seminima") drawSeminima(x, y, dot, color);
+    else if (note.type === "colcheia") drawColcheia(x, y, dot, color);
+    else if (note.type === "semicolcheia") drawSemicolcheia(x, y, dot, color);
 }
-function drawLedgerLines(x, y, staffY, clef) {
-    ctx.strokeStyle = "#333";
+function drawLedgerLines(x, y, staffY, clef, color = "#333") {
+    ctx.strokeStyle = color;
     ctx.lineWidth = 1.5;
     const topStaffLine = staffY;
     const bottomStaffLine = staffY + STAFF_HEIGHT;
@@ -1801,10 +1808,10 @@ function drawSingleStaff(staffY, clef, isActive = false, label = "", showFinalBa
     
     // Fim da pauta
     if (showFinalBarline) {
-        ctx.beginPath();
-        ctx.moveTo(canvas.width - 20, staffY);
-        ctx.lineTo(canvas.width - 20, staffY + STAFF_HEIGHT);
-        ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(canvas.width - 20, staffY);
+    ctx.lineTo(canvas.width - 20, staffY + STAFF_HEIGHT);
+    ctx.stroke();
     }
 }
 
@@ -1820,30 +1827,30 @@ function drawSystem(systemIndex, showInitialBarline = true, showFinalBarline = t
     });
     
     if (showInitialBarline) {
-        // Colchete inicial do sistema
-        const firstStaffY = systemY + 80;
-        const lastStaffY = systemY + 80 + (system.staves.length - 1) * (STAFF_HEIGHT + STAFF_GAP) + STAFF_HEIGHT;
-        
-        ctx.strokeStyle = "#333";
-        ctx.lineWidth = 4;
+    // Colchete inicial do sistema
+    const firstStaffY = systemY + 80;
+    const lastStaffY = systemY + 80 + (system.staves.length - 1) * (STAFF_HEIGHT + STAFF_GAP) + STAFF_HEIGHT;
+    
+    ctx.strokeStyle = "#333";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(15, firstStaffY);
+    ctx.lineTo(15, lastStaffY);
+    ctx.stroke();
+    
+    // Pequenos traços horizontais no início
+    ctx.lineWidth = 2;
+    system.staves.forEach((_, i) => {
+        const staffY = systemY + 80 + i * (STAFF_HEIGHT + STAFF_GAP);
         ctx.beginPath();
-        ctx.moveTo(15, firstStaffY);
-        ctx.lineTo(15, lastStaffY);
+        ctx.moveTo(15, staffY);
+        ctx.lineTo(20, staffY);
         ctx.stroke();
-        
-        // Pequenos traços horizontais no início
-        ctx.lineWidth = 2;
-        system.staves.forEach((_, i) => {
-            const staffY = systemY + 80 + i * (STAFF_HEIGHT + STAFF_GAP);
-            ctx.beginPath();
-            ctx.moveTo(15, staffY);
-            ctx.lineTo(20, staffY);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(15, staffY + STAFF_HEIGHT);
-            ctx.lineTo(20, staffY + STAFF_HEIGHT);
-            ctx.stroke();
-        });
+        ctx.beginPath();
+        ctx.moveTo(15, staffY + STAFF_HEIGHT);
+        ctx.lineTo(20, staffY + STAFF_HEIGHT);
+        ctx.stroke();
+    });
     }
 }
 
@@ -2014,16 +2021,19 @@ function redraw() {
                     
                     drawSlur(drawX + 10, startY - 10, nextX - 10, endY - 10, true);
                 }
-
+                
                 chord.forEach(note => {
+                    const isSelected = selectedNoteForMobile === note;
+                    const color = isSelected ? "#f44336" : "#333";
+
                     if (note.type.startsWith('pausa-')) {
                         // Não mostrar pausas na clave de fá durante a edição (pedido do usuário)
                         if (isEditing && staff.clef === 'bass') return;
-                        drawRest(note.type, drawX, staffYBase, note.dot);
+                        drawRest(note.type, drawX, staffYBase, note.dot, color);
                     } else {
                         const noteYPos = noteYMapByClef(staff.clef)[note.pitch] + staffYBase;
-                        drawLedgerLines(drawX, noteYPos, staffYBase, staff.clef);
-                        if (note.accidental) drawAccidental(note.accidental, drawX, noteYPos);
+                        drawLedgerLines(drawX, noteYPos, staffYBase, staff.clef, color);
+                        if (note.accidental) drawAccidental(note.accidental, drawX, noteYPos, color);
                         drawNote(note, drawX, noteYPos);
                     }
                 });
@@ -2154,7 +2164,7 @@ async function playFreq(freq, duration, startTime = 0) {
     Tone.Transport.schedule((time) => {
         if (isPlaying) {
             currentSampler.triggerAttackRelease(note, duration, time, 0.6);
-        }
+}
     }, startTime);
 }
 
@@ -2198,7 +2208,7 @@ async function playScore() {
         alert("Adicione notas primeiro!");
         return;
     }
-
+    
     isPlaying = true;
     updatePlayButtonUI();
     
@@ -2283,26 +2293,26 @@ async function playScore() {
 
                         let hasFirmata = chord.some(n => n.firmata);
                         if (hasFirmata) duration *= 2.5;
-
-                        for (const note of chord) {
+        
+        for (const note of chord) {
                             if (note._skipPlayback) continue;
-                            if (note.type.startsWith('pausa-')) continue;
-                            
-                            let freq = freqs[note.pitch];
-                            if (!freq) continue;
+            if (note.type.startsWith('pausa-')) continue;
+            
+            let freq = freqs[note.pitch];
+            if (!freq) continue;
 
                             let effectiveAccidental = note.accidental || measureAccidentals[note.pitch];
                             if (effectiveAccidental) {
                                 if (effectiveAccidental === 'sharp') freq *= SHARP_FACTOR;
                                 else if (effectiveAccidental === 'flat') freq *= FLAT_FACTOR;
                             } else {
-                                const sharpOrder = ['F', 'C', 'G', 'D', 'A', 'E', 'B'];
-                                const flatOrder = ['B', 'E', 'A', 'D', 'G', 'C', 'F'];
-                                const noteLetter = note.pitch[0];
-                                
-                                if (keySharps > 0) {
+                const sharpOrder = ['F', 'C', 'G', 'D', 'A', 'E', 'B'];
+                const flatOrder = ['B', 'E', 'A', 'D', 'G', 'C', 'F'];
+                const noteLetter = note.pitch[0];
+                
+                if (keySharps > 0) {
                                     if (sharpOrder.slice(0, keySharps).includes(noteLetter)) freq *= SHARP_FACTOR;
-                                } else if (keyFlats > 0) {
+                } else if (keyFlats > 0) {
                                     if (flatOrder.slice(0, keyFlats).includes(noteLetter)) freq *= FLAT_FACTOR;
                                 }
                             }
@@ -2400,28 +2410,28 @@ function exportToJSON() {
 }
 
 function loadScoreData(data) {
-    if (data.version !== "1.0" && data.version !== "1.1") {
-        alert("Versão incompatível");
+            if (data.version !== "1.0" && data.version !== "1.1") {
+                alert("Versão incompatível");
         return false;
-    }
-    tempo = data.tempo || 120;
-    timeSignature.top = data.timeSignature.top || 4;
-    timeSignature.bottom = data.timeSignature.bottom || 4;
-    keySharps = data.keySignature.sharps || 0;
-    keyFlats = data.keySignature.flats || 0;
-    
-    // Migrar do formato antigo se necessário
-    if (data.version === "1.0") {
-        staffs = data.staffs.map(grandStaff => ({
-            id: Date.now() + Math.random(),
-            staves: [
-                { clef: 'treble', notes: grandStaff[0].notes, label: 'P1' },
-                { clef: 'bass', notes: grandStaff[1].notes, label: '' }
+            }
+            tempo = data.tempo || 120;
+            timeSignature.top = data.timeSignature.top || 4;
+            timeSignature.bottom = data.timeSignature.bottom || 4;
+            keySharps = data.keySignature.sharps || 0;
+            keyFlats = data.keySignature.flats || 0;
+            
+            // Migrar do formato antigo se necessário
+            if (data.version === "1.0") {
+                staffs = data.staffs.map(grandStaff => ({
+                    id: Date.now() + Math.random(),
+                    staves: [
+                        { clef: 'treble', notes: grandStaff[0].notes, label: 'P1' },
+                        { clef: 'bass', notes: grandStaff[1].notes, label: '' }
             ],
             manualBarlines: [],
             repeats: []
-        }));
-    } else {
+                }));
+            } else {
         staffs = data.staffs.map(system => ({
             ...system,
             manualBarlines: Array.isArray(system.manualBarlines) ? system.manualBarlines : [],
@@ -2432,15 +2442,15 @@ function loadScoreData(data) {
         ensureManualBarlines(s);
         ensureRepeats(s);
     });
-    
-    currentSystemIndex = 0;
-    currentStaffIndex = 0;
-    document.getElementById('title-input').value = data.title || '';
-    document.getElementById('composer-input').value = data.composer || '';
-    document.getElementById('tempo-input').value = tempo;
-    document.getElementById('time-top').value = timeSignature.top;
-    document.getElementById('time-bottom').value = timeSignature.bottom;
-    redraw();
+            
+            currentSystemIndex = 0;
+            currentStaffIndex = 0;
+            document.getElementById('title-input').value = data.title || '';
+            document.getElementById('composer-input').value = data.composer || '';
+            document.getElementById('tempo-input').value = tempo;
+            document.getElementById('time-top').value = timeSignature.top;
+            document.getElementById('time-bottom').value = timeSignature.bottom;
+            redraw();
     return true;
 }
 
@@ -2452,7 +2462,7 @@ function importFromJSON(event) {
         try {
             const data = JSON.parse(e.target.result);
             if (loadScoreData(data)) {
-                alert("Importado com sucesso!");
+            alert("Importado com sucesso!");
             }
         } catch (error) {
             console.error(error);
@@ -2649,13 +2659,13 @@ function setEditMode(mode) {
         isRepeatStartMode ? 'repeat-start' :
         isRepeatEndMode ? 'repeat-end' :
         isHarmonyMode ? 'harmony' :
-        isNoteMode ? (document.getElementById('rest-mode-btn').classList.contains('selected') ? 'rest' : 'note') : 'note';
+        document.getElementById('rest-mode-btn').classList.contains('selected') ? 'rest' : 'note';
 
     if (isToggleable && mode === currentActive) {
         mode = 'note';
     }
 
-    isNoteMode = mode === 'note' || mode === 'rest' || mode === 'harmony';
+    isNoteMode = mode === 'note' || mode === 'harmony';
     isHarmonyMode = mode === 'harmony';
     isEraseMode = mode === 'erase';
     isFirmataMode = mode === 'firmata';
@@ -2706,7 +2716,7 @@ document.getElementById('finish-edit-btn').addEventListener('click', () => {
             staff.notes.sort((a, b) => (a[0].x || 0) - (b[0].x || 0));
         });
     });
-
+    
     isEditing = false;
     isBarlineMode = false;
     isRepeatStartMode = false;
@@ -2878,6 +2888,9 @@ document.getElementById('undo-btn').addEventListener('click', () => {
                 repeats.push(action.repeat);
                 repeats.sort((a, b) => a.x - b.x);
             }
+        } else if (action.type === 'change-duration') {
+            action.note.type = action.oldDuration.type;
+            action.note.dot = action.oldDuration.dot;
         }
         redraw();
     } else {
@@ -3072,7 +3085,7 @@ canvas.addEventListener('mousedown', async (e) => {
         redraw();
         return;
     }
-
+    
     currentSystemIndex = targetSystemIndex;
     currentStaffIndex = targetStaffIndex;
     const systemY = currentSystemIndex * SYSTEM_SPACING;
@@ -3147,12 +3160,22 @@ canvas.addEventListener('mousedown', async (e) => {
             redraw();
             return;
         }
-        // Mudar duração
+
+        // Lógica para celular: selecionar nota
+        if (isMobile()) {
+            selectedNoteForMobile = clickedNote;
+            redraw();
+            return;
+        }
+
+        // Mudar duração (PC)
         const currentNote = clickedNote;
         const isRest = currentNote.type.startsWith('pausa-');
         const baseType = isRest ? currentNote.type.replace('pausa-', '') : currentNote.type;
         
         let currentIndex = durationSequence.findIndex(d => d.type === baseType && d.dot === currentNote.dot);
+        
+        const oldDuration = { type: currentNote.type, dot: currentNote.dot };
         
         if (e.button === 0) { // Clique esquerdo - Aumentar
             if (currentIndex < durationSequence.length - 1) currentIndex++;
@@ -3166,8 +3189,16 @@ canvas.addEventListener('mousedown', async (e) => {
         clickedNote.type = isRest ? `pausa-${nextDuration.type}` : nextDuration.type;
         clickedNote.dot = nextDuration.dot;
         
+        undoStack.push({ type: 'change-duration', note: currentNote, oldDuration: oldDuration, newDuration: nextDuration });
+        
         redraw();
         return;
+    }
+
+    // Se clicar fora, desmarca a nota no celular
+    if (isMobile() && selectedNoteForMobile) {
+        selectedNoteForMobile = null;
+        redraw();
     }
 
     if (e.button !== 0) return; // Só permite adicionar novas notas com clique esquerdo
@@ -3225,13 +3256,13 @@ canvas.addEventListener('mousedown', async (e) => {
         system.staves.forEach(s => {
             s.notes.forEach((chord, idx) => {
                 const chordX = isEditing ? (chord[0].x || 0) : (CLEF_MARGIN + idx * SPACING);
-                const dist = Math.abs(chordX - clickX);
-                if (dist < minXDist) {
-                    minXDist = dist;
-                    nearestChord = chord;
+            const dist = Math.abs(chordX - clickX);
+            if (dist < minXDist) {
+                minXDist = dist;
+                nearestChord = chord;
                     targetIndex = idx;
                     referenceStaff = s;
-                }
+            }
             });
         });
 
@@ -3251,9 +3282,9 @@ canvas.addEventListener('mousedown', async (e) => {
                 } else {
                     // Adicionar ao acorde existente
                     const isPitchPresent = currentStaffChord.some(n =>
-                        n.pitch === bestPitch && n.accidental === selectedAccidental
-                    );
-                    if (!isPitchPresent) {
+                n.pitch === bestPitch && n.accidental === selectedAccidental
+            );
+            if (!isPitchPresent) {
                         newNote.x = currentStaffChord[0].x;
                         newNote.type = currentStaffChord[0].type;
                         newNote.dot = currentStaffChord[0].dot;
@@ -3304,6 +3335,53 @@ canvas.addEventListener('mousedown', async (e) => {
     document.querySelectorAll('.accidental-btn').forEach(b => b.classList.remove('selected'));
     redraw();
 });
+
+canvas.addEventListener('touchstart', (e) => {
+    if (!isMobile()) return;
+    const touch = e.touches[0];
+    touchStartY = touch.clientY;
+    hasSwiped = false;
+}, { passive: true });
+
+canvas.addEventListener('touchmove', (e) => {
+    if (!isMobile() || !selectedNoteForMobile) return;
+    
+    // Mudança de valor apenas se Melodia ou Harmonia estiverem selecionados
+    if (!isNoteMode) return; 
+
+    const touch = e.touches[0];
+    const distY = touch.clientY - touchStartY;
+    
+    if (Math.abs(distY) > 30) {
+        const currentNote = selectedNoteForMobile;
+        const isRest = currentNote.type.startsWith('pausa-');
+        const baseType = isRest ? currentNote.type.replace('pausa-', '') : currentNote.type;
+        let currentIndex = durationSequence.findIndex(d => d.type === baseType && d.dot === currentNote.dot);
+        
+        if (distY < 0) { // Swipe up - Aumentar valor
+            if (currentIndex < durationSequence.length - 1) {
+                const oldDuration = { type: currentNote.type, dot: currentNote.dot };
+                currentIndex++;
+                const nextDuration = durationSequence[currentIndex];
+                currentNote.type = isRest ? `pausa-${nextDuration.type}` : nextDuration.type;
+                currentNote.dot = nextDuration.dot;
+                undoStack.push({ type: 'change-duration', note: currentNote, oldDuration: oldDuration, newDuration: nextDuration });
+                redraw();
+            }
+        } else { // Swipe down - Diminuir valor
+            if (currentIndex > 0) {
+                const oldDuration = { type: currentNote.type, dot: currentNote.dot };
+                currentIndex--;
+                const nextDuration = durationSequence[currentIndex];
+                currentNote.type = isRest ? `pausa-${nextDuration.type}` : nextDuration.type;
+                currentNote.dot = nextDuration.dot;
+                undoStack.push({ type: 'change-duration', note: currentNote, oldDuration: oldDuration, newDuration: nextDuration });
+                redraw();
+            }
+        }
+        touchStartY = touch.clientY;
+    }
+}, { passive: true });
 </script>    
 </body>
 </html>
