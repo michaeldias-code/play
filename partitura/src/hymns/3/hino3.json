@@ -24,14 +24,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 130
+                "x": 151
               },
               {
                 "pitch": "D4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 130
+                "x": 151
               }
             ],
             [
@@ -40,14 +40,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 180
+                "x": 198
               },
               {
                 "pitch": "B3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 180
+                "x": 198
               }
             ],
             [
@@ -56,14 +56,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 230
+                "x": 253
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 230
+                "x": 253
               }
             ],
             [
@@ -72,7 +72,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 280,
+                "x": 302,
                 "ligadura": true
               },
               {
@@ -80,7 +80,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 280
+                "x": 302
               }
             ],
             [
@@ -89,14 +89,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 330
+                "x": 358
               },
               {
                 "pitch": "C4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 330
+                "x": 358
               }
             ],
             [
@@ -105,14 +105,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 380
+                "x": 409
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 380
+                "x": 409
               }
             ],
             [
@@ -121,14 +121,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 430
+                "x": 456
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 430
+                "x": 456
               }
             ],
             [
@@ -137,14 +137,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 480
+                "x": 538
               },
               {
                 "pitch": "E4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 480
+                "x": 538
               }
             ],
             [
@@ -153,14 +153,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 530
+                "x": 590
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 530
+                "x": 590
               }
             ],
             [
@@ -169,14 +169,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 580
+                "x": 648
               },
               {
                 "pitch": "C4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 580
+                "x": 648
               }
             ],
             [
@@ -185,14 +185,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 630
+                "x": 705
               },
               {
                 "pitch": "D4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 630
+                "x": 705
               }
             ],
             [
@@ -201,7 +201,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 680,
+                "x": 762,
                 "ligadura": true
               },
               {
@@ -209,7 +209,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 680
+                "x": 762
               }
             ],
             [
@@ -218,14 +218,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 730
+                "x": 816
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 730
+                "x": 816
               }
             ],
             [
@@ -234,14 +234,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 780
+                "x": 895
               },
               {
                 "pitch": "C4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 780
+                "x": 895
               }
             ],
             [
@@ -250,14 +250,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 830
+                "x": 954
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 830
+                "x": 954
               }
             ],
             [
@@ -266,14 +266,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 880
+                "x": 1010
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 880
+                "x": 1010
               }
             ]
           ],
@@ -288,14 +288,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 130
+                "x": 151
               },
               {
                 "pitch": "G3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 130
+                "x": 151
               }
             ],
             [
@@ -304,7 +304,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 180,
+                "x": 196,
                 "ligadura": true
               },
               {
@@ -312,7 +312,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 180,
+                "x": 196,
                 "ligadura": true
               }
             ],
@@ -322,14 +322,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 230
+                "x": 245
               },
               {
                 "pitch": "D3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 230
+                "x": 245
               }
             ],
             [
@@ -338,7 +338,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 280,
+                "x": 297,
                 "ligadura": true
               },
               {
@@ -346,7 +346,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 280,
+                "x": 297,
                 "ligadura": true
               }
             ],
@@ -356,14 +356,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 330
+                "x": 355
               },
               {
                 "pitch": "E3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 330
+                "x": 355
               }
             ],
             [
@@ -372,7 +372,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 380,
+                "x": 406,
                 "ligadura": true
               },
               {
@@ -380,7 +380,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 380,
+                "x": 406,
                 "ligadura": true
               }
             ],
@@ -390,14 +390,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 430
+                "x": 455
               },
               {
                 "pitch": "B2",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 430
+                "x": 455
               }
             ],
             [
@@ -406,14 +406,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 480
+                "x": 536
               },
               {
                 "pitch": "C3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 480
+                "x": 536
               }
             ],
             [
@@ -422,7 +422,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 530,
+                "x": 587,
                 "ligadura": true
               },
               {
@@ -430,7 +430,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 530,
+                "x": 587,
                 "ligadura": true
               }
             ],
@@ -440,14 +440,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 580
+                "x": 642
               },
               {
                 "pitch": "D3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 580
+                "x": 642
               }
             ],
             [
@@ -456,14 +456,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 630
+                "x": 703
               },
               {
                 "pitch": "G2",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 630
+                "x": 703
               }
             ],
             [
@@ -472,7 +472,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 680,
+                "x": 760,
                 "ligadura": true
               },
               {
@@ -480,7 +480,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 680,
+                "x": 760,
                 "ligadura": true
               }
             ],
@@ -490,14 +490,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 730
+                "x": 813
               },
               {
                 "pitch": "F3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 730
+                "x": 813
               }
             ],
             [
@@ -506,14 +506,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 780
+                "x": 894
               },
               {
                 "pitch": "E3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 780
+                "x": 894
               }
             ],
             [
@@ -522,7 +522,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 830,
+                "x": 954,
                 "ligadura": true
               },
               {
@@ -530,7 +530,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 830,
+                "x": 954,
                 "ligadura": true
               }
             ],
@@ -540,14 +540,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 880
+                "x": 1010
               },
               {
                 "pitch": "F3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 880
+                "x": 1010
               }
             ]
           ],
@@ -555,11 +555,12 @@
         }
       ],
       "manualBarlines": [
-        478.6000061035156,
-        779.6000061035156
+        504.6,
+        861.6
       ],
       "showInitial": true,
-      "showFinal": true
+      "showFinal": true,
+      "repeats": []
     },
     {
       "id": 1767716061844,
@@ -573,14 +574,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 137
+                "x": 183
               },
               {
                 "pitch": "D4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 137
+                "x": 183
               }
             ],
             [
@@ -589,14 +590,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 187
+                "x": 241
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 187
+                "x": 241
               }
             ],
             [
@@ -605,14 +606,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 237
+                "x": 298
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 237
+                "x": 298
               }
             ],
             [
@@ -621,14 +622,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 287
+                "x": 383
               },
               {
                 "pitch": "E4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 287
+                "x": 383
               }
             ],
             [
@@ -637,14 +638,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 337
+                "x": 441
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 337
+                "x": 441
               }
             ],
             [
@@ -653,14 +654,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 387
+                "x": 502
               },
               {
                 "pitch": "C4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 387
+                "x": 502
               }
             ],
             [
@@ -669,14 +670,14 @@
                 "type": "minima",
                 "dot": false,
                 "accidental": null,
-                "x": 437
+                "x": 563
               },
               {
                 "pitch": "B3",
                 "type": "minima",
                 "dot": false,
                 "accidental": null,
-                "x": 437
+                "x": 563
               }
             ],
             [
@@ -685,14 +686,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 487
+                "x": 659
               },
               {
                 "pitch": "D4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 487
+                "x": 659
               }
             ],
             [
@@ -701,14 +702,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 537
+                "x": 717
               },
               {
                 "pitch": "B3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 537
+                "x": 717
               }
             ],
             [
@@ -717,14 +718,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 587
+                "x": 788
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 587
+                "x": 788
               }
             ],
             [
@@ -733,7 +734,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 637,
+                "x": 858,
                 "ligadura": true
               },
               {
@@ -741,7 +742,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 637
+                "x": 858
               }
             ],
             [
@@ -750,14 +751,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 687
+                "x": 912
               },
               {
                 "pitch": "C4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 687
+                "x": 912
               }
             ],
             [
@@ -766,14 +767,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 737
+                "x": 977
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 737
+                "x": 977
               }
             ],
             [
@@ -782,14 +783,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 787
+                "x": 1030
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 787
+                "x": 1030
               }
             ]
           ],
@@ -804,7 +805,7 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 137
+                "x": 181
               }
             ],
             [
@@ -813,7 +814,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 187,
+                "x": 239,
                 "ligadura": true
               },
               {
@@ -821,7 +822,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 187,
+                "x": 239,
                 "ligadura": true
               }
             ],
@@ -831,14 +832,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 237
+                "x": 295
               },
               {
                 "pitch": "B2",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 237
+                "x": 295
               }
             ],
             [
@@ -847,14 +848,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 287
+                "x": 383
               },
               {
                 "pitch": "C3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 287
+                "x": 383
               }
             ],
             [
@@ -863,7 +864,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 337,
+                "x": 436,
                 "ligadura": true
               },
               {
@@ -871,7 +872,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 337,
+                "x": 436,
                 "ligadura": true
               }
             ],
@@ -881,14 +882,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 387
+                "x": 501
               },
               {
                 "pitch": "D3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 387
+                "x": 501
               }
             ],
             [
@@ -897,14 +898,14 @@
                 "type": "minima",
                 "dot": false,
                 "accidental": null,
-                "x": 437
+                "x": 564
               },
               {
                 "pitch": "G2",
                 "type": "minima",
                 "dot": false,
                 "accidental": null,
-                "x": 437
+                "x": 564
               }
             ],
             [
@@ -913,14 +914,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 487
+                "x": 658
               },
               {
                 "pitch": "G3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 487
+                "x": 658
               }
             ],
             [
@@ -929,7 +930,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 537,
+                "x": 717,
                 "ligadura": true
               },
               {
@@ -937,7 +938,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 537,
+                "x": 717,
                 "ligadura": true
               }
             ],
@@ -947,14 +948,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 587
+                "x": 785
               },
               {
                 "pitch": "D3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 587
+                "x": 785
               }
             ],
             [
@@ -963,7 +964,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 637,
+                "x": 853,
                 "ligadura": true
               },
               {
@@ -971,7 +972,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 637,
+                "x": 853,
                 "ligadura": true
               }
             ],
@@ -981,14 +982,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 687
+                "x": 919
               },
               {
                 "pitch": "E3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 687
+                "x": 919
               }
             ],
             [
@@ -997,7 +998,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 737,
+                "x": 975,
                 "ligadura": true
               },
               {
@@ -1005,7 +1006,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 737,
+                "x": 975,
                 "ligadura": true
               }
             ],
@@ -1015,14 +1016,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 787
+                "x": 1030
               },
               {
                 "pitch": "B2",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 787
+                "x": 1030
               }
             ]
           ],
@@ -1030,12 +1031,13 @@
         }
       ],
       "manualBarlines": [
-        259.6000061035156,
-        475.6000061035156,
-        843.6000061035156
+        340.6,
+        612.6,
+        1117.6
       ],
       "showInitial": true,
-      "showFinal": true
+      "showFinal": true,
+      "repeats": []
     },
     {
       "id": 1767716061845,
@@ -1049,14 +1051,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 137
+                "x": 179
               },
               {
                 "pitch": "E4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 137
+                "x": 179
               }
             ],
             [
@@ -1065,14 +1067,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 187
+                "x": 227
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 187
+                "x": 227
               }
             ],
             [
@@ -1081,14 +1083,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 237
+                "x": 284
               },
               {
                 "pitch": "C4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 237
+                "x": 284
               }
             ],
             [
@@ -1097,28 +1099,11 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 287
+                "x": 337
               },
               {
                 "pitch": "D4",
                 "type": "seminima",
-                "dot": false,
-                "accidental": null,
-                "x": 287
-              }
-            ],
-            [
-              {
-                "pitch": "G4",
-                "type": "colcheia",
-                "dot": false,
-                "accidental": null,
-                "x": 337,
-                "ligadura": true
-              },
-              {
-                "pitch": "D4",
-                "type": "colcheia",
                 "dot": false,
                 "accidental": null,
                 "x": 337
@@ -1130,14 +1115,31 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 387
+                "x": 393,
+                "ligadura": true
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 387
+                "x": 393
+              }
+            ],
+            [
+              {
+                "pitch": "G4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 456
+              },
+              {
+                "pitch": "D4",
+                "type": "colcheia",
+                "dot": false,
+                "accidental": null,
+                "x": 456
               }
             ],
             [
@@ -1146,14 +1148,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 437
+                "x": 516
               },
               {
                 "pitch": "C4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 437
+                "x": 516
               }
             ],
             [
@@ -1162,14 +1164,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 487
+                "x": 569
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 487
+                "x": 569
               }
             ],
             [
@@ -1178,14 +1180,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 537
+                "x": 621
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 537
+                "x": 621
               }
             ],
             [
@@ -1194,14 +1196,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 587
+                "x": 677
               },
               {
                 "pitch": "D4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 587
+                "x": 677
               }
             ],
             [
@@ -1210,14 +1212,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 637
+                "x": 728
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 637
+                "x": 728
               }
             ],
             [
@@ -1226,14 +1228,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 687
+                "x": 778
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 687
+                "x": 778
               }
             ],
             [
@@ -1242,14 +1244,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 737
+                "x": 858
               },
               {
                 "pitch": "E4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 737
+                "x": 858
               }
             ],
             [
@@ -1258,14 +1260,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 787
+                "x": 911
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 787
+                "x": 911
               }
             ],
             [
@@ -1274,14 +1276,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 837
+                "x": 970
               },
               {
                 "pitch": "C4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 837
+                "x": 970
               }
             ],
             [
@@ -1290,14 +1292,14 @@
                 "type": "minima",
                 "dot": false,
                 "accidental": null,
-                "x": 887
+                "x": 1028
               },
               {
                 "pitch": "B3",
                 "type": "minima",
                 "dot": false,
                 "accidental": null,
-                "x": 887
+                "x": 1028
               }
             ]
           ],
@@ -1312,14 +1314,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 137
+                "x": 176
               },
               {
                 "pitch": "C3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 137
+                "x": 176
               }
             ],
             [
@@ -1328,7 +1330,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 187,
+                "x": 224,
                 "ligadura": true
               },
               {
@@ -1336,7 +1338,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 187,
+                "x": 224,
                 "ligadura": true
               }
             ],
@@ -1346,14 +1348,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 237
+                "x": 278
               },
               {
                 "pitch": "D3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 237
+                "x": 278
               }
             ],
             [
@@ -1362,14 +1364,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 287
+                "x": 335
               },
               {
                 "pitch": "G2",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 287
+                "x": 335
               }
             ],
             [
@@ -1378,7 +1380,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 337,
+                "x": 391,
                 "ligadura": true
               },
               {
@@ -1386,7 +1388,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 337
+                "x": 391
               }
             ],
             [
@@ -1395,14 +1397,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 387
+                "x": 454
               },
               {
                 "pitch": "F3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 387
+                "x": 454
               }
             ],
             [
@@ -1411,14 +1413,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 437
+                "x": 516
               },
               {
                 "pitch": "E3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 437
+                "x": 516
               }
             ],
             [
@@ -1427,7 +1429,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 487,
+                "x": 568,
                 "ligadura": true
               },
               {
@@ -1435,7 +1437,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 487,
+                "x": 568,
                 "ligadura": true
               }
             ],
@@ -1445,14 +1447,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 537
+                "x": 621
               },
               {
                 "pitch": "F3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 537
+                "x": 621
               }
             ],
             [
@@ -1461,7 +1463,7 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 587
+                "x": 675
               }
             ],
             [
@@ -1470,7 +1472,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 637,
+                "x": 722,
                 "ligadura": true
               },
               {
@@ -1478,7 +1480,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 637,
+                "x": 722,
                 "ligadura": true
               }
             ],
@@ -1488,14 +1490,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 687
+                "x": 777
               },
               {
                 "pitch": "B2",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 687
+                "x": 777
               }
             ],
             [
@@ -1504,14 +1506,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 737
+                "x": 855
               },
               {
                 "pitch": "C3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 737
+                "x": 855
               }
             ],
             [
@@ -1520,7 +1522,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 787,
+                "x": 907,
                 "ligadura": true
               },
               {
@@ -1528,7 +1530,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 787,
+                "x": 907,
                 "ligadura": true
               }
             ],
@@ -1538,14 +1540,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 837
+                "x": 969
               },
               {
                 "pitch": "D3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 837
+                "x": 969
               }
             ],
             [
@@ -1554,14 +1556,14 @@
                 "type": "minima",
                 "dot": false,
                 "accidental": null,
-                "x": 887
+                "x": 1029
               },
               {
                 "pitch": "G2",
                 "type": "minima",
                 "dot": false,
                 "accidental": null,
-                "x": 887
+                "x": 1029
               }
             ]
           ],
@@ -1569,11 +1571,13 @@
         }
       ],
       "manualBarlines": [
-        419.6000061035156,
-        712.6000061035156
+        487.6,
+        819.6,
+        1117
       ],
       "showInitial": true,
-      "showFinal": true
+      "showFinal": true,
+      "repeats": []
     },
     {
       "id": 1767716061846,
@@ -1587,14 +1591,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 137
+                "x": 166
               },
               {
                 "pitch": "D4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 137
+                "x": 166
               }
             ],
             [
@@ -1603,14 +1607,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 187
+                "x": 212
               },
               {
                 "pitch": "F4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 187
+                "x": 212
               }
             ],
             [
@@ -1619,14 +1623,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 237
+                "x": 261
               },
               {
                 "pitch": "F4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 237
+                "x": 261
               }
             ],
             [
@@ -1635,7 +1639,7 @@
                 "type": "colcheia",
                 "dot": true,
                 "accidental": null,
-                "x": 287
+                "x": 302
               }
             ],
             [
@@ -1644,14 +1648,14 @@
                 "type": "semicolcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 337
+                "x": 351
               },
               {
                 "pitch": "G4",
                 "type": "semicolcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 337
+                "x": 351
               }
             ],
             [
@@ -1660,14 +1664,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 387
+                "x": 397
               },
               {
                 "pitch": "G4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 387
+                "x": 397
               }
             ],
             [
@@ -1676,14 +1680,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 437
+                "x": 458
               },
               {
                 "pitch": "E4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 437
+                "x": 458
               }
             ],
             [
@@ -1692,14 +1696,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 487
+                "x": 496
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 487
+                "x": 496
               }
             ],
             [
@@ -1708,14 +1712,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 537
+                "x": 540
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 537
+                "x": 540
               }
             ],
             [
@@ -1756,14 +1760,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 687
+                "x": 682
               },
               {
                 "pitch": "G4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 687
+                "x": 682
               }
             ],
             [
@@ -1772,14 +1776,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 737
+                "x": 744
               },
               {
                 "pitch": "E4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 737
+                "x": 744
               }
             ],
             [
@@ -1869,14 +1873,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 1037
+                "x": 1038
               },
               {
                 "pitch": "E4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 1037
+                "x": 1038
               }
             ]
           ],
@@ -1891,14 +1895,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 137
+                "x": 161
               },
               {
                 "pitch": "D3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 137
+                "x": 161
               }
             ],
             [
@@ -1907,7 +1911,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 187,
+                "x": 208,
                 "ligadura": true
               },
               {
@@ -1915,7 +1919,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 187,
+                "x": 208,
                 "ligadura": true
               }
             ],
@@ -1925,14 +1929,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 237
+                "x": 255
               },
               {
                 "pitch": "C3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 237
+                "x": 255
               }
             ],
             [
@@ -1941,7 +1945,7 @@
                 "type": "colcheia",
                 "dot": true,
                 "accidental": null,
-                "x": 287,
+                "x": 302,
                 "ligadura": true
               },
               {
@@ -1949,7 +1953,7 @@
                 "type": "colcheia",
                 "dot": true,
                 "accidental": null,
-                "x": 287,
+                "x": 302,
                 "ligadura": true
               }
             ],
@@ -1959,14 +1963,14 @@
                 "type": "semicolcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 337
+                "x": 352
               },
               {
                 "pitch": "B2",
                 "type": "semicolcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 337
+                "x": 352
               }
             ],
             [
@@ -1975,14 +1979,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 387
+                "x": 396
               },
               {
                 "pitch": "G2",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 387
+                "x": 396
               }
             ],
             [
@@ -1991,14 +1995,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 437
+                "x": 457
               },
               {
                 "pitch": "G3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 437
+                "x": 457
               }
             ],
             [
@@ -2007,7 +2011,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 487,
+                "x": 494,
                 "ligadura": true
               },
               {
@@ -2015,7 +2019,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 487,
+                "x": 494,
                 "ligadura": true
               }
             ],
@@ -2025,14 +2029,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 537
+                "x": 542
               },
               {
                 "pitch": "F3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 537
+                "x": 542
               }
             ],
             [
@@ -2075,14 +2079,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 687
+                "x": 683
               },
               {
                 "pitch": "B2",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 687
+                "x": 683
               }
             ],
             [
@@ -2091,14 +2095,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 737
+                "x": 745
               },
               {
                 "pitch": "C3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 737
+                "x": 745
               }
             ],
             [
@@ -2199,11 +2203,13 @@
         }
       ],
       "manualBarlines": [
-        433.6000061035156,
-        715.6000061035156
+        433.6,
+        715.6,
+        1117
       ],
       "showInitial": true,
-      "showFinal": true
+      "showFinal": true,
+      "repeats": []
     },
     {
       "id": 1767717205329,
@@ -2217,14 +2223,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 137
+                "x": 188
               },
               {
                 "pitch": "E4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 137
+                "x": 188
               }
             ],
             [
@@ -2233,14 +2239,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 187
+                "x": 250
               },
               {
                 "pitch": "E4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 187
+                "x": 250
               }
             ],
             [
@@ -2249,14 +2255,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 237
+                "x": 309
               },
               {
                 "pitch": "E4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 237
+                "x": 309
               }
             ],
             [
@@ -2265,7 +2271,7 @@
                 "type": "minima",
                 "dot": false,
                 "accidental": null,
-                "x": 287,
+                "x": 361,
                 "firmata": true
               },
               {
@@ -2273,7 +2279,7 @@
                 "type": "minima",
                 "dot": false,
                 "accidental": "sharp",
-                "x": 287
+                "x": 361
               }
             ],
             [
@@ -2282,14 +2288,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 337
+                "x": 438
               },
               {
                 "pitch": "E4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 337
+                "x": 438
               }
             ],
             [
@@ -2298,14 +2304,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 387
+                "x": 497
               },
               {
                 "pitch": "E4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 387
+                "x": 497
               }
             ],
             [
@@ -2314,14 +2320,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 437
+                "x": 560
               },
               {
                 "pitch": "E4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 437
+                "x": 560
               }
             ],
             [
@@ -2330,14 +2336,14 @@
                 "type": "colcheia",
                 "dot": true,
                 "accidental": null,
-                "x": 487
+                "x": 623
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": true,
                 "accidental": null,
-                "x": 487
+                "x": 623
               }
             ],
             [
@@ -2346,14 +2352,14 @@
                 "type": "semicolcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 537
+                "x": 681
               },
               {
                 "pitch": "D4",
                 "type": "semicolcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 537
+                "x": 681
               }
             ],
             [
@@ -2362,14 +2368,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 587
+                "x": 739
               },
               {
                 "pitch": "D4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 587
+                "x": 739
               }
             ],
             [
@@ -2378,14 +2384,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 637
+                "x": 827
               },
               {
                 "pitch": "E4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 637
+                "x": 827
               }
             ],
             [
@@ -2394,14 +2400,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 687
+                "x": 888
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 687
+                "x": 888
               }
             ],
             [
@@ -2410,14 +2416,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 737
+                "x": 954
               },
               {
                 "pitch": "C4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 737
+                "x": 954
               }
             ],
             [
@@ -2426,7 +2432,7 @@
                 "type": "minima",
                 "dot": false,
                 "accidental": null,
-                "x": 787,
+                "x": 1030,
                 "firmata": true
               },
               {
@@ -2434,7 +2440,7 @@
                 "type": "minima",
                 "dot": false,
                 "accidental": null,
-                "x": 787,
+                "x": 1030,
                 "firmata": true
               }
             ]
@@ -2450,14 +2456,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 137
+                "x": 187
               },
               {
                 "pitch": "C3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 137
+                "x": 187
               }
             ],
             [
@@ -2466,7 +2472,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 187,
+                "x": 247,
                 "ligadura": true
               },
               {
@@ -2474,7 +2480,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 187,
+                "x": 247,
                 "ligadura": true
               }
             ],
@@ -2484,14 +2490,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 237
+                "x": 307
               },
               {
                 "pitch": "C3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 237
+                "x": 307
               }
             ],
             [
@@ -2500,7 +2506,7 @@
                 "type": "minima",
                 "dot": false,
                 "accidental": null,
-                "x": 287,
+                "x": 362,
                 "firmata": true
               },
               {
@@ -2508,7 +2514,7 @@
                 "type": "minima",
                 "dot": false,
                 "accidental": null,
-                "x": 287,
+                "x": 362,
                 "firmata": true
               }
             ],
@@ -2518,14 +2524,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 337
+                "x": 439
               },
               {
                 "pitch": "E3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 337
+                "x": 439
               }
             ],
             [
@@ -2534,7 +2540,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 387,
+                "x": 493,
                 "ligadura": true
               },
               {
@@ -2542,7 +2548,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 387,
+                "x": 493,
                 "ligadura": true
               }
             ],
@@ -2552,14 +2558,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 437
+                "x": 560
               },
               {
                 "pitch": "C3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 437
+                "x": 560
               }
             ],
             [
@@ -2568,7 +2574,7 @@
                 "type": "colcheia",
                 "dot": true,
                 "accidental": null,
-                "x": 487,
+                "x": 621,
                 "ligadura": true
               }
             ],
@@ -2578,7 +2584,7 @@
                 "type": "semicolcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 537
+                "x": 683
               }
             ],
             [
@@ -2587,14 +2593,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 587
+                "x": 738
               },
               {
                 "pitch": "G2",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 587
+                "x": 738
               }
             ],
             [
@@ -2603,14 +2609,14 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 637
+                "x": 828
               },
               {
                 "pitch": "C3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 637
+                "x": 828
               }
             ],
             [
@@ -2619,7 +2625,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 687,
+                "x": 886,
                 "ligadura": true
               },
               {
@@ -2627,7 +2633,7 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 687,
+                "x": 886,
                 "ligadura": true
               }
             ],
@@ -2637,14 +2643,14 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 737
+                "x": 953
               },
               {
                 "pitch": "D3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 737
+                "x": 953
               }
             ],
             [
@@ -2653,7 +2659,7 @@
                 "type": "minima",
                 "dot": false,
                 "accidental": null,
-                "x": 787,
+                "x": 1030,
                 "firmata": true
               },
               {
@@ -2661,7 +2667,7 @@
                 "type": "minima",
                 "dot": false,
                 "accidental": null,
-                "x": 787,
+                "x": 1030,
                 "firmata": true
               },
               {
@@ -2669,7 +2675,7 @@
                 "type": "minima",
                 "dot": false,
                 "accidental": null,
-                "x": 787,
+                "x": 1030,
                 "firmata": true
               }
             ]
@@ -2680,9 +2686,10 @@
       "showInitial": true,
       "showFinal": true,
       "manualBarlines": [
-        312.1000061035156,
-        624.1000061035156
-      ]
+        406.1,
+        791.1
+      ],
+      "repeats": []
     }
   ]
 }
