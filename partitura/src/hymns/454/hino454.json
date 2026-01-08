@@ -24,14 +24,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 130
+                "x": 165,
+                "_isPlaying": false
               },
               {
                 "pitch": "D4",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 130
+                "x": 165,
+                "_isPlaying": false
               }
             ],
             [
@@ -40,14 +42,16 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 180
+                "x": 216,
+                "_isPlaying": false
               },
               {
                 "pitch": "C4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 180
+                "x": 216,
+                "_isPlaying": false
               }
             ],
             [
@@ -56,14 +60,16 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 230
+                "x": 258,
+                "_isPlaying": false
               },
               {
                 "pitch": "B3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 230
+                "x": 258,
+                "_isPlaying": false
               }
             ],
             [
@@ -72,14 +78,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 280
+                "x": 333,
+                "_isPlaying": false
               },
               {
                 "pitch": "E4",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 280
+                "x": 333,
+                "_isPlaying": false
               }
             ],
             [
@@ -88,14 +96,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 330
+                "x": 399,
+                "_isPlaying": false
               },
               {
                 "pitch": "C4",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 330
+                "x": 399,
+                "_isPlaying": false
               }
             ],
             [
@@ -104,14 +114,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 390.2941207885742
+                "x": 486.2941207885742,
+                "_isPlaying": false
               },
               {
                 "pitch": "B3",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 390.2941207885742
+                "x": 486.2941207885742,
+                "_isPlaying": false
               }
             ],
             [
@@ -120,14 +132,16 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 440.2941207885742
+                "x": 543.2941207885742,
+                "_isPlaying": false
               },
               {
                 "pitch": "D4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 440.2941207885742
+                "x": 543.2941207885742,
+                "_isPlaying": false
               }
             ],
             [
@@ -136,14 +150,16 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 490.2941207885742
+                "x": 596.2941207885742,
+                "_isPlaying": false
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 490.2941207885742
+                "x": 596.2941207885742,
+                "_isPlaying": false
               }
             ],
             [
@@ -152,14 +168,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 540.2941207885742
+                "x": 685.2941207885742,
+                "_isPlaying": false
               },
               {
                 "pitch": "D4",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 540.2941207885742
+                "x": 685.2941207885742,
+                "_isPlaying": false
               }
             ],
             [
@@ -168,14 +186,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 590.2941207885742
+                "x": 745.2941207885742,
+                "_isPlaying": false
               },
               {
                 "pitch": "D4",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 590.2941207885742
+                "x": 745.2941207885742,
+                "_isPlaying": false
               }
             ],
             [
@@ -184,14 +204,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 640.2941207885742
+                "x": 829.2941207885742,
+                "_isPlaying": false
               },
               {
                 "pitch": "D4",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 640.2941207885742
+                "x": 829.2941207885742,
+                "_isPlaying": false
               }
             ],
             [
@@ -200,14 +222,16 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 690.2941207885742
+                "x": 888.2941207885742,
+                "_isPlaying": false
               },
               {
                 "pitch": "C4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 690.2941207885742
+                "x": 888.2941207885742,
+                "_isPlaying": false
               }
             ],
             [
@@ -216,14 +240,16 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 740.2941207885742
+                "x": 933.2941207885742,
+                "_isPlaying": false
               },
               {
                 "pitch": "B3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 740.2941207885742
+                "x": 933.2941207885742,
+                "_isPlaying": false
               }
             ]
           ],
@@ -238,7 +264,8 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 130
+                "x": 164,
+                "_isPlaying": false
               }
             ],
             [
@@ -247,14 +274,16 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 180
+                "x": 215,
+                "_isPlaying": false
               },
               {
                 "pitch": "D3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 180
+                "x": 215,
+                "_isPlaying": false
               }
             ],
             [
@@ -263,14 +292,16 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 230
+                "x": 258,
+                "_isPlaying": false
               },
               {
                 "pitch": "E3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 230
+                "x": 258,
+                "_isPlaying": false
               }
             ],
             [
@@ -279,14 +310,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 280
+                "x": 333,
+                "_isPlaying": false
               },
               {
                 "pitch": "C4",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 280
+                "x": 333,
+                "_isPlaying": false
               }
             ],
             [
@@ -295,14 +328,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 330
+                "x": 399,
+                "_isPlaying": false
               },
               {
                 "pitch": "C3",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 330
+                "x": 399,
+                "_isPlaying": false
               }
             ],
             [
@@ -311,14 +346,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 390.2941207885742
+                "x": 488.2941207885742,
+                "_isPlaying": false
               },
               {
                 "pitch": "G2",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 390.2941207885742
+                "x": 488.2941207885742,
+                "_isPlaying": false
               }
             ],
             [
@@ -327,14 +364,16 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 440.2941207885742
+                "x": 544.2941207885742,
+                "_isPlaying": false
               },
               {
                 "pitch": "G3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 440.2941207885742
+                "x": 544.2941207885742,
+                "_isPlaying": false
               }
             ],
             [
@@ -343,14 +382,16 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 490.2941207885742
+                "x": 595.2941207885742,
+                "_isPlaying": false
               },
               {
                 "pitch": "G2",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 490.2941207885742
+                "x": 595.2941207885742,
+                "_isPlaying": false
               }
             ],
             [
@@ -359,14 +400,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 540.2941207885742
+                "x": 686.2941207885742,
+                "_isPlaying": false
               },
               {
                 "pitch": "B2",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 540.2941207885742
+                "x": 686.2941207885742,
+                "_isPlaying": false
               }
             ],
             [
@@ -375,14 +418,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 590.2941207885742
+                "x": 745.2941207885742,
+                "_isPlaying": false
               },
               {
                 "pitch": "D3",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 590.2941207885742
+                "x": 745.2941207885742,
+                "_isPlaying": false
               }
             ],
             [
@@ -391,7 +436,8 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 640.2941207885742
+                "x": 829.2941207885742,
+                "_isPlaying": false
               }
             ],
             [
@@ -400,14 +446,16 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 690.2941207885742
+                "x": 887.2941207885742,
+                "_isPlaying": false
               },
               {
                 "pitch": "F3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 690.2941207885742
+                "x": 887.2941207885742,
+                "_isPlaying": false
               }
             ],
             [
@@ -416,14 +464,16 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 740.2941207885742
+                "x": 935.2941207885742,
+                "_isPlaying": false
               },
               {
                 "pitch": "E3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 740.2941207885742
+                "x": 935.2941207885742,
+                "_isPlaying": false
               }
             ]
           ],
@@ -431,11 +481,11 @@
         }
       ],
       "manualBarlines": [
-        256.2941207885742,
-        370.2941207885742,
-        515.6470642089844,
-        619.2549133300781,
-        819.176513671875
+        295.2941207885742,
+        448.2941207885742,
+        644.6470642089844,
+        792.2549133300781,
+        1017.176513671875
       ],
       "repeats": [],
       "showInitial": true,
@@ -453,14 +503,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 130
+                "x": 159,
+                "_isPlaying": false
               },
               {
                 "pitch": "E4",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 130
+                "x": 159,
+                "_isPlaying": false
               }
             ],
             [
@@ -469,14 +521,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 180
+                "x": 216,
+                "_isPlaying": false
               },
               {
                 "pitch": "C4",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 180
+                "x": 216,
+                "_isPlaying": false
               }
             ],
             [
@@ -485,14 +539,16 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 241
+                "x": 293,
+                "_isPlaying": false
               },
               {
                 "pitch": "B3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 241
+                "x": 293,
+                "_isPlaying": false
               }
             ],
             [
@@ -501,14 +557,16 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 291
+                "x": 339,
+                "_isPlaying": false
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 291
+                "x": 339,
+                "_isPlaying": false
               }
             ],
             [
@@ -517,14 +575,16 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 341
+                "x": 391,
+                "_isPlaying": false
               },
               {
                 "pitch": "D4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 341
+                "x": 391,
+                "_isPlaying": false
               }
             ],
             [
@@ -533,14 +593,16 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 391
+                "x": 437,
+                "_isPlaying": false
               },
               {
                 "pitch": "F4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 391
+                "x": 437,
+                "_isPlaying": false
               }
             ],
             [
@@ -549,14 +611,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 441
+                "x": 501,
+                "_isPlaying": false
               },
               {
                 "pitch": "F4",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 441
+                "x": 501,
+                "_isPlaying": false
               }
             ],
             [
@@ -565,14 +629,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 491
+                "x": 553,
+                "_isPlaying": false
               },
               {
                 "pitch": "D4",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 491
+                "x": 553,
+                "_isPlaying": false
               }
             ],
             [
@@ -581,14 +647,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 556.2745361328125
+                "x": 629.2745361328125,
+                "_isPlaying": false
               },
               {
                 "pitch": "G4",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 556.2745361328125
+                "x": 629.2745361328125,
+                "_isPlaying": false
               }
             ],
             [
@@ -597,14 +665,16 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 606.2745361328125
+                "x": 686.2745361328125,
+                "_isPlaying": false
               },
               {
                 "pitch": "G4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 606.2745361328125
+                "x": 686.2745361328125,
+                "_isPlaying": false
               }
             ],
             [
@@ -613,14 +683,16 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 656.2745361328125
+                "x": 742.2745361328125,
+                "_isPlaying": false
               },
               {
                 "pitch": "G4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 656.2745361328125
+                "x": 742.2745361328125,
+                "_isPlaying": false
               }
             ],
             [
@@ -629,16 +701,18 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 706.2745361328125,
-                "ligadura": true
+                "x": 827.2745361328125,
+                "ligadura": true,
+                "_isPlaying": false
               },
               {
                 "pitch": "G4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 706.2745361328125,
-                "ligadura": true
+                "x": 827.2745361328125,
+                "ligadura": true,
+                "_isPlaying": false
               }
             ],
             [
@@ -647,14 +721,16 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 756.2745361328125
+                "x": 885.2745361328125,
+                "_isPlaying": false
               },
               {
                 "pitch": "G4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 756.2745361328125
+                "x": 885.2745361328125,
+                "_isPlaying": false
               }
             ],
             [
@@ -663,14 +739,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 806.2745361328125
+                "x": 938.2745361328125,
+                "_isPlaying": false
               },
               {
                 "pitch": "G4",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 806.2745361328125
+                "x": 938.2745361328125,
+                "_isPlaying": false
               }
             ]
           ],
@@ -685,14 +763,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 130
+                "x": 157,
+                "_isPlaying": false
               },
               {
                 "pitch": "C3",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 130
+                "x": 157,
+                "_isPlaying": false
               }
             ],
             [
@@ -701,14 +781,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 180
+                "x": 215,
+                "_isPlaying": false
               },
               {
                 "pitch": "C3",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 180
+                "x": 215,
+                "_isPlaying": false
               }
             ],
             [
@@ -717,14 +799,16 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 241
+                "x": 293,
+                "_isPlaying": false
               },
               {
                 "pitch": "D3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 241
+                "x": 293,
+                "_isPlaying": false
               }
             ],
             [
@@ -733,14 +817,16 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 291
+                "x": 339,
+                "_isPlaying": false
               },
               {
                 "pitch": "D3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 291
+                "x": 339,
+                "_isPlaying": false
               }
             ],
             [
@@ -749,14 +835,16 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 341
+                "x": 389,
+                "_isPlaying": false
               },
               {
                 "pitch": "D3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 341
+                "x": 389,
+                "_isPlaying": false
               }
             ],
             [
@@ -765,14 +853,16 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 391
+                "x": 434,
+                "_isPlaying": false
               },
               {
                 "pitch": "D3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 391
+                "x": 434,
+                "_isPlaying": false
               }
             ],
             [
@@ -781,14 +871,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 441
+                "x": 499,
+                "_isPlaying": false
               },
               {
                 "pitch": "D3",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 441
+                "x": 499,
+                "_isPlaying": false
               }
             ],
             [
@@ -797,14 +889,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 491
+                "x": 552,
+                "_isPlaying": false
               },
               {
                 "pitch": "G2",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 491
+                "x": 552,
+                "_isPlaying": false
               }
             ],
             [
@@ -813,14 +907,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 556.2745361328125
+                "x": 630.2745361328125,
+                "_isPlaying": false
               },
               {
                 "pitch": "B3",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 556.2745361328125
+                "x": 630.2745361328125,
+                "_isPlaying": false
               }
             ],
             [
@@ -829,14 +925,16 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 606.2745361328125
+                "x": 685.2745361328125,
+                "_isPlaying": false
               },
               {
                 "pitch": "C4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 606.2745361328125
+                "x": 685.2745361328125,
+                "_isPlaying": false
               }
             ],
             [
@@ -845,14 +943,16 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 656.2745361328125
+                "x": 740.2745361328125,
+                "_isPlaying": false
               },
               {
                 "pitch": "B3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 656.2745361328125
+                "x": 740.2745361328125,
+                "_isPlaying": false
               }
             ],
             [
@@ -861,16 +961,18 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 706.2745361328125,
-                "ligadura": true
+                "x": 827.2745361328125,
+                "ligadura": true,
+                "_isPlaying": false
               },
               {
                 "pitch": "B3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 706.2745361328125,
-                "ligadura": true
+                "x": 827.2745361328125,
+                "ligadura": true,
+                "_isPlaying": false
               }
             ],
             [
@@ -879,7 +981,8 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 756.2745361328125
+                "x": 883.2745361328125,
+                "_isPlaying": false
               }
             ],
             [
@@ -888,14 +991,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 806.2745361328125
+                "x": 938.2745361328125,
+                "_isPlaying": false
               },
               {
                 "pitch": "B3",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 806.2745361328125
+                "x": 938.2745361328125,
+                "_isPlaying": false
               }
             ]
           ],
@@ -903,11 +1008,11 @@
         }
       ],
       "manualBarlines": [
-        221,
-        414.47059631347656,
-        536.2745361328125,
-        673.1764683215097,
-        886.0587781988634
+        264,
+        470.47059631347656,
+        596.2745361328125,
+        784.1764683215097,
+        1017.0587781988634
       ],
       "repeats": [],
       "showInitial": true,
@@ -925,14 +1030,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 137
+                "x": 155,
+                "_isPlaying": false
               },
               {
                 "pitch": "G4",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 137
+                "x": 155,
+                "_isPlaying": false
               }
             ],
             [
@@ -941,14 +1048,16 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 187
+                "x": 205,
+                "_isPlaying": false
               },
               {
                 "pitch": "G4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 187
+                "x": 205,
+                "_isPlaying": false
               }
             ],
             [
@@ -957,14 +1066,16 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 237
+                "x": 254,
+                "_isPlaying": false
               },
               {
                 "pitch": "G4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 237
+                "x": 254,
+                "_isPlaying": false
               }
             ],
             [
@@ -973,14 +1084,16 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 287
+                "x": 310,
+                "_isPlaying": false
               },
               {
                 "pitch": "D4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 287
+                "x": 310,
+                "_isPlaying": false
               }
             ],
             [
@@ -989,14 +1102,16 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 337
+                "x": 350,
+                "_isPlaying": false
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 337
+                "x": 350,
+                "_isPlaying": false
               }
             ],
             [
@@ -1005,14 +1120,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 387
+                "x": 398,
+                "_isPlaying": false
               },
               {
                 "pitch": "D4",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 387
+                "x": 398,
+                "_isPlaying": false
               }
             ],
             [
@@ -1021,14 +1138,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 437
+                "x": 459,
+                "_isPlaying": false
               },
               {
                 "pitch": "D4",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 437
+                "x": 459,
+                "_isPlaying": false
               }
             ],
             [
@@ -1037,14 +1156,16 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 487
+                "x": 505,
+                "_isPlaying": false
               },
               {
                 "pitch": "C4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 487
+                "x": 505,
+                "_isPlaying": false
               }
             ],
             [
@@ -1053,14 +1174,16 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 537
+                "x": 545,
+                "_isPlaying": false
               },
               {
                 "pitch": "B3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 537
+                "x": 545,
+                "_isPlaying": false
               }
             ],
             [
@@ -1069,14 +1192,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 587
+                "x": 606,
+                "_isPlaying": false
               },
               {
                 "pitch": "E4",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 587
+                "x": 606,
+                "_isPlaying": false
               }
             ],
             [
@@ -1085,14 +1210,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 637
+                "x": 656,
+                "_isPlaying": false
               },
               {
                 "pitch": "C4",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 637
+                "x": 656,
+                "_isPlaying": false
               }
             ],
             [
@@ -1101,14 +1228,16 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 693.980362310322
+                "x": 726.980362310322,
+                "_isPlaying": false
               },
               {
                 "pitch": "B3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 693.980362310322
+                "x": 726.980362310322,
+                "_isPlaying": false
               }
             ],
             [
@@ -1117,14 +1246,16 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 743.980362310322
+                "x": 771.980362310322,
+                "_isPlaying": false
               },
               {
                 "pitch": "D4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 743.980362310322
+                "x": 771.980362310322,
+                "_isPlaying": false
               }
             ],
             [
@@ -1133,14 +1264,16 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 793.980362310322
+                "x": 816.980362310322,
+                "_isPlaying": false
               },
               {
                 "pitch": "D4",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 793.980362310322
+                "x": 816.980362310322,
+                "_isPlaying": false
               }
             ],
             [
@@ -1149,14 +1282,16 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 843.980362310322
+                "x": 858.980362310322,
+                "_isPlaying": false
               },
               {
                 "pitch": "F4",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 843.980362310322
+                "x": 858.980362310322,
+                "_isPlaying": false
               }
             ],
             [
@@ -1165,7 +1300,8 @@
                 "type": "minima",
                 "dot": true,
                 "accidental": null,
-                "x": 893.980362310322
+                "x": 938.980362310322,
+                "_isPlaying": false
               }
             ]
           ],
@@ -1180,14 +1316,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 137
+                "x": 155,
+                "_isPlaying": false
               },
               {
                 "pitch": "B3",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 137
+                "x": 155,
+                "_isPlaying": false
               }
             ],
             [
@@ -1196,14 +1334,16 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 187
+                "x": 203,
+                "_isPlaying": false
               },
               {
                 "pitch": "C3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 187
+                "x": 203,
+                "_isPlaying": false
               }
             ],
             [
@@ -1212,14 +1352,16 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 237
+                "x": 254,
+                "_isPlaying": false
               },
               {
                 "pitch": "B3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 237
+                "x": 254,
+                "_isPlaying": false
               }
             ],
             [
@@ -1228,16 +1370,18 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 287,
-                "ligadura": true
+                "x": 311,
+                "ligadura": true,
+                "_isPlaying": false
               },
               {
                 "pitch": "F3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 287,
-                "ligadura": true
+                "x": 311,
+                "ligadura": true,
+                "_isPlaying": false
               }
             ],
             [
@@ -1246,7 +1390,8 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 337
+                "x": 347,
+                "_isPlaying": false
               }
             ],
             [
@@ -1255,14 +1400,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 387
+                "x": 401,
+                "_isPlaying": false
               },
               {
                 "pitch": "D3",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 387
+                "x": 401,
+                "_isPlaying": false
               }
             ],
             [
@@ -1271,7 +1418,8 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 437
+                "x": 459,
+                "_isPlaying": false
               }
             ],
             [
@@ -1280,14 +1428,16 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 487
+                "x": 503,
+                "_isPlaying": false
               },
               {
                 "pitch": "D3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 487
+                "x": 503,
+                "_isPlaying": false
               }
             ],
             [
@@ -1296,14 +1446,16 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 537
+                "x": 547,
+                "_isPlaying": false
               },
               {
                 "pitch": "E3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 537
+                "x": 547,
+                "_isPlaying": false
               }
             ],
             [
@@ -1312,14 +1464,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 587
+                "x": 605,
+                "_isPlaying": false
               },
               {
                 "pitch": "C3",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 587
+                "x": 605,
+                "_isPlaying": false
               }
             ],
             [
@@ -1328,14 +1482,16 @@
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 637
+                "x": 654,
+                "_isPlaying": false
               },
               {
                 "pitch": "C3",
                 "type": "seminima",
                 "dot": true,
                 "accidental": null,
-                "x": 637
+                "x": 654,
+                "_isPlaying": false
               }
             ],
             [
@@ -1344,14 +1500,16 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 693.980362310322
+                "x": 726.980362310322,
+                "_isPlaying": false
               },
               {
                 "pitch": "D3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 693.980362310322
+                "x": 726.980362310322,
+                "_isPlaying": false
               }
             ],
             [
@@ -1360,14 +1518,16 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 743.980362310322
+                "x": 770.980362310322,
+                "_isPlaying": false
               },
               {
                 "pitch": "D3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 743.980362310322
+                "x": 770.980362310322,
+                "_isPlaying": false
               }
             ],
             [
@@ -1376,14 +1536,16 @@
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 793.980362310322
+                "x": 815.980362310322,
+                "_isPlaying": false
               },
               {
                 "pitch": "D3",
                 "type": "seminima",
                 "dot": false,
                 "accidental": null,
-                "x": 793.980362310322
+                "x": 815.980362310322,
+                "_isPlaying": false
               }
             ],
             [
@@ -1392,14 +1554,16 @@
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 843.980362310322
+                "x": 860.980362310322,
+                "_isPlaying": false
               },
               {
                 "pitch": "D3",
                 "type": "colcheia",
                 "dot": false,
                 "accidental": null,
-                "x": 843.980362310322
+                "x": 860.980362310322,
+                "_isPlaying": false
               }
             ],
             [
@@ -1408,21 +1572,24 @@
                 "type": "minima",
                 "dot": true,
                 "accidental": null,
-                "x": 893.980362310322
+                "x": 937.980362310322,
+                "_isPlaying": false
               },
               {
                 "pitch": "D3",
                 "type": "minima",
                 "dot": true,
                 "accidental": null,
-                "x": 893.980362310322
+                "x": 937.980362310322,
+                "_isPlaying": false
               },
               {
                 "pitch": "G2",
                 "type": "minima",
                 "dot": true,
                 "accidental": null,
-                "x": 893.980362310322
+                "x": 937.980362310322,
+                "_isPlaying": false
               }
             ]
           ],
@@ -1430,11 +1597,11 @@
         }
       ],
       "manualBarlines": [
-        256.9999826864966,
-        412.01959504591275,
-        673.980362310322,
-        866.4509355127657,
-        974.2744762486284
+        280.9999826864966,
+        434.01959504591275,
+        693.980362310322,
+        898.4509355127657,
+        1017.2744762486284
       ],
       "repeats": [],
       "showInitial": true,
