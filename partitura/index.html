@@ -664,6 +664,7 @@ let isRepeatEndMode = false;
 let isAdjustmentMode = false;
 let selectedAdjustmentItem = null;
 let isEditing = true;
+let isExporting = false;
 const durationSequence = [
     { type: 'semicolcheia', dot: false },
     { type: 'semicolcheia', dot: true },
@@ -1907,10 +1908,12 @@ function redraw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     // Título e info do sistema
-    ctx.font = "bold 16px Arial";
-    ctx.fillStyle = "#3b82f6";
-    const currentStaff = staffs[currentSystemIndex].staves[currentStaffIndex];
-    ctx.fillText(`📝 Sistema: ${currentSystemIndex + 1}/${staffs.length} | Pauta: ${currentStaffIndex + 1} (${currentStaff.clef === 'treble' ? 'Sol' : 'Fá'}) | ${isEditing ? 'MODO EDIÇÃO LIVRE' : 'MODO FINALIZADO'}`, 20, 25);
+    if (!isExporting) {
+        ctx.font = "bold 16px Arial";
+        ctx.fillStyle = "#3b82f6";
+        const currentStaff = staffs[currentSystemIndex].staves[currentStaffIndex];
+        ctx.fillText(`📝 Sistema: ${currentSystemIndex + 1}/${staffs.length} | Pauta: ${currentStaffIndex + 1} (${currentStaff.clef === 'treble' ? 'Sol' : 'Fá'}) | ${isEditing ? 'MODO EDIÇÃO LIVRE' : 'MODO FINALIZADO'}`, 20, 25);
+    }
     
     let totalBeatsAccumulated = 0;
     staffs.forEach((system, systemIndex) => {
@@ -2577,6 +2580,8 @@ function exportToMusicXML() {
     URL.revokeObjectURL(url);
 }
 function exportToPDF() {
+    isExporting = true;
+    redraw();
     const title = document.getElementById('title-input').value;
     const composer = document.getElementById('composer-input').value;
     const pdfCanvas = document.createElement('canvas');
@@ -2602,6 +2607,8 @@ function exportToPDF() {
         a.click();
         URL.revokeObjectURL(url);
     });
+    isExporting = false;
+    redraw();
 }
 redraw();
 
