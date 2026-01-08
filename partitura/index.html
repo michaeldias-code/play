@@ -415,17 +415,6 @@
             </div>
 
             <div class="sidebar-section">
-                <h3>Duração</h3>
-                <div class="button-grid">
-                    <button class="duration-btn" data-index="8" title="Semibreve">𝅝</button>
-                    <button class="duration-btn" data-index="6" title="Mínima">𝅗𝅥</button>
-                    <button class="duration-btn selected" data-index="4" title="Semínima">𝅘𝅥</button>
-                    <button class="duration-btn" data-index="2" title="Colcheia">𝅘𝅥𝅮</button>
-                    <button class="duration-btn" data-index="0" title="Semicolcheia">𝅘𝅥𝅯</button>
-                </div>
-            </div>
-
-            <div class="sidebar-section">
                 <h3>Acidentes</h3>
                 <div class="button-grid">
                     <button class="accidental-btn" data-accidental="sharp" title="Sustenido">♯</button>
@@ -460,7 +449,7 @@
                 <div class="button-list">
                     <button id="add-system-btn">➕ <span class="btn-text">Sistema</span></button>
                     <button id="add-staff-btn">➕ <span class="btn-text">Pauta</span></button>
-                    <button id="finish-edit-btn" class="btn-success" title="Ajustar posição horizontal de notas e compassos">🎯 <span class="btn-text">Ajuste</span></button>
+                    <button id="finish-edit-btn" class="btn-success" title="Ajustar posição de harmonias e linhas de compasso">🎯 <span class="btn-text">Ajuste</span></button>
                 </div>
             </div>
 
@@ -664,7 +653,6 @@ let isRepeatEndMode = false;
 let isAdjustmentMode = false;
 let selectedAdjustmentItem = null;
 let isEditing = true;
-let currentDurationIndex = 4; // Inicializa com semínima
 const durationSequence = [
     { type: 'semicolcheia', dot: false },
     { type: 'semicolcheia', dot: true },
@@ -2099,7 +2087,7 @@ function getPitchAtY(clickY, clef, staffYBase) {
 const instrumentConfigs = {
     piano: {
         baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/piano/",
-        urls: { "A0": "A0.mp3", "C1": "C1.mp3", "D#1": "Ds1.mp3", "F#1": "Fs1.mp3", "A1": "A1.mp3", "C2": "C2.mp3", "D#2": "Ds2.mp3", "F#2": "Fs2.mp3", "A2": "A2.mp3", "C3": "C3.mp3", "D#3": "Ds3.mp3", "F#3": "Fs3.mp3", "A3": "A3.mp3", "C4": "C4.mp3", "D#4": "Ds4.mp3", "F#4": "Fs4.mp3", "A4": "A4.mp3", "C5": "C5.mp3", "D#5": "Ds5.mp3", "F#5": "Fs5.mp3", "A5": "A5.mp3", "C6": "C6.mp3" }
+        urls: { "C1": "C1.mp3", "D#1": "Ds1.mp3", "F#1": "Fs1.mp3", "A1": "A1.mp3", "C2": "C2.mp3", "D#2": "Ds2.mp3", "F#2": "Fs2.mp3", "A2": "A2.mp3", "C3": "C3.mp3", "D#3": "Ds3.mp3", "F#3": "Fs3.mp3", "A3": "A3.mp3", "C4": "C4.mp3", "D#4": "Ds4.mp3", "F#4": "Fs4.mp3", "A4": "A4.mp3", "C5": "C5.mp3", "D#5": "Ds5.mp3", "F#5": "Fs5.mp3", "A5": "A5.mp3", "C6": "C6.mp3" }
     },
     guitar: {
         baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-acoustic/",
@@ -2121,30 +2109,51 @@ const instrumentConfigs = {
 
 let currentSampler = null;
 let currentInstrumentName = null;
+let fallbackSynth = null;
 
 async function initInstrument() {
     const selected = document.getElementById('instrument-select').value;
+    
+    // Inicializar o synth de fallback se ainda não existir
+    if (!fallbackSynth) {
+        fallbackSynth = new Tone.PolySynth().toDestination();
+    }
     if (currentSampler && currentInstrumentName === selected) {
         if (currentSampler.loaded) return;
-        await Tone.loaded();
+        try {
+            await Tone.loaded();
+        } catch (e) {
+            console.warn("Aviso: Falha ao carregar alguns buffers", e);
+        }
         return;
     }
     
     // Se mudar o instrumento, libera o anterior
     if (currentSampler) {
         currentSampler.dispose();
+        currentSampler = null;
     }
     
     currentInstrumentName = selected;
     const config = instrumentConfigs[selected];
     
-    currentSampler = new Tone.Sampler({
-        urls: config.urls,
-        release: 1,
-        baseUrl: config.baseUrl
-    }).toDestination();
-    
-    await Tone.loaded();
+    return new Promise((resolve) => {
+        currentSampler = new Tone.Sampler({
+            urls: config.urls,
+            release: 1,
+            baseUrl: config.baseUrl,
+            onload: () => {
+                resolve();
+            },
+            onerror: (err) => {
+                console.error("Erro ao carregar sampler:", err);
+                resolve(); // Resolvemos de qualquer forma para não travar o app
+            }
+        }).toDestination();
+
+        // Timeout de segurança para não travar se o onload/onerror não dispararem
+        setTimeout(resolve, 5000);
+    });
 }
 function freqToNoteName(freq) {
     const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -2181,33 +2190,47 @@ function stopScore() {
     Tone.Transport.stop();
     Tone.Transport.cancel();
     if (currentSampler) currentSampler.releaseAll();
+    if (fallbackSynth) fallbackSynth.releaseAll();
     updatePlayButtonUI();
 }
 
-async function playFreq(freq, duration, startTime = 0) {
-    await initInstrument();
+function playFreq(freq, duration, startTime = 0) {
     const noteName = freqToNoteName(freq);
     // Agendar no Transport para permitir parar
     Tone.Transport.schedule((time) => {
         if (isPlaying) {
             if (currentSampler && currentSampler.loaded) {
                 currentSampler.triggerAttackRelease(noteName, duration, time, 0.6);
-            } else {
-                const synth = new Tone.PolySynth().toDestination();
-                synth.triggerAttackRelease(noteName, duration, time);
+            } else if (fallbackSynth) {
+                // Fallback para sintetizador básico se o sampler não carregou
+                fallbackSynth.triggerAttackRelease(noteName, duration, time);
             }
         }
     }, startTime);
 }
 
 async function playScore() {
+    // 1. Iniciar áudio imediatamente no clique (exigência do navegador)
+    await Tone.start();
+
     if (isPlaying) {
         stopScore();
         return;
     }
 
-    await initInstrument();
-    await Tone.start();
+    // Feedback visual de carregamento
+    const btn = document.getElementById('play-btn');
+    if (btn) {
+        btn.innerHTML = '⏳';
+        btn.title = "Carregando instrumentos...";
+    }
+
+    // 2. Garantir que o instrumento esteja carregado ANTES de agendar
+    try {
+        await initInstrument();
+    } catch (e) {
+        console.error("Erro ao carregar instrumento:", e);
+    }
     
     const beatDuration = 60 / tempo;
     let unitDuration = beatDuration;
@@ -2239,6 +2262,7 @@ async function playScore() {
 
     if (staffs.length === 0 || staffs.every(s => s.staves.every(st => st.notes.length === 0))) {
         alert("Adicione notas primeiro!");
+        updatePlayButtonUI();
         return;
     }
     
@@ -2382,7 +2406,7 @@ async function playScore() {
                                 }
                             }
 
-                            await playFreq(freq, noteDuration, currentStaffTime);
+                            playFreq(freq, noteDuration, currentStaffTime);
                         }
                         currentStaffTime += duration;
                         beatsInMeasure += chordBeats;
@@ -2682,6 +2706,8 @@ document.getElementById('time-bottom').addEventListener('change', (e) => {
     redraw();
 });
 function setEditMode(mode) {
+    const wasAdjustmentMode = isAdjustmentMode;
+
     // Se o modo clicado já estiver ativo (e for um modo alternável), desativa e volta para Melodia
     const isToggleable = ['erase', 'firmata', 'ligadura', 'barline', 'repeat-start', 'repeat-end', 'harmony', 'adjustment'].includes(mode);
     const currentActive = 
@@ -2710,6 +2736,28 @@ function setEditMode(mode) {
     isRepeatEndMode = mode === 'repeat-end';
     isAdjustmentMode = mode === 'adjustment';
 
+    // Se sair do modo de ajuste, arredondar posições e limpar seleção
+    if (wasAdjustmentMode && !isAdjustmentMode) {
+        staffs.forEach(system => {
+            if (system.manualBarlines) {
+                system.manualBarlines = system.manualBarlines.map(x => Math.round(x * 10) / 10);
+            }
+            if (system.repeats) {
+                system.repeats.forEach(r => {
+                    if (r.x !== undefined) r.x = Math.round(r.x * 10) / 10;
+                });
+            }
+            system.staves.forEach(staff => {
+                staff.notes.forEach(chord => {
+                    chord.forEach(note => {
+                        if (note.x !== undefined) note.x = Math.round(note.x * 10) / 10;
+                    });
+                });
+            });
+        });
+        selectedAdjustmentItem = null;
+    }
+
     // UI Updates
     document.getElementById('note-mode-btn').classList.toggle('selected', mode === 'note');
     document.getElementById('rest-mode-btn').classList.toggle('selected', mode === 'rest');
@@ -2722,9 +2770,6 @@ function setEditMode(mode) {
     document.getElementById('repeat-end-btn').classList.toggle('selected', mode === 'repeat-end');
     document.getElementById('finish-edit-btn').classList.toggle('selected', mode === 'adjustment');
     
-    // Se sair do modo de ajuste, limpar seleção
-    if (!isAdjustmentMode) selectedAdjustmentItem = null;
-
     redraw();
 }
 
@@ -2739,15 +2784,6 @@ document.getElementById('repeat-start-btn').addEventListener('click', () => setE
 document.getElementById('repeat-end-btn').addEventListener('click', () => setEditMode('repeat-end'));
 
 document.getElementById('finish-edit-btn').addEventListener('click', () => setEditMode('adjustment'));
-
-// Event listeners para os novos botões de duração
-document.querySelectorAll('.duration-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        currentDurationIndex = parseInt(btn.dataset.index);
-    });
-});
 
 document.querySelectorAll('.accidental-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -3269,12 +3305,10 @@ canvas.addEventListener('mousedown', async (e) => {
 
     if (!isNoteMode) return; // Se não estiver em modo de nota/pausa/harmonia, não adiciona nada
 
-    const baseDuration = durationSequence[currentDurationIndex];
-    
     const newNote = {
         pitch: getPitchAtY(clickY, currentClef, staffYBase),
-        type: isRestMode ? `pausa-${baseDuration.type}` : baseDuration.type,
-        dot: baseDuration.dot,
+        type: isRestMode ? "pausa-seminima" : "seminima",
+        dot: false,
         accidental: selectedAccidental,
         x: clickX
     };
