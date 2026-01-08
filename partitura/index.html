@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editor Profissional de Partituras</title>
+    <title>Score Editor</title>
+    <link rel="icon" href="Score_Editor.png" type="image/png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -62,8 +63,14 @@
         }
 
         .header-title h1 {
-            font-size: 18px;
+            font-size: 28px;
             color: #1a73e8;
+        }
+
+        .header-logo {
+            height: 60px;
+            width: auto;
+            display: block;
         }
 
         /* Seções da Sidebar */
@@ -266,8 +273,6 @@
             color: #1a73e8;
         }
 
-        #staff-indicator { font-size: 12px; font-weight: bold; color: #1a73e8; }
-
         @media (max-width: 768px) {
             .app-container { flex-direction: column; height: 100vh; }
             .sidebar { 
@@ -308,6 +313,12 @@
                 gap: 12px;
                 height: auto;
                 overflow-y: visible;
+            }
+            .header-logo {
+                height: 60px;
+            }
+            .header-title h1 {
+                font-size: 20px;
             }
             .meta-inputs {
                 flex-direction: column;
@@ -473,8 +484,8 @@
             <!-- Barra Superior: Metadados -->
             <header class="top-bar">
                 <div class="header-title">
-                    <h1>🎵 Partitura</h1>
-                    <span id="staff-indicator">Sistema 1/4</span>
+                    <img src="Score_Editor.png" alt="Score Editor Logo" class="header-logo">
+                    <h1>Score Editor</h1>
                     <button id="toggle-meta-btn" class="mobile-only" style="padding: 4px 8px; font-size: 11px; margin-left: 10px; border-radius: 4px; background: #f0f2f5; border: 1px solid #ddd;">🔼 Recolher</button>
                 </div>
                 
@@ -768,20 +779,11 @@ function checkAndCreateNewStaff() {
             repeats: []
         });
         currentSystemIndex = staffs.length - 1;
-        updateStaffIndicator();
         return true;
     }
     return false;
 }
 
-function updateStaffIndicator() {
-    const indicator = document.getElementById('staff-indicator');
-    if (indicator) {
-        indicator.textContent = `Sistema ${currentSystemIndex + 1}/${staffs.length}`;
-    }
-}
-
-// Converte tempo em segundos para tipo de nota musical com lógica matemática
 function calculateNoteType(seconds, bpm = 30) {
     // BPM = batidas por minuto. Em 4/4, uma batida = 1 seminima.
     const beatDuration = 60 / bpm;
@@ -2063,7 +2065,6 @@ function redraw() {
         });
         totalBeatsAccumulated += calculateSystemBeats(system);
     });
-    updateStaffIndicator();
 }
 
 function noteYMapByClef(clef) {
