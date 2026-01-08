@@ -415,6 +415,17 @@
             </div>
 
             <div class="sidebar-section">
+                <h3>Duração</h3>
+                <div class="button-grid">
+                    <button class="duration-btn" data-index="8" title="Semibreve">𝅝</button>
+                    <button class="duration-btn" data-index="6" title="Mínima">𝅗𝅥</button>
+                    <button class="duration-btn selected" data-index="4" title="Semínima">𝅘𝅥</button>
+                    <button class="duration-btn" data-index="2" title="Colcheia">𝅘𝅥𝅮</button>
+                    <button class="duration-btn" data-index="0" title="Semicolcheia">𝅘𝅥𝅯</button>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
                 <h3>Acidentes</h3>
                 <div class="button-grid">
                     <button class="accidental-btn" data-accidental="sharp" title="Sustenido">♯</button>
@@ -449,7 +460,7 @@
                 <div class="button-list">
                     <button id="add-system-btn">➕ <span class="btn-text">Sistema</span></button>
                     <button id="add-staff-btn">➕ <span class="btn-text">Pauta</span></button>
-                    <button id="finish-edit-btn" class="btn-success" title="Preencher linhas de compasso automaticamente">🪄 <span class="btn-text">Auto-Comp.</span></button>
+                    <button id="finish-edit-btn" class="btn-success" title="Ajustar posição horizontal de notas e compassos">🎯 <span class="btn-text">Ajuste</span></button>
                 </div>
             </div>
 
@@ -583,7 +594,7 @@
                     <li>Clique com o <strong>botão direito</strong> para <strong>diminuir</strong> seu valor.</li>
                 </ul>
 
-                <p style="margin-top: 10px;"><strong>✅ Auto Compassos:</strong> Use esse botão para ordenar as notas livres e alinhar as <strong>linhas de compasso</strong> automaticamente de acordo com a fórmula escolhida.</p>
+                <p style="margin-top: 10px;"><strong>🎯 Ajuste:</strong> Ative este modo para selecionar uma harmonia (notas ficarão vermelhas) ou uma linha de compasso e movimentá-las livremente horizontalmente.</p>
                 <p style="margin-top: 10px;"><strong>║ Linha de Compasso:</strong> Ative o botão "Linha" na seção Estrutura e clique sobre a pauta para posicionar ou remover manualmente as linhas de compasso onde achar que devem aparecer.</p>
 
                 <p style="margin-top: 10px;"><strong>🎹 Harmonia:</strong> Ative este modo para sobrepor notas na mesma posição horizontal, criando acordes.</p>
@@ -643,13 +654,17 @@ let currentSystemIndex = 0;
 let currentStaffIndex = 0; // Index da pauta dentro do sistema
 let currentClef = 'treble';
 let isNoteMode = true;
+let isRestMode = false;
 let isEraseMode = false;
 let isFirmataMode = false;
 let isLigaduraMode = false;
 let isBarlineMode = false;
 let isRepeatStartMode = false;
 let isRepeatEndMode = false;
+let isAdjustmentMode = false;
+let selectedAdjustmentItem = null;
 let isEditing = true;
+let currentDurationIndex = 4; // Inicializa com semínima
 const durationSequence = [
     { type: 'semicolcheia', dot: false },
     { type: 'semicolcheia', dot: true },
@@ -1605,8 +1620,8 @@ function drawLedgerLines(x, y, staffY, clef, color = "#333") {
     }
 }
 
-function drawBarline(x, y) {
-    ctx.strokeStyle = "#333";
+function drawBarline(x, y, color = "#333") {
+    ctx.strokeStyle = color;
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(x, y);
@@ -1689,8 +1704,10 @@ function ensureRepeats(system) {
 
 function drawManualBarlines(system, staffYBase) {
     const manualLines = ensureManualBarlines(system);
-    manualLines.forEach(barX => {
-        drawBarline(barX, staffYBase);
+    manualLines.forEach((barX, idx) => {
+        const isSelected = selectedAdjustmentItem && selectedAdjustmentItem.type === 'barline' && selectedAdjustmentItem.system === system && selectedAdjustmentItem.index === idx;
+        const color = isSelected ? "#f44336" : "#333";
+        drawBarline(barX, staffYBase, color);
     });
 
     const repeats = ensureRepeats(system);
@@ -1806,13 +1823,7 @@ function drawSingleStaff(staffY, clef, isActive = false, label = "", showFinalBa
     
     drawTimeSignature(timeSignatureX, staffY);
     
-    // Fim da pauta
-    if (showFinalBarline) {
-    ctx.beginPath();
-    ctx.moveTo(canvas.width - 20, staffY);
-    ctx.lineTo(canvas.width - 20, staffY + STAFF_HEIGHT);
-    ctx.stroke();
-    }
+    // Fim da pauta (Removido para seguir padrão profissional de sistema aberto)
 }
 
 function drawSystem(systemIndex, showInitialBarline = true, showFinalBarline = true) {
@@ -1964,7 +1975,7 @@ function redraw() {
             const numMeasures = lastMeasureIdx - firstMeasureIdx + 1;
             
             currentSystemMeasures = numMeasures;
-            const measureWidth = (canvas.width - CLEF_MARGIN - 60) / numMeasures;
+            const measureWidth = (canvas.width - CLEF_MARGIN - 20) / numMeasures;
 
             system.staves.forEach((staff, sIdx) => {
                 const staffT = systemTiming[sIdx];
@@ -2024,7 +2035,8 @@ function redraw() {
                 
                 chord.forEach(note => {
                     const isSelected = selectedNoteForMobile === note;
-                    const color = isSelected ? "#f44336" : "#333";
+                    const isChordSelected = selectedAdjustmentItem && selectedAdjustmentItem.type === 'chord' && selectedAdjustmentItem.item === chord;
+                    const color = (isSelected || isChordSelected || note._isPlaying) ? "#f44336" : "#333";
 
                     if (note.type.startsWith('pausa-')) {
                         // Não mostrar pausas na clave de fá durante a edição (pedido do usuário)
@@ -2068,6 +2080,21 @@ function redraw() {
 
 function noteYMapByClef(clef) {
     return clef === 'treble' ? noteYTreble : noteYBass;
+}
+
+function getPitchAtY(clickY, clef, staffYBase) {
+    const noteYMap = noteYMapByClef(clef);
+    let bestPitch = null;
+    let bestDist = Infinity;
+    for (const p in noteYMap) {
+        const noteAbsoluteY = noteYMap[p] + staffYBase;
+        const d = Math.abs(noteAbsoluteY - clickY);
+        if (d < bestDist) {
+            bestDist = d;
+            bestPitch = p;
+        }
+    }
+    return bestPitch;
 }
 const instrumentConfigs = {
     piano: {
@@ -2159,12 +2186,17 @@ function stopScore() {
 
 async function playFreq(freq, duration, startTime = 0) {
     await initInstrument();
-    const note = freqToNoteName(freq);
+    const noteName = freqToNoteName(freq);
     // Agendar no Transport para permitir parar
     Tone.Transport.schedule((time) => {
         if (isPlaying) {
-            currentSampler.triggerAttackRelease(note, duration, time, 0.6);
-}
+            if (currentSampler && currentSampler.loaded) {
+                currentSampler.triggerAttackRelease(noteName, duration, time, 0.6);
+            } else {
+                const synth = new Tone.PolySynth().toDestination();
+                synth.triggerAttackRelease(noteName, duration, time);
+            }
+        }
     }, startTime);
 }
 
@@ -2197,6 +2229,7 @@ async function playScore() {
             staff.notes.forEach((chord, chordIdx) => {
                 chord.forEach(n => {
                     n._skipPlayback = false;
+                    n._isPlaying = false;
                     n._staffRef = staff;
                     n._noteIdxInStaff = chordIdx;
                 });
@@ -2650,7 +2683,7 @@ document.getElementById('time-bottom').addEventListener('change', (e) => {
 });
 function setEditMode(mode) {
     // Se o modo clicado já estiver ativo (e for um modo alternável), desativa e volta para Melodia
-    const isToggleable = ['erase', 'firmata', 'ligadura', 'barline', 'repeat-start', 'repeat-end', 'harmony'].includes(mode);
+    const isToggleable = ['erase', 'firmata', 'ligadura', 'barline', 'repeat-start', 'repeat-end', 'harmony', 'adjustment'].includes(mode);
     const currentActive = 
         isEraseMode ? 'erase' :
         isFirmataMode ? 'firmata' :
@@ -2659,13 +2692,15 @@ function setEditMode(mode) {
         isRepeatStartMode ? 'repeat-start' :
         isRepeatEndMode ? 'repeat-end' :
         isHarmonyMode ? 'harmony' :
-        document.getElementById('rest-mode-btn').classList.contains('selected') ? 'rest' : 'note';
+        isAdjustmentMode ? 'adjustment' :
+        isRestMode ? 'rest' : 'note';
 
     if (isToggleable && mode === currentActive) {
         mode = 'note';
     }
 
-    isNoteMode = mode === 'note' || mode === 'harmony';
+    isNoteMode = mode === 'note' || mode === 'rest' || mode === 'harmony';
+    isRestMode = mode === 'rest';
     isHarmonyMode = mode === 'harmony';
     isEraseMode = mode === 'erase';
     isFirmataMode = mode === 'firmata';
@@ -2673,6 +2708,7 @@ function setEditMode(mode) {
     isBarlineMode = mode === 'barline';
     isRepeatStartMode = mode === 'repeat-start';
     isRepeatEndMode = mode === 'repeat-end';
+    isAdjustmentMode = mode === 'adjustment';
 
     // UI Updates
     document.getElementById('note-mode-btn').classList.toggle('selected', mode === 'note');
@@ -2684,14 +2720,10 @@ function setEditMode(mode) {
     document.getElementById('barline-mode-btn').classList.toggle('selected', mode === 'barline');
     document.getElementById('repeat-start-btn').classList.toggle('selected', mode === 'repeat-start');
     document.getElementById('repeat-end-btn').classList.toggle('selected', mode === 'repeat-end');
+    document.getElementById('finish-edit-btn').classList.toggle('selected', mode === 'adjustment');
     
-    // Atualiza o tipo de nota se for modo Melodia ou Pausa
-    if (mode === 'rest') {
-        const currentType = durationSequence[currentDurationIndex].type;
-        if (!currentType.startsWith('pausa-')) {
-            // Find corresponding pause
-        }
-    }
+    // Se sair do modo de ajuste, limpar seleção
+    if (!isAdjustmentMode) selectedAdjustmentItem = null;
 
     redraw();
 }
@@ -2706,40 +2738,17 @@ document.getElementById('barline-mode-btn').addEventListener('click', () => setE
 document.getElementById('repeat-start-btn').addEventListener('click', () => setEditMode('repeat-start'));
 document.getElementById('repeat-end-btn').addEventListener('click', () => setEditMode('repeat-end'));
 
-document.getElementById('finish-edit-btn').addEventListener('click', () => {
-    if (!isEditing) return;
-    
-    // Formatação: ordenar notas por X e organizar em compassos
-    staffs.forEach(system => {
-        system.staves.forEach(staff => {
-            // Ordenar por X
-            staff.notes.sort((a, b) => (a[0].x || 0) - (b[0].x || 0));
-        });
-    });
-    
-    isEditing = false;
-    isBarlineMode = false;
-    isRepeatStartMode = false;
-    isRepeatEndMode = false;
-    document.getElementById('barline-mode-btn').classList.remove('selected');
-    document.getElementById('repeat-start-btn').classList.remove('selected');
-    document.getElementById('repeat-end-btn').classList.remove('selected');
-    redraw();
+document.getElementById('finish-edit-btn').addEventListener('click', () => setEditMode('adjustment'));
 
-    // Sincronizar posições X para que a transição de volta para edição seja suave
-    staffs.forEach(system => {
-        system.staves.forEach(staff => {
-            staff.notes.forEach(chord => {
-                if (chord[0].renderX) {
-                    chord.forEach(n => n.x = chord[0].renderX);
-                }
-            });
-        });
+// Event listeners para os novos botões de duração
+document.querySelectorAll('.duration-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        currentDurationIndex = parseInt(btn.dataset.index);
     });
-    
-    document.getElementById('finish-edit-btn').style.display = 'none';
-    redraw(); // Redesenhar para garantir que tudo use isEditing=false
 });
+
 document.querySelectorAll('.accidental-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         const accType = btn.dataset.accidental;
@@ -3048,6 +3057,54 @@ canvas.addEventListener('mousedown', async (e) => {
     if (targetStaffIndex === -1) return;
     
     const system = staffs[targetSystemIndex];
+    
+    if (isAdjustmentMode) {
+        // Verificar se clicou em um acorde
+        let foundChord = null;
+        let foundStaff = null;
+        let foundSystem = null;
+        
+        staffs.forEach((sys, sIdx) => {
+            sys.staves.forEach((st, stIdx) => {
+                const staffYBase = sIdx * SYSTEM_SPACING + 80 + stIdx * (STAFF_HEIGHT + STAFF_GAP);
+                st.notes.forEach(chord => {
+                    const x = chord[0].x || 0;
+                    if (Math.abs(x - clickX) < 20) {
+                        const noteYMap = noteYMapByClef(st.clef);
+                        chord.forEach(note => {
+                            const noteYPos = (note.type.startsWith('pausa-') ? staffYBase + 40 : noteYMap[note.pitch] + staffYBase);
+                            if (Math.abs(noteYPos - clickY) < 20) {
+                                foundChord = chord;
+                                foundStaff = st;
+                                foundSystem = sys;
+                            }
+                        });
+                    }
+                });
+            });
+        });
+
+        if (foundChord) {
+            selectedAdjustmentItem = { type: 'chord', item: foundChord, system: foundSystem, staff: foundStaff, initialX: foundChord[0].x || 0, initialMouseX: clickX };
+            redraw();
+            return;
+        }
+
+        // Verificar se clicou em uma linha de compasso manual
+        const manualLines = ensureManualBarlines(system);
+        const barlineIdx = manualLines.findIndex(x => Math.abs(x - clickX) < 15);
+        if (barlineIdx > -1) {
+            selectedAdjustmentItem = { type: 'barline', index: barlineIdx, system: system, initialX: manualLines[barlineIdx], initialMouseX: clickX };
+            redraw();
+            return;
+        }
+        
+        // Se não clicou em nada, desselecionar
+        selectedAdjustmentItem = null;
+        redraw();
+        return;
+    }
+
     if (isBarlineMode) {
         const manualLines = ensureManualBarlines(system);
         const existingIndex = manualLines.findIndex(x => Math.abs(x - clickX) < MANUAL_BARLINE_TOLERANCE);
@@ -3210,50 +3267,23 @@ canvas.addEventListener('mousedown', async (e) => {
 
     if (e.button !== 0) return; // Só permite adicionar novas notas com clique esquerdo
 
-    if (isEraseMode || isFirmataMode || isLigaduraMode) return; // Se estiver em um modo de edição de nota existente e não clicou em nada, não faz nada
+    if (!isNoteMode) return; // Se não estiver em modo de nota/pausa/harmonia, não adiciona nada
 
-    if (!isNoteMode) {
-        const newNote = {
-            type: "pausa-seminima",
-            dot: false,
-            pitch: null,
-            accidental: null,
-            x: CLEF_MARGIN + staff.notes.length * SPACING
-        };
-        if (isHarmonyMode) {
-            alert('Pausas não podem ser adicionadas em harmonia');
-            return;
-        }
-        staff.notes.push([newNote]);
-        undoStack.push({ type: 'add-chord', staff: staff });
-        redraw();
-        return;
-    }
-
-    // Usar o noteYMap já definido acima
-    
-    let bestPitch = null;
-    let bestDist = Infinity;
-    for (const p in noteYMap) {
-        const noteAbsoluteY = noteYMap[p] + staffYBase;
-        const d = Math.abs(noteAbsoluteY - clickY);
-        if (d < bestDist) {
-            bestDist = d;
-            bestPitch = p;
-        }
-    }
-
-    if (bestDist > 25) return;
+    const baseDuration = durationSequence[currentDurationIndex];
     
     const newNote = {
-        pitch: bestPitch,
-        type: "seminima",
-        dot: false,
+        pitch: getPitchAtY(clickY, currentClef, staffYBase),
+        type: isRestMode ? `pausa-${baseDuration.type}` : baseDuration.type,
+        dot: baseDuration.dot,
         accidental: selectedAccidental,
         x: clickX
     };
-    
+
     if (isHarmonyMode) {
+        if (isRestMode) {
+            alert('Pausas não podem ser adicionadas em modo harmonia');
+            return;
+        }
         // Encontrar o acorde mais próximo no eixo X em QUALQUER pauta do sistema
         let nearestChord = null;
         let minXDist = Infinity;
@@ -3289,9 +3319,9 @@ canvas.addEventListener('mousedown', async (e) => {
                 } else {
                     // Adicionar ao acorde existente
                     const isPitchPresent = currentStaffChord.some(n =>
-                n.pitch === bestPitch && n.accidental === selectedAccidental
-            );
-            if (!isPitchPresent) {
+                        n.pitch === newNote.pitch && n.accidental === selectedAccidental
+                    );
+                    if (!isPitchPresent) {
                         newNote.x = currentStaffChord[0].x;
                         newNote.type = currentStaffChord[0].type;
                         newNote.dot = currentStaffChord[0].dot;
@@ -3318,7 +3348,8 @@ canvas.addEventListener('mousedown', async (e) => {
                     }]);
                 }
                 // Adiciona a nota no índice alvo, herdando a duração da referência
-                newNote.x = isEditing ? (nearestChord[0].x || 0) : (CLEF_MARGIN + targetIndex * SPACING);
+                let targetX = nearestChord[0].x || (CLEF_MARGIN + targetIndex * SPACING);
+                newNote.x = targetX;
                 const refType = nearestChord[0].type;
                 newNote.type = refType.startsWith('pausa-') ? refType.replace('pausa-', '') : refType;
                 newNote.dot = nearestChord[0].dot;
@@ -3327,13 +3358,33 @@ canvas.addEventListener('mousedown', async (e) => {
             }
         } else {
             // Se não houver nota próxima em nenhuma pauta, cria um novo acorde no final da pauta atual
-            newNote.x = CLEF_MARGIN + staff.notes.length * SPACING;
+            let maxX = CLEF_MARGIN + staff.notes.length * SPACING;
+            if (staff.notes.length > 0) {
+                const lastX = staff.notes[staff.notes.length - 1][0].x || 0;
+                if (lastX + SPACING > maxX) maxX = lastX + SPACING;
+            }
+            const manualLines = system.manualBarlines || [];
+            if (manualLines.length > 0) {
+                const lastBar = manualLines[manualLines.length - 1];
+                if (lastBar + 20 > maxX) maxX = lastBar + 20;
+            }
+            newNote.x = maxX;
             staff.notes.push([newNote]);
             undoStack.push({ type: 'add-chord', staff: staff });
         }
     } else {
         // Modo Melodia - Adicionar nova nota ao final de forma organizada
-        newNote.x = CLEF_MARGIN + staff.notes.length * SPACING;
+        let maxX = CLEF_MARGIN + staff.notes.length * SPACING;
+        if (staff.notes.length > 0) {
+            const lastX = staff.notes[staff.notes.length - 1][0].x || 0;
+            if (lastX + SPACING > maxX) maxX = lastX + SPACING;
+        }
+        const manualLines = system.manualBarlines || [];
+        if (manualLines.length > 0) {
+            const lastBar = manualLines[manualLines.length - 1];
+            if (lastBar + 20 > maxX) maxX = lastBar + 20;
+        }
+        newNote.x = maxX;
         staff.notes.push([newNote]);
         undoStack.push({ type: 'add-chord', staff: staff });
     }
@@ -3341,6 +3392,37 @@ canvas.addEventListener('mousedown', async (e) => {
     selectedAccidental = null;
     document.querySelectorAll('.accidental-btn').forEach(b => b.classList.remove('selected'));
     redraw();
+});
+
+canvas.addEventListener('mousemove', (e) => {
+    if (!isAdjustmentMode || !selectedAdjustmentItem) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const clickX = (e.clientX - rect.left) * scaleX;
+    
+    const deltaX = clickX - selectedAdjustmentItem.initialMouseX;
+    const newX = selectedAdjustmentItem.initialX + deltaX;
+
+    if (selectedAdjustmentItem.type === 'chord') {
+        selectedAdjustmentItem.item.forEach(n => n.x = newX);
+    } else if (selectedAdjustmentItem.type === 'barline') {
+        const manualLines = ensureManualBarlines(selectedAdjustmentItem.system);
+        manualLines[selectedAdjustmentItem.index] = newX;
+    }
+    
+    redraw();
+});
+
+canvas.addEventListener('mouseup', () => {
+    if (isAdjustmentMode && selectedAdjustmentItem) {
+        if (selectedAdjustmentItem.type === 'barline') {
+            const manualLines = ensureManualBarlines(selectedAdjustmentItem.system);
+            manualLines.sort((a, b) => a - b);
+        }
+        selectedAdjustmentItem = null;
+        redraw();
+    }
 });
 
 canvas.addEventListener('touchstart', (e) => {
